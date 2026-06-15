@@ -8,6 +8,16 @@ sdk_version: 6.18.0
 app_file: app.py
 pinned: false
 license: mit
+tags:
+  - track:wood
+  - sponsor:openbmb
+  - sponsor:openai
+  - sponsor:nvidia
+  - sponsor:modal
+  - achievement:offbrand
+  - achievement:llama
+  - achievement:sharing
+  - achievement:fieldnotes
 ---
 
 # Epic Errands V2 Mobile Review

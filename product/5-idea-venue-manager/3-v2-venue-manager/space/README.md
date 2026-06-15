@@ -7,6 +7,14 @@ sdk: gradio
 sdk_version: 6.18.0
 app_file: app.py
 pinned: false
+tags:
+  - track:backyard
+  - sponsor:openai
+  - sponsor:nvidia
+  - sponsor:modal
+  - achievement:offbrand
+  - achievement:sharing
+  - achievement:fieldnotes
 ---
 
 # Floodlight Venue Manager

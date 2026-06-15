@@ -5,6 +5,15 @@ colorTo: green
 sdk: docker
 app_port: 7860
 suggested_hardware: t4-medium
+tags:
+  - track:backyard
+  - sponsor:openai
+  - sponsor:nvidia
+  - achievement:offgrid
+  - achievement:offbrand
+  - achievement:llama
+  - achievement:sharing
+  - achievement:fieldnotes
 ---
 
 # Voice Reach V1
@@ -12,6 +21,10 @@ suggested_hardware: t4-medium
 Voice Reach V1 is a metime.to voice contact widget that lets a site visitor
 speak in Hindi or Hinglish, review an editable English contact message, and
 send it through a site-owner contact flow.
+
+NOTE: This is designed to be run 'Off Grid', so needs HF runtime (GPU) but since I'm unable to add credits to this org, it uses Modal.
+
+NOTE: This competes for 'Tiny Titan' prize
 
 ## Links
 
@@ -33,8 +46,11 @@ send it through a site-owner contact flow.
 - ASR: `nvidia/nemotron-3.5-asr-streaming-0.6b` through NeMo/PyTorch.
 - Text: `CohereLabs/tiny-aya-fire-GGUF:Q8_0` through `llama.cpp`.
 - Official Space runtime: `VCW_MODEL_RUNTIME=hf_space` on `t4-medium`.
-- Local default: deterministic fallback, clearly labeled with
-  `fallback_used=true`.
+- Local default without a selected real runtime: deterministic fallback,
+  clearly labeled with `fallback_used=true`.
+- When a UI-selected runtime is unavailable, `Record message` is disabled and
+  the line below explains `Why it's disabled`; deterministic output is not
+  substituted for selected runtime failures.
 - Submission path: Space-local model runtime; Modal is testing-only and is not
   part of the official submission runtime.
 
@@ -103,6 +119,9 @@ Runtime modes:
   - `HF personal space` is a server-side proxy to
     `APP_HF_PERSONAL_BASE_URL`; browser clients never receive HF or Modal
     tokens.
+  - A selected runtime must be available before recording starts. Unavailable
+    selected runtimes block the recorder and `/api/process` or
+    `/api/text-smoke` returns `424` with `fallback_used=false`.
   - Official submission config clears the switch flag and proxy secrets.
 
 Deployment targets are recorded in `../deployment-targets.json`:
