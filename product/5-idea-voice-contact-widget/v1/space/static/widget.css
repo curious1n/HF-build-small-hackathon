@@ -288,6 +288,19 @@ button:disabled {
   background: var(--color-primary-hover);
 }
 
+.record-disabled-reason {
+  min-height: 18px;
+  margin: var(--space-2) 0 0;
+  color: var(--color-danger);
+  font-size: 0.86rem;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.record-disabled-reason[hidden] {
+  display: none;
+}
+
 .secondary {
   color: var(--color-primary);
   background: var(--color-surface-subtle);

@@ -92,6 +92,7 @@ Local evidence:
 - [Private HF Space no-iframe hotfix check](evidence/hf-space-v2-no-iframe-hotfix-2026-06-15.md)
 - [Private HF Space Gradio backend bridge check](evidence/hf-space-v2-gradio-backend-bridge-2026-06-15.md)
 - [Private HF Space light shell hotfix check](evidence/hf-space-v2-light-shell-hotfix-2026-06-16.md)
+- [Private HF Space theme browser QA](evidence/hf-space-v2-theme-browser-qa-2026-06-16.md)
 
 Local Modal smoke scripts load account/HF credentials from repo root `.env` and
 idea-specific Modal config from `product/5-idea-epic-errands/.env.modal.local`.

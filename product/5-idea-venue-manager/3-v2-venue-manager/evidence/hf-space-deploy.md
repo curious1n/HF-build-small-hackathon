@@ -108,3 +108,57 @@ send_adapter=simulator
 This is a hosted app dry run for v2 packaging and deterministic fixture-backed
 demo reset behavior. It does not prove Modal model quality, live WhatsApp,
 public release readiness, or judge readiness.
+
+## Warm Preload Config Push
+
+Date: 2026-06-15 UTC / 2026-06-16 local
+
+Scope:
+
+- Push the current Space package to `build-small-hackathon/venue-manager-agent`.
+- Set redacted `APP_MODAL_*` variables/secrets for the new Modal
+  `extract-booking` endpoint.
+- Verify hosted deterministic endpoints after the Space rebuild.
+
+Commands:
+
+```bash
+cd product/5-idea-venue-manager/3-v2-venue-manager
+../../../.venv/bin/python deploy_space.py --create --upload --set-modal-config --commit-message "Fix Venue Manager hosted startup and Modal preload config"
+```
+
+Preflight and package checks:
+
+- Deploy dry run resolved `build-small-hackathon/venue-manager-agent`,
+  `HF_HACKATHON`, `HF_2`, and `HF_TOKEN_2` with secret values redacted.
+- Python tests: `30 passed`, one Starlette/httpx deprecation warning.
+- Python package compile: `app.py` and `floodlight_space/*.py` passed.
+- JS syntax checks: `space/frontend/js/app.js`, `components.js`, `dom.js`,
+  and `data.js` passed.
+
+Hosted result:
+
+| Field | Value |
+| - | - |
+| Space repo | `build-small-hackathon/venue-manager-agent` |
+| Space URL | `https://build-small-hackathon-venue-manager-agent.hf.space` |
+| Uploaded revision | `eb44c6f13cead44b71f95256c9a7c0423f6ed624` |
+| Last modified | `2026-06-15 21:05:34+00:00` |
+| Runtime stage | `RUNNING` after `APP_STARTING` polls |
+| `/health` | `200`, model runtime `modal`, model id `nvidia/Nemotron-Cascade-2-30B-A3B` |
+| `/api/model-status` | `200`, configured/base URL/auth all `true`, timeout `900.0` |
+| `/api/bootstrap` | `200`, 10 requests, 3 seed bookings |
+| `/api/reload-demo` | `200`, `demo_reset.state=reloaded`, 10 requests restored |
+
+Fix applied:
+
+- `space/app.py` no longer assumes a fixed parent depth when looking for local
+  `.env.modal.local`; this prevents `/app/app.py` from crashing on HF Spaces.
+
+Proof boundary:
+
+- This proves the hosted Space package and redacted Modal config are deployed
+  and the deterministic hosted endpoints are healthy.
+- Modal model proof for the preload change is recorded separately in
+  `evidence/modal-world-smoke-2026-06-15.md`.
+  This pass did not run a hosted Space-to-Modal model call.

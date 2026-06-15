@@ -177,10 +177,8 @@
 }
 
 .upload-chip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  display: grid;
+  gap: 8px;
   background: var(--field-bg);
   border: 1px solid var(--field-border-color);
   border-radius: var(--control-radius);
@@ -188,6 +186,14 @@
   padding: 9px 10px 9px 13px;
   font-size: 13px;
   font-weight: 800;
+}
+
+.upload-chip__row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .upload-chip__main {
@@ -210,6 +216,12 @@
   border-radius: 8px;
   object-fit: cover;
   border: 1px solid var(--field-border-color);
+}
+
+.upload-audio {
+  display: block;
+  width: 100%;
+  max-width: 100%;
 }
 
 .upload-trigger {

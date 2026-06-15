@@ -110,7 +110,17 @@ for prompt-quality checks and does not claim ASR proof.
 Runtime modes:
 
 - Modal testing: `VCW_MODEL_RUNTIME=modal` calls the `voice-reach-v1-modal`
-  Modal sidecar from the HF Space CPU shell.
+  Modal GPU sidecar from the HF Space CPU shell. The sidecar runs
+  `nvidia/nemotron-3.5-asr-streaming-0.6b` through NeMo on CUDA and
+  `CohereLabs/tiny-aya-fire-GGUF:Q8_0` through CUDA llama.cpp.
+  Runtime is configured with `min_containers=1` and `scaledown_window=600`.
+  After deploy or rollover, warm it with one text request and one audio request
+  so both Q8 Tiny Aya and NeMo ASR are loaded in memory. Latest measured hot
+  full-audio path: `4.5s` HTTP, `2.1s` Modal total, `1.1s` ASR, `0.96s` text,
+  `fallback_used=false`.
+- Local Modal config is auto-loaded from
+  `product/5-idea-voice-contact-widget/.env.modal.local`.
+  Already-exported environment variables take precedence.
 - HF Space proof: `VCW_MODEL_MODE=real` on `t4-medium`.
 - Model Runtime UI switch:
   - Always shows `HF hackathon space`, `HF personal space`, and `Modal`.

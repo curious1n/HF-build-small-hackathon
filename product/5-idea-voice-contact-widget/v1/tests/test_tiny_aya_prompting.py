@@ -151,12 +151,59 @@ def test_runtime_override_requires_switch(monkeypatch) -> None:
     assert app.selected_model_runtime("hf_personal_space") == "hf_personal_space"
 
 
-def test_local_deterministic_hf_space_request_uses_safe_fallback(monkeypatch) -> None:
+def test_local_deterministic_selected_hf_space_is_unavailable(monkeypatch) -> None:
     app = load_app_module()
     monkeypatch.setenv("VCW_MODEL_MODE", "deterministic")
     monkeypatch.setenv("VCW_MODEL_RUNTIME", "hf_space")
     monkeypatch.setenv("VCW_ALLOW_RUNTIME_SWITCH", "1")
 
-    assert app.selected_model_runtime() == "none"
-    assert app.selected_model_runtime("hf_space") == "none"
+    assert app.selected_model_runtime() == "hf_space"
+    assert app.selected_model_runtime("hf_space") == "hf_space"
+    assert app.runtime_availability("hf_space")["available"] is False
+    controls = app.runtime_controls(app.selected_model_runtime())
+    hf_space = next(option for option in controls["options"] if option["value"] == "hf_space")
+    assert hf_space["enabled"] is True
+    assert hf_space["available"] is False
+    assert "local deterministic mode" in hf_space["disabled_reason"]
     assert app.selected_model_runtime("modal") == "modal"
+
+
+def test_runtime_unavailable_response_does_not_mark_fallback(monkeypatch) -> None:
+    app = load_app_module()
+    monkeypatch.setenv("VCW_MODEL_MODE", "deterministic")
+    packet = app.load_packet()
+    payload = {"speech_mode": "hinglish", "model_runtime": "hf_space"}
+
+    response = app.runtime_unavailable_response(packet, payload, "hf_space", text_only=False)
+    body = json.loads(response.body.decode("utf-8"))
+
+    assert response.status_code == 424
+    assert "deterministic output was not substituted" in body["error"]
+    assert body["trace"]["model_runtime"] == "hf_space"
+    assert body["trace"]["fallback_used"] is False
+    assert body["trace"]["fallback_reason"] is None
+
+
+def test_local_env_loader_fills_missing_modal_keys_without_overriding(monkeypatch, tmp_path) -> None:
+    app = load_app_module()
+    env_path = tmp_path / ".env.modal.local"
+    env_path.write_text(
+        "\n".join(
+            [
+                "APP_MODAL_BASE_URL=https://example-modal.invalid/process",
+                "APP_MODAL_AUTH_TOKEN=local-secret",
+                "APP_MODAL_TIMEOUT_SECONDS=42",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("APP_MODAL_BASE_URL", "https://already-set.invalid/process")
+    monkeypatch.delenv("APP_MODAL_AUTH_TOKEN", raising=False)
+    monkeypatch.delenv("APP_MODAL_TIMEOUT_SECONDS", raising=False)
+
+    loaded = app.load_local_env_files((env_path,))
+
+    assert loaded == [str(env_path)]
+    assert app.modal_base_url() == "https://already-set.invalid/process"
+    assert app.modal_auth_token() == "local-secret"
+    assert app.modal_timeout_seconds() == 42

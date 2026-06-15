@@ -6,8 +6,12 @@ from typing import Any
 
 
 def load_local_modal_env() -> None:
-    env_path = Path(__file__).resolve().parents[2] / ".env.modal.local"
-    if not env_path.exists():
+    current = Path(__file__).resolve()
+    env_path = next(
+        (parent / ".env.modal.local" for parent in current.parents if (parent / ".env.modal.local").exists()),
+        None,
+    )
+    if env_path is None:
         return
     for raw_line in env_path.read_text().splitlines():
         line = raw_line.strip()
@@ -25,6 +29,7 @@ from fastapi import Body, Header
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from gradio import Server
+from starlette.concurrency import run_in_threadpool
 
 from floodlight_space.booking_flow import approve_booking_flow
 from floodlight_space.conversation_service import (
@@ -116,7 +121,8 @@ def build_server() -> Server:
         message = str(payload.get("message") or SAMPLE_USER_MESSAGE)
         trace_id = str(payload.get("trace_id") or "space-venue-sample-001")
         context = build_bootstrap(scenario)
-        result = call_booking_extractor(
+        result = await run_in_threadpool(
+            call_booking_extractor,
             message=message,
             venue_context=_model_context(context),
             trace_id=trace_id,
@@ -158,7 +164,8 @@ def build_server() -> Server:
     async def whatsapp_simulated_model_message(payload: dict[str, Any] = Body(default_factory=dict)) -> JSONResponse:
         scenario = str(payload.get("scenario") or "normal")
         context = _model_context(build_bootstrap(scenario))
-        session = process_simulated_model_message(
+        session = await run_in_threadpool(
+            process_simulated_model_message,
             payload=payload,
             venue_context=context,
             store=CONVERSATION_STORE,
@@ -199,13 +206,23 @@ def build_server() -> Server:
         context = _model_context(build_bootstrap(scenario))
         mode = _live_adapter_mode()
         try:
-            session = process_baileys_message(
-                payload=payload,
-                venue_context=context,
-                store=CONVERSATION_STORE,
-                extraction_mode=mode,
-                extraction_provider=call_booking_extractor,
-            )
+            if mode == "modal":
+                session = await run_in_threadpool(
+                    process_baileys_message,
+                    payload=payload,
+                    venue_context=context,
+                    store=CONVERSATION_STORE,
+                    extraction_mode=mode,
+                    extraction_provider=call_booking_extractor,
+                )
+            else:
+                session = process_baileys_message(
+                    payload=payload,
+                    venue_context=context,
+                    store=CONVERSATION_STORE,
+                    extraction_mode=mode,
+                    extraction_provider=call_booking_extractor,
+                )
         except ValueError as exc:
             return JSONResponse({"ok": False, "error": str(exc), "conversation": None}, status_code=400)
 

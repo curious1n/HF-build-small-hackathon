@@ -1,0 +1,146 @@
+{
+  "approval": "COAGENTS.md standing bounded approval: Venue Manager v2 Modal/Nemotron single-scenario smoke; max $20; max 15 minutes; stop after one world-demo scenario returns schema-valid fallback_used=false result or exact blocker.",
+  "backend_action": "failed_model",
+  "fallback_used": false,
+  "first_failure": "Modal HTTP 404: modal-http: invalid function call\n",
+  "generated_at": "2026-06-15T20:55:57+00:00",
+  "http_status": 502,
+  "max_seconds": 900.0,
+  "modal_status": {
+    "auth_configured": true,
+    "base_url_configured": true,
+    "configured": true,
+    "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+    "timeout_seconds": 900.0
+  },
+  "passed": false,
+  "proof_boundary": "One local v2 world-demo simulator scenario through server-side Modal extraction. No broad eval, public release, live WhatsApp send, HF Space proof, or judge-ready claim.",
+  "response": {
+    "conversation": {
+      "agent_trace": [
+        {
+          "adapter": "simulator",
+          "label": "Simulator WhatsApp message normalized",
+          "message_id": "venue-v2-warm-preload-20260616-002-1",
+          "step": "adapter_envelope",
+          "timestamp": "2026-06-15T20:55:57+00:00",
+          "tone": "neutral"
+        },
+        {
+          "label": "Model extraction blocked",
+          "step": "model_validation",
+          "timestamp": "2026-06-15T20:55:57+00:00",
+          "tone": "error",
+          "validation": {
+            "errors": [
+              "modal_request_blocked"
+            ],
+            "valid": false
+          }
+        },
+        {
+          "fallback_used": false,
+          "label": "Model/runtime/schema path blocked; no fallback extraction used",
+          "step": "terminal_state",
+          "timestamp": "2026-06-15T20:55:57+00:00",
+          "tone": "error"
+        }
+      ],
+      "approval_source": null,
+      "approved_extraction": {},
+      "booking_record": {},
+      "candidate_extraction": {},
+      "created_at": "2026-06-15T20:55:57+00:00",
+      "model_extraction": {
+        "backend": "modal_http",
+        "blocker": "Modal HTTP 404: modal-http: invalid function call\n",
+        "booking": null,
+        "fallback_used": false,
+        "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+        "ok": false,
+        "trace_id": "venue-v2-warm-preload-20260616-002",
+        "validation": {
+          "errors": [
+            "modal_request_blocked"
+          ],
+          "valid": false
+        }
+      },
+      "model_validation": {
+        "errors": [
+          "modal_request_blocked"
+        ],
+        "valid": false
+      },
+      "outbound_message": {
+        "channel": "whatsapp_simulator",
+        "delivery_state": "not_sent",
+        "reason": "failed_model",
+        "text": ""
+      },
+      "owner_correction_diff": [],
+      "owner_review_action": null,
+      "owner_review_required": false,
+      "player_phone": "+91 98765 43210",
+      "send_adapter": {
+        "adapter": "simulator",
+        "delivery_state": "not_sent",
+        "reason": "failed_model"
+      },
+      "session_id": "venue-v2-warm-preload-20260616-002",
+      "status": "failed_model",
+      "terminal_state": "failed_model",
+      "trace_id": "venue-v2-warm-preload-20260616-002",
+      "truth_check_final": {},
+      "truth_check_initial": {},
+      "turn_count": 1,
+      "turns": [
+        {
+          "adapter_envelope": {
+            "adapter": "simulator",
+            "message_id": "venue-v2-warm-preload-20260616-002-1",
+            "provider_metadata": {},
+            "received_at": "2026-06-15T20:55:56+00:00",
+            "sender_phone": "+91 98765 43210",
+            "text": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210."
+          },
+          "raw_message": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210.",
+          "received_at": "2026-06-15T20:55:56+00:00",
+          "turn_index": 1
+        }
+      ],
+      "updated_at": "2026-06-15T20:55:57+00:00"
+    },
+    "ok": false,
+    "proof_boundary": {
+      "adapter": "simulator",
+      "extraction_mode": "modal",
+      "live_outbound_proven": false,
+      "live_whatsapp_inbound_proven": false
+    }
+  },
+  "run_label": "venue-manager-v2-world-modal-smoke",
+  "runtime_axes": {
+    "app_host": "local",
+    "fallback_used": false,
+    "inference_engine": "unknown",
+    "lifecycle_stage": "testing",
+    "model_artifact_format": "unknown",
+    "model_backend": "modal_http",
+    "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+    "model_runtime": "modal",
+    "quantization": "unknown"
+  },
+  "scenario": "normal",
+  "session_id": "venue-v2-warm-preload-20260616-002",
+  "terminal_state": "failed_model",
+  "trace_id": "venue-v2-warm-preload-20260616-002",
+  "trace_response": null,
+  "validation": {
+    "errors": [
+      "modal_request_blocked"
+    ],
+    "valid": false
+  },
+  "wall_clock_seconds": 1.068
+}

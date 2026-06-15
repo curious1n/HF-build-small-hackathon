@@ -149,6 +149,8 @@ function Stage(state, on) {
       ? 'I need one more detail before owner approval.'
       : 'your booking is confirmed.';
   const suppressModelEmptyReply = req.modelBacked && !conversation;
+  const replyComposerText = replyComposerTextForState(state);
+  const showTryMeComposer = req.modelBacked && !req.pendingInboundMessage && !conversation;
 
   /* customer's incoming messages */
   const incoming = buildHistory(req, conversation).map(m =>
@@ -180,12 +182,13 @@ function Stage(state, on) {
           h('div', { class: 'p' }, req.phone)),
         h('div', { class: 'chan' }, h('span', { class: 'u-dot' }), 'WhatsApp')),
       h('div', { class: 'pc-body' },
-      h('div', { class: 'chat-thread' },
+        showTryMeComposer && TryMeComposer(state, on),
+        h('div', { class: 'chat-thread' },
           h('div', { class: 'day-chip' }, 'Today'),
           ...incoming,
           !modelReadyForInput && !suppressModelEmptyReply && h('div', { class: 'draft-divider', 'data-design-id': 'reply-draft' }, h('span', { class: 'u-dot' }), draftLabelForState(state)),
           outgoing)),
-      req.modelBacked && TryMeComposer(state, on)),
+      ReplySendComposer(state, on, replyComposerText)),
     showPreviewMeta && h('div', { class: 'preview-meta' },
       MetaPill('Venue', venue.name),
       MetaPill('Slot', metaSlot),
@@ -206,7 +209,23 @@ function TryMeComposer(state, on) {
   return h('form', { class: 'chat-compose', 'data-design-id': 'try-me-chat-composer', onSubmit: on.sendDemoChat },
     input,
     h('button', { type: 'submit', disabled: disabled || !String(state.demoChatDraft || '').trim() },
-      disabled ? 'Calling' : 'Send to Model'));
+      disabled ? 'Calling' : 'Receive from User'));
+}
+
+function ReplySendComposer(state, on, value) {
+  const disabled = state.syncStatus === 'syncing';
+  const text = String(value || '');
+  const input = h('textarea', {
+    rows: '2',
+    maxlength: '520',
+    placeholder: 'Reply draft will appear here...',
+    oninput: e => on.replyComposerDraft(e.target.value),
+    disabled,
+  });
+  input.value = text;
+  return h('form', { class: 'chat-compose reply-compose', 'data-design-id': 'reply-send-composer', onSubmit: on.sendReplyComposer },
+    input,
+    h('button', { type: 'submit', disabled: disabled || !text.trim() }, 'Send'));
 }
 
 function MetaPill(k, v, accent) {
@@ -371,10 +390,10 @@ function BackendRows(state) {
   ];
 }
 
-function formatLatency(ms) {
-  if (ms == null || ms === '') return 'Pending';
+function formatLatency(ms, emptyLabel = 'Pending') {
+  if (ms == null || ms === '') return emptyLabel;
   const n = Number(ms);
-  if (!Number.isFinite(n)) return 'Pending';
+  if (!Number.isFinite(n)) return emptyLabel;
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}s`;
   return `${Math.round(n)}ms`;
 }
@@ -402,7 +421,11 @@ function modelRunState(state) {
         : extraction.ok
           ? 'Complete'
           : 'Ready';
-  const elapsed = calling && run.startedAt ? Date.now() - run.startedAt : '';
+  const elapsed = calling && run.startedAt
+    ? Date.now() - run.startedAt
+    : run.startedAt && run.completedAt
+      ? run.completedAt - run.startedAt
+      : run.latencyMs || extraction.client_latency_ms || extraction.latency_ms;
   return {
     status,
     traceId: extraction.trace_id || run.traceId || conversation?.trace_id || 'pending',
@@ -429,9 +452,11 @@ function ModelRunBlock(state) {
   if (!req?.modelBacked) return null;
   const info = modelRunState(state);
   const valid = info.validation?.valid;
-  const fallback = info.fallbackUsed === true ? 'Yes' : info.fallbackUsed === false ? 'No' : 'Pending';
-  const schema = valid === true ? 'Valid' : valid === false ? 'Blocked' : 'Pending';
   const statusClass = String(info.status || '').toLowerCase();
+  const runEnded = ['complete', 'blocked', 'error'].includes(statusClass);
+  const pendingOrMissing = runEnded ? 'Not reported' : 'Pending';
+  const fallback = info.fallbackUsed === true ? 'Yes' : info.fallbackUsed === false ? 'No' : pendingOrMissing;
+  const schema = valid === true ? 'Valid' : valid === false ? 'Blocked' : runEnded ? 'Not validated' : 'Pending';
   const raw = activeConversation(state)?.model_extraction || state.modelRuns?.[req.id] || {};
   return h('div', { class: 'model-run', 'data-design-id': 'model-run-proof' },
     h('div', { class: 'model-run-head' },
@@ -445,7 +470,7 @@ function ModelRunBlock(state) {
       SimpleDetailRow('Signal', info.signal),
       SimpleDetailRow('Elapsed', formatLatency(info.elapsed)),
       SimpleDetailRow('Timeout', info.timeoutSeconds ? `${info.timeoutSeconds}s` : 'Pending'),
-      SimpleDetailRow('Latency', formatLatency(info.latency)),
+      SimpleDetailRow('Latency', formatLatency(info.latency, pendingOrMissing)),
       SimpleDetailRow('Schema', schema),
       SimpleDetailRow('Fallback', fallback),
       SimpleDetailRow('Trace id', info.traceId)),

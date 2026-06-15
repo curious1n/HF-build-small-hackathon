@@ -78,14 +78,118 @@ ASSET_VARIANTS: dict[str, dict[str, dict[str, str]]] = {
     },
 }
 
+ADD_ELEMENTS_BASE_THEME_IMAGES: dict[str, str] = {
+    "classroom": "base-theme-images/classroom-base-theme-1024.png",
+    "questbook": "base-theme-images/questbook-base-theme-1024.png",
+    "comic": "base-theme-images/comic-base-theme-1024.png",
+}
+
+ADD_ELEMENTS_PHASE1_VARIANTS: dict[str, dict[str, dict[str, str]]] = {
+    "clean-room": {
+        "classroom": {
+            "image": "add-elements/phase1-classroom.png",
+            "source_goal": "Clean up my room before dinner",
+        },
+    },
+    "project-outline": {
+        "questbook": {
+            "image": "add-elements/phase1-questbook.png",
+            "source_goal": "Finish my class project outline",
+        },
+    },
+    "read-20": {
+        "comic": {
+            "image": "add-elements/phase1-comic.png",
+            "source_goal": "Read for 20 minutes",
+        },
+    },
+}
+
+ADD_ELEMENTS_PHASE2_VARIANTS: dict[str, dict[str, dict[str, str]]] = {
+    "clean-room": {
+        "classroom": {
+            "image": "add-elements/phase2-classroom.png",
+            "source_goal": "Clean up my room before dinner",
+            "parent_reference_id": "parent-mom-demo",
+            "child_reference_id": "child-boy-demo",
+        },
+    },
+    "project-outline": {
+        "questbook": {
+            "image": "add-elements/phase2-questbook.png",
+            "source_goal": "Finish my class project outline",
+            "parent_reference_id": "parent-dad-demo",
+            "child_reference_id": "child-girl-demo",
+        },
+    },
+    "read-20": {
+        "comic": {
+            "image": "add-elements/phase2-comic.png",
+            "source_goal": "Read for 20 minutes",
+            "parent_reference_id": "parent-dad-demo",
+            "child_reference_id": "child-boy-demo",
+        },
+    },
+}
+
+SEEDED_UPLOADS: dict[str, Any] = {
+    "parent_photo_refs": [
+        {
+            "id": "parent-dad-demo",
+            "kind": "parent_photo",
+            "asset_ref": "Dad reference portrait",
+            "preview_ref": "reference-seeds/parent-reference-photo.png",
+            "privacy_scope": "session_only",
+            "created_at": "local-demo",
+        },
+        {
+            "id": "parent-mom-demo",
+            "kind": "parent_photo",
+            "asset_ref": "Mom reference portrait",
+            "preview_ref": "reference-seeds/placeholder-female-parent-720.png",
+            "privacy_scope": "session_only",
+            "created_at": "local-demo",
+        }
+    ],
+    "child_photo_refs": [
+        {
+            "id": "child-boy-demo",
+            "kind": "child_photo",
+            "asset_ref": "Boy reference portrait",
+            "preview_ref": "reference-seeds/kid-reference-photo.png",
+            "privacy_scope": "session_only",
+            "created_at": "local-demo",
+        },
+        {
+            "id": "child-girl-demo",
+            "kind": "child_photo",
+            "asset_ref": "Girl reference portrait",
+            "preview_ref": "reference-seeds/placeholder-girl-720.png",
+            "privacy_scope": "session_only",
+            "created_at": "local-demo",
+        }
+    ],
+    "custom_image_reference_refs": [],
+    "parent_reference_audio_ref": {
+        "id": "parent-audio-demo",
+        "kind": "parent_reference_audio",
+        "asset_ref": "Parent reference audio sample",
+        "preview_ref": "reference-seeds/parent-reference-audio.m4a",
+        "privacy_scope": "session_only",
+        "created_at": "local-demo",
+    },
+}
+
+DEFAULT_GENERATION_REFERENCE_IDS = ["parent-dad-demo", "child-girl-demo"]
+
 SEED_GOALS: list[dict[str, Any]] = [
     {
-        "id": "goal-seed-clean-room",
+        "id": "goal-seed-project-outline",
         "asset_key": "clean-room",
-        "ordinary_goal": "Clean up my room before dinner",
+        "ordinary_goal": "Finish my class project outline",
         "theme_id_at_creation": "questbook",
-        "generated_title": "Quest: Room Cleanup",
-        "generated_narration": "A tidy room is the first little victory before dinner.",
-        "generated_reward_label": "Dinner-time Crest",
+        "generated_title": "Quest: Project Outline",
+        "generated_narration": "A clear outline turns a big class project into a brave first step.",
+        "generated_reward_label": "Planning Crest",
     },
 ]

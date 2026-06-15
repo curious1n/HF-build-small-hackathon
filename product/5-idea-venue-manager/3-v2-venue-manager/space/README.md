@@ -53,12 +53,26 @@ Runtime path for this v2 demo:
   config is supplied.
 - No deterministic model fallback is claimed as model proof.
 
+Runtime timing finding:
+
+- `H100:2` is a valid proof path for `nvidia/Nemotron-Cascade-2-30B-A3B`, but
+  the slow first request was dominated by vLLM/model startup, not generation.
+- Batch requests reduced suite time by amortizing one model load across many
+  prompts.
+- Modal warm preloading now loads the model in `@modal.enter()`. The bounded
+  warm-preload smoke returned `fallback_used=false`, schema-valid output with
+  model-side latency about `4.0s` and `load_llm_end=0`.
+- End-to-end first-request latency was still about `344s` because the request
+  arrived while the warm container was still starting/preloading. Responsive
+  demos should deploy warm, wait for readiness, then begin the human demo.
+
 ## Evidence
 
 - Local UAT: `../evidence/local-uat.md`
 - Hosted Space dry run: `../evidence/hf-space-deploy.md`
 - Modal single-scenario smoke: `../evidence/modal-world-smoke-2026-06-15.md`
 - Modal demo-world suite: `../evidence/modal-demo-world-suite-2026-06-15.md`
+- Runtime note: `../reducing-model-execution-time.md`
 - Agent trace rows: `../evidence/modal-demo-world-suite-20260615-131029/rows.jsonl`
 
 Proof claimed by this Space README:
@@ -98,5 +112,8 @@ Optional Space configuration for Modal-backed extraction:
   flow only.
 - Fresh hosted Space-to-Modal proof requires a separate `fallback_used=false`
   hosted smoke.
+- Warm preloading improves model-side request time after the Modal container is
+  ready, but it does not remove the need for a warmup/readiness wait before a
+  live demo.
 - The Venue Manager HF Article should be updated from `../articles/running-notes.md`
   when the local source changes.

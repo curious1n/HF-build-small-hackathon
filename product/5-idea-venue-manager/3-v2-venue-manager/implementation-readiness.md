@@ -23,6 +23,7 @@ remains untouched.
 | Local demo model mode | Fixture-shaped simulator extraction |
 | Fallback claim | Deterministic fallback is not model proof |
 | Modal suite path | Existing `extract_booking` endpoint accepts a single payload or an `items` batch payload |
+| Warm preload | `modal/modal_venue_manager_cascade.py` uses a class-backed endpoint with `@modal.enter()` to load vLLM once when a Modal container starts |
 
 ## Standing Modal Smoke Default
 
@@ -88,3 +89,15 @@ Modal demo-world suite evidence:
 ```text
 evidence/modal-demo-world-suite-2026-06-15.md
 ```
+
+## Runtime Optimization Notes
+
+- 2026-06-16: Modal endpoint code now preloads `nvidia/Nemotron-Cascade-2-30B-A3B`
+  in `@modal.enter()` before serving `extract-booking`, so a bounded warm-pool
+  deploy should pay the vLLM load during container startup instead of on the
+  first real request.
+- Bounded warm-preload smoke passed with `fallback_used=false`: model-side
+  latency was about `4.0s` with `load_llm_end=0`, while end-to-end first-request
+  wall clock was about `344s` because the request arrived during container
+  startup/preload. Evidence:
+  `evidence/modal-world-smoke-2026-06-15.md`.

@@ -1,6 +1,6 @@
 {
   "modal-test": {
-    "purpose": "Use Modal-hosted model inference for testing while the Hugging Face Space stays on CPU Basic.",
+    "purpose": "Use Modal GPU-hosted model inference for testing while the Hugging Face Space stays on CPU Basic.",
     "space_repo": "${HF_HACKATHON}/voice-reach",
     "space_url": "https://build-small-hackathon-voice-reach.hf.space",
     "namespace_env": "HF_HACKATHON",
@@ -16,6 +16,11 @@
     "modal_endpoint": "https://curious1n--voice-reach-v1-modal-process.modal.run",
     "hf_personal_space_url": "https://curieous-voice-reach.hf.space",
     "modal_app": "voice-reach-v1-modal",
+    "modal_hardware": "T4",
+    "modal_models": {
+      "asr": "nvidia/nemotron-3.5-asr-streaming-0.6b",
+      "text": "CohereLabs/tiny-aya-fire-GGUF:Q8_0"
+    },
     "submission_allowed": false,
     "notes": [
       "Testing-only profile.",

@@ -35,6 +35,32 @@ from pydantic import BaseModel
 APP_VERSION = "v1-space-local-model-2026-06-15"
 SPACE_DIR = Path(__file__).resolve().parent
 V1_DIR = SPACE_DIR.parent
+IDEA_DIR = V1_DIR.parent
+REPO_ROOT = V1_DIR.parents[2]
+
+
+def load_local_env_files(paths: tuple[Path, ...]) -> list[str]:
+    loaded: list[str] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip().removeprefix("export ").strip()
+            if key and key not in os.environ:
+                os.environ[key] = value.strip().strip("'\"")
+        loaded.append(str(path))
+    return loaded
+
+
+LOCAL_ENV_FILES = (
+    IDEA_DIR / ".env.modal.local",
+)
+LOADED_LOCAL_ENV_FILES = load_local_env_files(LOCAL_ENV_FILES) if not os.environ.get("SPACE_ID") else []
+
 PACKET_CANDIDATES = (
     V1_DIR / "onboarding" / "metime-to.json",
     SPACE_DIR / "onboarding" / "metime-to.json",
@@ -49,9 +75,9 @@ ASR_MODEL_FILE = "nemotron-3.5-asr-streaming-0.6b.nemo"
 TEXT_MODEL_ID = "CohereLabs/tiny-aya-fire-GGUF"
 TEXT_MODEL_FILE = "tiny-aya-fire-q8_0.gguf"
 TEXT_MODEL_LABEL = "CohereLabs/tiny-aya-fire-GGUF:Q8_0"
-MODAL_ASR_MODEL_ID = "onnx-community/nemotron-3.5-asr-streaming-0.6b-onnx-int4"
+MODAL_ASR_MODEL_ID = ASR_MODEL_ID
 MODAL_TEXT_MODEL_ID = TEXT_MODEL_ID
-MODAL_TEXT_MODEL_LABEL = "CohereLabs/tiny-aya-fire-GGUF:Q4_K_M"
+MODAL_TEXT_MODEL_LABEL = TEXT_MODEL_LABEL
 DEFAULT_HF_PERSONAL_BASE_URL = "https://curieous-voice-reach.hf.space"
 MAX_AUDIO_BYTES = int(os.environ.get("VCW_MAX_AUDIO_BYTES", str(16 * 1024 * 1024)))
 MAX_AUDIO_SECONDS = int(os.environ.get("VCW_MAX_AUDIO_SECONDS", "45"))
@@ -197,8 +223,6 @@ def selected_model_runtime(override: Any = None) -> str:
     }
     requested = aliases.get(requested, requested)
     if requested:
-        if model_mode() == "deterministic" and requested == "hf_space":
-            return "none"
         if requested == "hf_space":
             return "hf_space"
         if requested in {"hf_personal_space", "modal"} and runtime_switch_allowed():
@@ -209,8 +233,6 @@ def selected_model_runtime(override: Any = None) -> str:
 
     runtime = os.environ.get("VCW_MODEL_RUNTIME", "").strip().lower()
     runtime = aliases.get(runtime, runtime)
-    if model_mode() == "deterministic" and runtime == "hf_space":
-        return "none"
     if runtime in {"modal", "hf_personal_space", "hf_space", "none"}:
         return runtime
     if model_mode() == "deterministic":
@@ -222,9 +244,9 @@ def runtime_axes(runtime: str) -> dict[str, Any]:
     if runtime == "modal":
         return {
             "model_backend": "modal_http",
-            "inference_engine": "onnxruntime+llama.cpp",
-            "model_artifact_format": "onnx+gguf",
-            "quantization": "int4+q4_k_m",
+            "inference_engine": "nemo+llama.cpp",
+            "model_artifact_format": "nemo_archive+gguf",
+            "quantization": "unquantized+q8_0",
             "asr_model_id": os.environ.get("APP_MODAL_ASR_MODEL_ID", MODAL_ASR_MODEL_ID),
             "text_model_id": os.environ.get("APP_MODAL_MODEL_ID", MODAL_TEXT_MODEL_LABEL),
             "fallback_used": False,
@@ -260,30 +282,67 @@ def runtime_axes(runtime: str) -> dict[str, Any]:
     }
 
 
+def runtime_availability(runtime: str) -> dict[str, Any]:
+    if runtime == "none":
+        return {"available": True, "reason": None}
+    if runtime == "hf_space":
+        if model_mode() == "deterministic":
+            return {
+                "available": False,
+                "reason": "HF hackathon space is not available in local deterministic mode. Set VCW_MODEL_MODE=real on model-backed hardware.",
+            }
+        return {"available": True, "reason": None}
+    if runtime == "hf_personal_space":
+        if not runtime_switch_allowed():
+            return {"available": False, "reason": "Runtime switching is disabled for this Space."}
+        if not hf_personal_base_url():
+            return {"available": False, "reason": "HF personal space URL is not configured."}
+        return {"available": True, "reason": None}
+    if runtime == "modal":
+        if not runtime_switch_allowed():
+            return {"available": False, "reason": "Runtime switching is disabled for this Space."}
+        if not modal_base_url():
+            return {"available": False, "reason": "Modal endpoint is not configured."}
+        if not modal_auth_token():
+            return {"available": False, "reason": "Modal auth token is not configured."}
+        return {"available": True, "reason": None}
+    return {"available": False, "reason": "Unsupported model runtime."}
+
+
 def runtime_controls(default_runtime: str) -> dict[str, Any]:
     allow_switch = runtime_switch_allowed()
+    selected = default_runtime if default_runtime in {"hf_space", "hf_personal_space", "modal"} else "hf_space"
+    hf_space_availability = runtime_availability("hf_space")
+    hf_personal_availability = runtime_availability("hf_personal_space")
+    modal_availability = runtime_availability("modal")
     return {
         "label": "Model Runtime",
         "allow_switch": allow_switch,
-        "selected": default_runtime,
+        "selected": selected,
         "options": [
             {
                 "value": "hf_space",
                 "label": "HF hackathon space",
                 "note": "credit issue",
                 "enabled": True,
+                "available": hf_space_availability["available"],
+                "disabled_reason": hf_space_availability["reason"],
             },
             {
                 "value": "hf_personal_space",
                 "label": "HF personal space",
                 "note": "test runtime",
                 "enabled": allow_switch,
+                "available": allow_switch and hf_personal_availability["available"],
+                "disabled_reason": hf_personal_availability["reason"] if allow_switch else "Enable VCW_ALLOW_RUNTIME_SWITCH=1 to test this runtime.",
             },
             {
                 "value": "modal",
                 "label": "Modal",
                 "note": "test runtime",
                 "enabled": allow_switch,
+                "available": allow_switch and modal_availability["available"],
+                "disabled_reason": modal_availability["reason"] if allow_switch else "Enable VCW_ALLOW_RUNTIME_SWITCH=1 to test this runtime.",
             },
         ],
     }
@@ -1023,9 +1082,9 @@ def modal_result_to_response(
             "text_only_smoke": text_only,
             "model_runtime": "modal",
             "model_backend": "modal_http",
-            "inference_engine": modal_result.get("inference_engine") or "onnxruntime+llama.cpp",
-            "model_artifact_format": modal_result.get("model_artifact_format") or "onnx+gguf",
-            "quantization": modal_result.get("quantization") or "int4+q4_k_m",
+            "inference_engine": modal_result.get("inference_engine") or "nemo+llama.cpp",
+            "model_artifact_format": modal_result.get("model_artifact_format") or "nemo_archive+gguf",
+            "quantization": modal_result.get("quantization") or "unquantized+q8_0",
             "model_id": modal_result.get("model_id") or f"{MODAL_ASR_MODEL_ID}+{MODAL_TEXT_MODEL_LABEL}",
             "fallback_used": fallback_used,
             "fallback_reason": modal_result.get("fallback_reason"),
@@ -1039,9 +1098,9 @@ def modal_result_to_response(
             "asr": {
                 "model_id": asr.get("model_id") or ("supplied-transcript" if text_only else MODAL_ASR_MODEL_ID),
                 "backend": asr.get("backend") or ("none" if text_only else "modal_http"),
-                "inference_engine": asr.get("inference_engine") or ("none" if text_only else "onnxruntime"),
-                "model_artifact_format": asr.get("model_artifact_format") or ("none" if text_only else "onnx"),
-                "quantization": asr.get("quantization") or ("none" if text_only else "int4"),
+                "inference_engine": asr.get("inference_engine") or ("none" if text_only else "nemo"),
+                "model_artifact_format": asr.get("model_artifact_format") or ("none" if text_only else "nemo_archive"),
+                "quantization": asr.get("quantization") or ("none" if text_only else "unquantized"),
                 "target_lang": trace["asr_language_hint"],
                 "fallback_used": bool(asr.get("fallback_used")),
                 "transcript": transcript,
@@ -1051,7 +1110,7 @@ def modal_result_to_response(
                 "backend": text.get("backend") or "modal_http",
                 "inference_engine": text.get("inference_engine") or "llama.cpp",
                 "model_artifact_format": text.get("model_artifact_format") or "gguf",
-                "quantization": text.get("quantization") or "q4_k_m",
+                "quantization": text.get("quantization") or "q8_0",
                 "fallback_used": bool(text.get("fallback_used")),
                 "raw_output": raw_output[:2000],
                 "output": text_json,
@@ -1109,6 +1168,37 @@ def deterministic_process(packet: dict[str, Any], payload: dict[str, Any], reaso
     return {"transcript": transcript, "model_message_en": text_json["message_en"], "text": text_json, "trace": trace}
 
 
+def runtime_unavailable_response(packet: dict[str, Any], payload: dict[str, Any], runtime: str, *, text_only: bool) -> JSONResponse:
+    availability = runtime_availability(runtime)
+    reason = availability["reason"] or "Selected model runtime is not available."
+    trace = build_trace_base(packet, payload)
+    axes = runtime_axes(runtime)
+    trace.update(
+        {
+            "text_only_smoke": text_only,
+            "model_runtime": runtime,
+            "model_backend": axes["model_backend"],
+            "inference_engine": axes["inference_engine"],
+            "model_artifact_format": axes["model_artifact_format"],
+            "quantization": axes["quantization"],
+            "model_id": f"{axes['asr_model_id']}+{axes['text_model_id']}",
+            "fallback_used": False,
+            "fallback_reason": None,
+            "blocker": reason,
+            "timings_ms": {"total": 0},
+        }
+    )
+    append_trace(trace)
+    return JSONResponse(
+        {
+            "error": "Selected model runtime is not available; deterministic output was not substituted.",
+            "blocker": reason,
+            "trace": trace,
+        },
+        status_code=424,
+    )
+
+
 app = FastAPI(title="Voice Reach V1", version=APP_VERSION)
 app.add_middleware(
     CORSMiddleware,
@@ -1129,6 +1219,7 @@ def health() -> dict[str, Any]:
     mode = model_mode()
     runtime = selected_model_runtime()
     axes = runtime_axes(runtime)
+    availability = runtime_availability(runtime)
     return {
         "ok": True,
         "app": "voice-reach-v1",
@@ -1141,12 +1232,15 @@ def health() -> dict[str, Any]:
         "model_artifact_format": axes["model_artifact_format"],
         "quantization": axes["quantization"],
         "model_mode": mode,
+        "runtime_available": availability["available"],
+        "runtime_unavailable_reason": availability["reason"],
         "fallback_used": axes["fallback_used"],
         "asr_model_id": axes["asr_model_id"],
         "text_model_id": axes["text_model_id"],
         "modal_configured": bool(modal_base_url()) if runtime == "modal" else None,
         "hf_personal_configured": bool(hf_personal_base_url()) if runtime == "hf_personal_space" else None,
         "runtime_switch_allowed": runtime_switch_allowed(),
+        "local_env_files_loaded": [Path(path).name for path in LOADED_LOCAL_ENV_FILES],
         "concurrency": 1,
         "gradio_status_path": "/gradio",
         "trace_path": str(TRACE_PATH),
@@ -1185,6 +1279,8 @@ async def api_process(request: Request) -> JSONResponse:
             result = deterministic_process(packet, payload, "deterministic_mode")
             append_trace(result["trace"])
             return JSONResponse(result)
+        if not runtime_availability(runtime)["available"]:
+            return runtime_unavailable_response(packet, payload, runtime, text_only=False)
 
         try:
             if runtime == "modal":
@@ -1207,7 +1303,7 @@ async def api_process(request: Request) -> JSONResponse:
                 result["trace"]["audio_size_bytes"] = audio_size
                 result["trace"]["audio_duration_ms"] = duration_ms
             else:
-                result = deterministic_process(packet, payload, f"unsupported_model_runtime:{runtime}")
+                return runtime_unavailable_response(packet, payload, runtime, text_only=False)
             append_trace(result["trace"])
             return JSONResponse(result)
         except Exception as exc:
@@ -1290,6 +1386,8 @@ async def api_text_smoke(request: Request) -> JSONResponse:
         )
         append_trace(trace)
         return JSONResponse({"transcript": transcript, "model_message_en": text_json["message_en"], "text": text_json, "trace": trace})
+    if not runtime_availability(runtime)["available"]:
+        return runtime_unavailable_response(packet, payload, runtime, text_only=True)
 
     started = time.time()
     try:

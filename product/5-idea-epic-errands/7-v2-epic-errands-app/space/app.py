@@ -15,7 +15,12 @@ from gradio.workflow import WRITE_TOKEN
 from gradio import Server
 
 from diy_lab.epic_errands_diy_workflow.workflow_adapter import build_workflow_canvas_app
-from epic_errands_v2.generation import build_app_bootstrap, build_diy_state, build_generated_goal
+from epic_errands_v2.generation import (
+    build_app_bootstrap,
+    build_diy_state,
+    build_generated_goal,
+    build_generated_goal_with_live_fallback,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -81,7 +86,7 @@ def build_server() -> Server:
             "frontend": "fully-custom-ui",
             "version": "v2",
             "proof_claim": "local_implementation_only",
-            "live_generation": "disabled",
+            "live_generation": _live_generation_label(),
             "quality_text_model": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
             "quality_image_model": "black-forest-labs/FLUX.2-klein-9B",
             "quality_audio_model": "openbmb/VoxCPM2",
@@ -95,7 +100,7 @@ def build_server() -> Server:
     @app.post("/api/generate-goal")
     async def generate_goal(payload: dict[str, Any] = Body(default_factory=dict)) -> JSONResponse:
         return JSONResponse(
-            build_generated_goal(
+            build_generated_goal_with_live_fallback(
                 str(payload.get("ordinary_goal") or ""),
                 str(
                     payload.get("ui_theme_id")
@@ -183,6 +188,19 @@ def _hosted_css() -> str:
         ".dark .gradio-container,.gradio-container.dark{background:#f4f5f7!important;color:#353a42!important;}"
         "footer{display:none!important;}"
         "#epic-hosted-shell{padding:0!important;margin:0!important;background:var(--page-bg)!important;color:var(--body-color)!important;}"
+        "#epic-hosted-shell .card,#epic-hosted-shell .card-inner{color:var(--body-color)!important;font-family:var(--font-body)!important;}"
+        "#epic-hosted-shell .wordmark .display,#epic-hosted-shell .lead h1,#epic-hosted-shell .panel-head h2,#epic-hosted-shell .section__title,#epic-hosted-shell .parent__head h3,#epic-hosted-shell .field .big,#epic-hosted-shell .field .pts,#epic-hosted-shell .kidnote b{color:var(--heading-color)!important;font-family:var(--font-display)!important;}"
+        "#epic-hosted-shell .wordmark .sub,#epic-hosted-shell .lead p,#epic-hosted-shell .panel-head span,#epic-hosted-shell .section__sub,#epic-hosted-shell .empty-line,#epic-hosted-shell .kidnote,#epic-hosted-shell .foot{color:var(--muted-color)!important;font-family:var(--font-body)!important;}"
+        "#epic-hosted-shell .tab-btn{background:var(--panel-bg)!important;color:var(--muted-color)!important;border-color:var(--panel-border-color)!important;font-family:var(--font-body)!important;font-size:11px!important;font-weight:850!important;}"
+        "#epic-hosted-shell .tab-btn[aria-pressed='true']{background:var(--accent-soft)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important;}"
+        "#epic-hosted-shell .tab-btn b{background:var(--reward)!important;color:#17120c!important;}"
+        "#epic-hosted-shell .seg-btn,#epic-hosted-shell .mode-btn,#epic-hosted-shell .ref-chip{background:var(--field-bg)!important;color:var(--field-fg)!important;border-color:var(--field-border-color)!important;font-family:var(--font-body)!important;font-weight:850!important;}"
+        "#epic-hosted-shell .seg-btn[aria-pressed='true'],#epic-hosted-shell .mode-btn[aria-pressed='true'],#epic-hosted-shell .ref-chip[aria-pressed='true']{background:var(--accent-soft)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important;}"
+        "#epic-hosted-shell .btn-primary{background:var(--primary)!important;color:var(--primary-text)!important;border:0!important;font-family:var(--font-display)!important;font-weight:var(--display-weight)!important;text-transform:var(--display-transform)!important;letter-spacing:var(--display-tracking)!important;box-shadow:var(--primary-shadow)!important;}"
+        "#epic-hosted-shell .btn-ghost,#epic-hosted-shell .field__input,#epic-hosted-shell .upload-chip{background:var(--field-bg)!important;color:var(--field-fg)!important;border-color:var(--field-border-color)!important;font-family:var(--font-body)!important;}"
+        "#epic-hosted-shell .tab-btn span,#epic-hosted-shell .tab-btn svg,#epic-hosted-shell .seg-btn span,#epic-hosted-shell .mode-btn span,#epic-hosted-shell .ref-chip span,#epic-hosted-shell .ref-chip small,#epic-hosted-shell .btn-primary span,#epic-hosted-shell .btn-primary svg,#epic-hosted-shell .btn-ghost span,#epic-hosted-shell .btn-ghost svg,#epic-hosted-shell .upload-chip span{color:inherit!important;}"
+        "#epic-hosted-shell .quest-headline .eyebrow{color:var(--banner-text)!important;font-family:var(--font-display)!important;}"
+        "#epic-hosted-shell .quest-headline .quest-title{color:var(--quest-title-color)!important;font-family:var(--font-display)!important;}"
     )
     return (
         hosted_overrides
@@ -199,10 +217,9 @@ def _hosted_js() -> str:
     js = (FRONTEND_ROOT / "scripts" / "app.js").read_text(encoding="utf-8")
     manifest = {
         str(path.relative_to(ASSETS_ROOT)): _data_uri(path)
-        for path in sorted((ASSETS_ROOT / "generated-v2").glob("*"))
+        for path in sorted(ASSETS_ROOT.rglob("*"))
         if path.is_file()
     }
-    manifest["sc2-hero-scene-clean.png"] = _data_uri(ASSETS_ROOT / "sc2-hero-scene-clean.png")
     bootstrap = (
         "window.EPIC_ASSET_BASE = '';"
         "window.EPIC_EMBEDDED_SPACE_MODE = true;"
@@ -238,7 +255,7 @@ def _hosted_bootstrap(payload_json: str | None = None) -> str:
 
 def _hosted_generate_goal(payload_json: str | None = None) -> str:
     payload = _decode_request(payload_json)
-    generated = build_generated_goal(
+    generated = build_generated_goal_with_live_fallback(
         str(payload.get("ordinary_goal") or ""),
         str(
             payload.get("ui_theme_id")
@@ -251,14 +268,22 @@ def _hosted_generate_goal(payload_json: str | None = None) -> str:
         ],
         audio_used_parent_reference=bool(payload.get("audio_used_parent_reference")),
     )
+    fallback_used = bool(generated.get("provenance", {}).get("fallback_used", True))
     generated["provenance"] = {
         **generated.get("provenance", {}),
         "app_host": "hf_space_gradio_blocks",
-        "model_runtime": "none",
-        "model_backend": "static_review_asset",
+        "model_runtime": generated.get("provenance", {}).get("model_runtime") or ("none" if fallback_used else "modal"),
+        "model_backend": generated.get("provenance", {}).get("model_backend") or ("static_review_asset" if fallback_used else "modal_http"),
         "backend_transport": "gradio_blocks_named_api",
         "api_name": "epic_generate_goal",
-        "fallback_reason": "deterministic hosted dry-run; Modal/live model not wired to hosted app",
+        "fallback_reason": generated.get("provenance", {}).get("fallback_reason")
+        or (
+            "partial fallback; see modal_runtime_steps"
+            if fallback_used and generated.get("provenance", {}).get("model_runtime") == "modal"
+            else "deterministic hosted dry-run; Modal/live generation disabled or unavailable"
+            if fallback_used
+            else ""
+        ),
     }
     return json.dumps(generated, separators=(",", ":"))
 
@@ -286,6 +311,14 @@ def _data_uri(path: Path) -> str:
     mime_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"data:{mime_type};base64,{encoded}"
+
+
+def _live_generation_label() -> str:
+    if os.environ.get("EPIC_ENABLE_LIVE_GENERATION", "").strip().lower() in {"1", "true", "yes"}:
+        return "enabled"
+    if os.environ.get("APP_DRY_RUN", "true").strip().lower() in {"0", "false", "no"}:
+        return "enabled"
+    return "disabled"
 
 
 server = build_server()

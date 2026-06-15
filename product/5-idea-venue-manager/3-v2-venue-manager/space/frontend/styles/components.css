@@ -221,8 +221,15 @@ body.is-resizing{user-select:none;cursor:col-resize}
   color:var(--t-disabled);text-align:right;margin-top:6px}
 .chat-compose{
   display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--sp-3);
-  padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--c-border);
+  padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--c-border);
   background:var(--c-surface-sunken);
+}
+.pc-body > .chat-compose{
+  margin:calc(var(--sp-5) * -1) calc(var(--sp-5) * -1) var(--sp-4);
+}
+.reply-compose{
+  border-top:1px solid var(--c-border);
+  border-bottom:0;
 }
 .chat-compose textarea{
   min-width:0;resize:vertical;max-height:96px;min-height:48px;
@@ -593,6 +600,9 @@ body.is-resizing{user-select:none;cursor:col-resize}
   .chat-compose{
     grid-template-columns:1fr;
     padding:var(--sp-4);
+  }
+  .pc-body > .chat-compose{
+    margin:calc(var(--sp-4) * -1) calc(var(--sp-4) * -1) var(--sp-4);
   }
   .chat-compose button{
     min-height:42px;

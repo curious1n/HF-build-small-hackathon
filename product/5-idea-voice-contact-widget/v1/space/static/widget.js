@@ -20,6 +20,7 @@ const els = {
   runtimeSegmented: document.querySelector("#runtime-segmented"),
   recorderPanel: document.querySelector(".recorder-panel"),
   recordButton: document.querySelector("#record-button"),
+  recordDisabledReason: document.querySelector("#record-disabled-reason"),
   stateLabel: document.querySelector("#state-label"),
   helperCopy: document.querySelector("#helper-copy"),
   processingPanel: document.querySelector("#processing-panel"),
@@ -149,7 +150,7 @@ function renderRuntimeControls(controls = {}) {
     button.role = "radio";
     button.dataset.runtime = option.value;
     button.disabled = !option.enabled;
-    button.title = option.enabled ? option.label : "Enable VCW_ALLOW_RUNTIME_SWITCH=1 to test this runtime";
+    button.title = option.enabled ? option.disabled_reason || option.label : "Enable VCW_ALLOW_RUNTIME_SWITCH=1 to test this runtime";
 
     const label = document.createElement("span");
     label.className = "segment-label";
@@ -169,6 +170,31 @@ function renderRuntimeControls(controls = {}) {
   selectModelRuntime(state.modelRuntime, { silent: true });
 }
 
+function selectedRuntimeOption() {
+  const options = state.packet?.runtime_controls?.options || [];
+  return options.find((option) => option.value === state.modelRuntime) || null;
+}
+
+function recordDisabledReason() {
+  if (state.recorder?.state === "recording") return "";
+  const option = selectedRuntimeOption();
+  if (option && option.available === false) {
+    return option.disabled_reason || "Selected model runtime is not available.";
+  }
+  return "";
+}
+
+function updateRecordAvailability() {
+  if (!state.packet) return;
+  const reason = recordDisabledReason();
+  els.recordButton.disabled = Boolean(reason);
+  if (els.recordDisabledReason) {
+    els.recordDisabledReason.hidden = !reason;
+    els.recordDisabledReason.textContent = reason ? `Why it's disabled: ${reason}` : "";
+  }
+  updateDebug({ record_disabled_reason: reason || null });
+}
+
 function selectModelRuntime(runtime, { silent = false } = {}) {
   const buttons = [...els.runtimeSegmented.querySelectorAll("[data-runtime]")];
   const requested = buttons.find((button) => button.dataset.runtime === runtime);
@@ -180,6 +206,7 @@ function selectModelRuntime(runtime, { silent = false } = {}) {
     button.setAttribute("aria-checked", String(selected));
   });
   if (!silent) resetFlow();
+  updateRecordAvailability();
   updateDebug({ model_runtime_changed: !silent });
 }
 
@@ -246,6 +273,10 @@ async function mirrorPendingWork(requestPromise) {
 }
 
 async function startRecording() {
+  if (recordDisabledReason()) {
+    updateRecordAvailability();
+    return;
+  }
   if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
     showError("micDenied");
     return;
@@ -267,7 +298,7 @@ async function startRecording() {
     els.recordButton.textContent = state.packet.copy.stop_cta;
     setAppState("recording");
   } catch (_error) {
-    els.recordButton.disabled = false;
+    updateRecordAvailability();
     showError("micDenied");
   }
 }
@@ -284,8 +315,8 @@ async function finishRecording(stream) {
   const durationMs = Date.now() - state.startedAt;
   const blob = new Blob(state.chunks, { type: state.recorder?.mimeType || "audio/webm" });
   state.recorder = null;
-  els.recordButton.disabled = false;
   els.recordButton.textContent = state.packet.copy.record_cta;
+  updateRecordAvailability();
   if (durationMs < 700 || blob.size < 128) {
     showError("emptyAudio");
     return;
@@ -383,6 +414,7 @@ function resetFlow() {
   els.recordButton.textContent = state.packet.copy.record_cta;
   setPanels();
   setAppState("idle");
+  updateRecordAvailability();
 }
 
 function wireEvents() {

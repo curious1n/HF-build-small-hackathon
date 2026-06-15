@@ -205,6 +205,7 @@ const state = {
   conversations: {},
   traces: {},
   modelRuns: {},
+  replyComposerDrafts: {},
   modalStatus: null,
   demoChatDraft: '',
   requestSeq: 0,
@@ -264,6 +265,7 @@ function resetRuntimeState() {
   state.conversations = {};
   state.traces = {};
   state.modelRuns = {};
+  state.replyComposerDrafts = {};
   state.demoChatDraft = '';
   state.syncStatus = 'idle';
   state.backendError = '';
@@ -515,6 +517,18 @@ function replyDraftForState(s) {
   return `Hi ${req.name.split(' ')[0]}, ${venue.name} is available ${s.dateLabel} from ${s.slot}. The slot is ${fmtPrice(s.price)}. I can hold it after owner approval.`;
 }
 
+function replyComposerTextForState(s) {
+  const req = currentRequest(s);
+  if (!req) return '';
+  if (Object.prototype.hasOwnProperty.call(s.replyComposerDrafts || {}, req.id)) {
+    return s.replyComposerDrafts[req.id] || '';
+  }
+  const conversation = activeConversation(s);
+  if (conversation?.outbound_message?.text) return conversation.outbound_message.text;
+  if (isModelBackedRequest(req)) return '';
+  return req.replyDraft || '';
+}
+
 function draftLabelForState(s) {
   const conversation = activeConversation(s);
   const req = currentRequest(s);
@@ -638,6 +652,7 @@ async function sendDemoChatMessage(text) {
   req.pendingInboundMessage = clean;
   req.chatDraft = '';
   state.demoChatDraft = '';
+  delete state.replyComposerDrafts[req.id];
   delete state.conversations[req.id];
   delete state.traces[req.id];
   return syncSelectedRequest();
@@ -829,6 +844,22 @@ const handlers = {
   sendDemoChat(e) {
     if (e) e.preventDefault();
     sendDemoChatMessage(state.demoChatDraft);
+  },
+
+  replyComposerDraft(val) {
+    const req = currentRequest(state);
+    if (!req) return;
+    state.replyComposerDrafts[req.id] = val;
+  },
+
+  sendReplyComposer(e) {
+    if (e) e.preventDefault();
+    const text = String(replyComposerTextForState(state) || '').trim();
+    if (!text) {
+      toast('No reply draft yet');
+      return;
+    }
+    toast('Note: WhatsApp / Baileys not set up');
   },
 
   copy(num) {

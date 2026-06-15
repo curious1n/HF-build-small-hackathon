@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-06-15T12:32:58.433732+00:00",
+  "checked_at": "2026-06-15T20:22:43.953856+00:00",
   "paid_run_allowed_now": true,
   "proof_boundary": "File access only; no model load, inference, Modal GPU, or fallback proof claimed.",
   "purpose": "Fresh token-backed no-GPU required-file access check before approved Modal GPU smoke.",

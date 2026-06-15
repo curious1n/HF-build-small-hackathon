@@ -7,7 +7,6 @@
   const API_BASE = window.EPIC_API_BASE || "";
   const EMBEDDED_SPACE_MODE = Boolean(window.EPIC_EMBEDDED_SPACE_MODE);
   const GRADIO_API_PREFIX = window.EPIC_GRADIO_API_PREFIX || "/gradio_api";
-  const QUALITY_MEDIA_VARIANT_ID = "questbook";
   const root = document.getElementById("app");
 
   const themeToToken = {
@@ -91,6 +90,110 @@
     },
   };
 
+  const addElementsBaseThemeImages = {
+    classroom: "base-theme-images/classroom-base-theme-1024.png",
+    questbook: "base-theme-images/questbook-base-theme-1024.png",
+    comic: "base-theme-images/comic-base-theme-1024.png",
+  };
+
+  const addElementsPhase1Variants = {
+    "clean-room": {
+      classroom: {
+        image: "add-elements/phase1-classroom.png",
+        source_goal: "Clean up my room before dinner",
+      },
+    },
+    "project-outline": {
+      questbook: {
+        image: "add-elements/phase1-questbook.png",
+        source_goal: "Finish my class project outline",
+      },
+    },
+    "read-20": {
+      comic: {
+        image: "add-elements/phase1-comic.png",
+        source_goal: "Read for 20 minutes",
+      },
+    },
+  };
+
+  const addElementsPhase2Variants = {
+    "clean-room": {
+      classroom: {
+        image: "add-elements/phase2-classroom.png",
+        source_goal: "Clean up my room before dinner",
+        parent_reference_id: "parent-mom-demo",
+        child_reference_id: "child-boy-demo",
+      },
+    },
+    "project-outline": {
+      questbook: {
+        image: "add-elements/phase2-questbook.png",
+        source_goal: "Finish my class project outline",
+        parent_reference_id: "parent-dad-demo",
+        child_reference_id: "child-girl-demo",
+      },
+    },
+    "read-20": {
+      comic: {
+        image: "add-elements/phase2-comic.png",
+        source_goal: "Read for 20 minutes",
+        parent_reference_id: "parent-dad-demo",
+        child_reference_id: "child-boy-demo",
+      },
+    },
+  };
+
+  const seededUploads = {
+    parent_photo_refs: [
+      {
+        id: "parent-dad-demo",
+        kind: "parent_photo",
+        asset_ref: "Dad reference portrait",
+        preview_ref: "reference-seeds/parent-reference-photo.png",
+        privacy_scope: "session_only",
+        created_at: "local-demo",
+      },
+      {
+        id: "parent-mom-demo",
+        kind: "parent_photo",
+        asset_ref: "Mom reference portrait",
+        preview_ref: "reference-seeds/placeholder-female-parent-720.png",
+        privacy_scope: "session_only",
+        created_at: "local-demo",
+      },
+    ],
+    child_photo_refs: [
+      {
+        id: "child-boy-demo",
+        kind: "child_photo",
+        asset_ref: "Boy reference portrait",
+        preview_ref: "reference-seeds/kid-reference-photo.png",
+        privacy_scope: "session_only",
+        created_at: "local-demo",
+      },
+      {
+        id: "child-girl-demo",
+        kind: "child_photo",
+        asset_ref: "Girl reference portrait",
+        preview_ref: "reference-seeds/placeholder-girl-720.png",
+        privacy_scope: "session_only",
+        created_at: "local-demo",
+      },
+    ],
+    custom_image_reference_refs: [],
+    parent_reference_audio_ref: {
+      id: "parent-audio-demo",
+      kind: "parent_reference_audio",
+      asset_ref: "Parent reference audio sample",
+      preview_ref: "reference-seeds/parent-reference-audio.m4a",
+      privacy_scope: "session_only",
+      created_at: "local-demo",
+    },
+  };
+
+  const defaultGenerationReferenceIds = ["parent-dad-demo", "child-girl-demo"];
+
   const qualityMode = {
     id: "quality",
     label: "Quality",
@@ -132,7 +235,13 @@
   let state = makeFallbackState();
 
   function makeFallbackState() {
-    const seedGoal = createGoal("Clean up my room before dinner", "questbook", "goal-seed-clean-room", []);
+    const seedGoal = createGoal(
+      "Finish my class project outline",
+      "questbook",
+      "goal-seed-project-outline",
+      defaultGenerationReferenceIds,
+      true
+    );
     seedGoal.review_state = "accepted";
     const fallback = {
       active_tab: "home",
@@ -141,29 +250,29 @@
       available_generation_modes: [qualityMode, speedMode],
       parent_profile: {
         display_name: "Parent",
-        photo_refs: [],
-        reference_audio_ref: null,
+        photo_refs: seededUploads.parent_photo_refs,
+        reference_audio_ref: seededUploads.parent_reference_audio_ref,
         reference_audio_optional: true,
       },
-      children: [{ id: "child-1", display_name: "Kid", photo_refs: [] }],
+      children: [{ id: "child-1", display_name: "Kid", photo_refs: seededUploads.child_photo_refs }],
       custom_image_reference_refs: [],
       uploads: {
-        parent_photo_refs: [],
-        child_photo_refs: [],
+        parent_photo_refs: seededUploads.parent_photo_refs,
+        child_photo_refs: seededUploads.child_photo_refs,
         custom_image_reference_refs: [],
-        parent_reference_audio_ref: null,
+        parent_reference_audio_ref: seededUploads.parent_reference_audio_ref,
       },
       generation_references: [],
       goal_draft: {
-        ordinary_goal: "Read for 20 minutes",
-        selected_generation_reference_ids: [],
+        ordinary_goal: "Finish my class project outline",
+        selected_generation_reference_ids: defaultGenerationReferenceIds,
         generation_mode: "quality",
       },
       pending_review_goal: null,
       goals: [seedGoal],
       accepted_goals: [seedGoal],
       selected_goal_id: "goal-seed-clean-room",
-      diy: buildLocalDiyState("questbook", "Clean up my room before dinner", []),
+      diy: buildLocalDiyState("questbook", "Finish my class project outline", defaultGenerationReferenceIds),
       generation_status: {
         state: "ready",
         message: "Hosted deterministic generation is ready.",
@@ -176,6 +285,7 @@
   }
 
   function asset(path) {
+    if (/^(data:|https?:|blob:)/.test(String(path || ""))) return path;
     if (ASSET_MANIFEST[path]) return ASSET_MANIFEST[path];
     return `${ASSET_BASE}${path}`;
   }
@@ -200,6 +310,62 @@
     return "clean-room";
   }
 
+  function referenceKind(refId) {
+    const lowered = String(refId || "").toLowerCase();
+    if (["parent", "dad", "mom"].some((token) => lowered.includes(token))) return "parent_photo";
+    if (["child", "kid", "boy", "girl"].some((token) => lowered.includes(token))) return "child_photo";
+    return "custom_image_reference";
+  }
+
+  function hasParentChildRefs(referenceIds) {
+    const kinds = new Set((referenceIds || []).map(referenceKind));
+    return kinds.has("parent_photo") && kinds.has("child_photo");
+  }
+
+  function mediaAssetsFor(key, themeId, referenceIds) {
+    const variant = { ...(assets[key][themeId] || assets[key].questbook) };
+    const imageProvenance = {
+      image_fallback_source: "generated_v2_fixture",
+      add_elements_cache_hit: false,
+      add_elements_contract: "not_applied",
+      base_theme_image_ref: addElementsBaseThemeImages[themeId],
+    };
+    if (hasParentChildRefs(referenceIds)) {
+      const addElements = addElementsPhase2Variants[key]?.[themeId];
+      if (addElements) {
+        variant.image = addElements.image;
+        Object.assign(imageProvenance, {
+          image_fallback_source: "cached_flux2_add_elements_phase2",
+          add_elements_cache_hit: true,
+          add_elements_phase: "phase2",
+          add_elements_contract: "base_theme_plus_parent_child_goal",
+          add_elements_source_goal: addElements.source_goal,
+          add_elements_reference_ids: [addElements.parent_reference_id, addElements.child_reference_id],
+        });
+      } else {
+        Object.assign(imageProvenance, {
+          add_elements_contract: "base_theme_plus_parent_child_goal",
+          add_elements_cache_miss_reason: "no_exact_cached_phase2_theme_goal_match",
+        });
+      }
+      return { variant, imageProvenance };
+    }
+    if (!(referenceIds || []).length) {
+      const addElements = addElementsPhase1Variants[key]?.[themeId];
+      if (addElements) {
+        variant.image = addElements.image;
+        Object.assign(imageProvenance, {
+          image_fallback_source: "cached_flux2_add_elements_phase1",
+          add_elements_cache_hit: true,
+          add_elements_phase: "phase1",
+          add_elements_contract: "base_theme_plus_goal_no_people",
+          add_elements_source_goal: addElements.source_goal,
+        });
+      }
+    }
+    return { variant, imageProvenance };
+  }
+
   function titleFor(goalText, themeId) {
     if (themeId === "comic") return "Mission: Everyday Hero";
     if (themeId === "classroom") return "Quest: Ready to Shine";
@@ -221,14 +387,15 @@
   function createGoal(ordinaryGoal, themeId, id, referenceIds, audioUsedParentReference) {
     const normalizedTheme = themes[themeId] ? themeId : "questbook";
     const key = assetKey(ordinaryGoal);
-    const variant = assets[key][QUALITY_MEDIA_VARIANT_ID] || assets[key].questbook;
+    const selectedRefs = referenceIds || [];
+    const { variant, imageProvenance } = mediaAssetsFor(key, normalizedTheme, selectedRefs);
     const referenceSignature = (referenceIds || []).join(",");
     return {
       id: id || `goal-${Date.now()}`,
       ordinary_goal: ordinaryGoal,
       generation_mode: "quality",
       theme_id_at_creation: normalizedTheme,
-      selected_generation_reference_ids: referenceIds || [],
+      selected_generation_reference_ids: selectedRefs,
       generated_title: titleFor(ordinaryGoal, normalizedTheme),
       generated_narration: narrationFor(ordinaryGoal, normalizedTheme),
       generated_reward_label: rewardFor(normalizedTheme),
@@ -264,7 +431,8 @@
         audio_format: qualityMode.audio_format,
         audio_precision: qualityMode.audio_precision,
         fallback_used: true,
-        trace_id: `local-v2-${key}-quality-media-${referenceSignature || "no-refs"}`,
+        trace_id: `local-v2-${key}-${normalizedTheme}-quality-media-${referenceSignature || "no-refs"}`,
+        ...imageProvenance,
       },
       review_state: "pending",
       kid_completion_state: "not_started",
@@ -289,6 +457,10 @@
         runtime: qualityMode.image_runtime,
         output_size_px: qualityMode.image_output_size_px,
         result_asset_ref: goal.media.image_asset_ref,
+        image_fallback_source: goal.provenance.image_fallback_source,
+        add_elements_cache_hit: goal.provenance.add_elements_cache_hit,
+        add_elements_contract: goal.provenance.add_elements_contract,
+        base_theme_image_ref: goal.provenance.base_theme_image_ref,
       },
       audio_step: {
         model: qualityMode.audio_model_id,
@@ -309,7 +481,7 @@
   function buildLocalDiyState(themeId, ordinaryGoal, referenceIds) {
     const selectedRefs = referenceIds && referenceIds.length
       ? referenceIds
-      : ["parent-photo-demo", "child-photo-demo", "custom-image-reference-demo"];
+      : defaultGenerationReferenceIds;
     const preview = createGoal(ordinaryGoal, themeId, "diy-preview", selectedRefs);
     return {
       isolated_surface: true,
@@ -363,8 +535,8 @@
     const existingUploads = targetState.uploads || {};
     const hasAudioUpload = Object.prototype.hasOwnProperty.call(existingUploads, "parent_reference_audio_ref");
     targetState.uploads = {
-      parent_photo_refs: existingUploads.parent_photo_refs || parent.photo_refs || [],
-      child_photo_refs: existingUploads.child_photo_refs || child.photo_refs || [],
+      parent_photo_refs: existingUploads.parent_photo_refs?.length ? existingUploads.parent_photo_refs : parent.photo_refs || [],
+      child_photo_refs: existingUploads.child_photo_refs?.length ? existingUploads.child_photo_refs : child.photo_refs || [],
       custom_image_reference_refs: existingUploads.custom_image_reference_refs || targetState.custom_image_reference_refs || [],
       parent_reference_audio_ref: hasAudioUpload
         ? existingUploads.parent_reference_audio_ref
@@ -783,12 +955,15 @@
     const items = refs.length
       ? refs
           .map((ref, index) => `
-            <div class="upload-chip">
-              <span class="upload-chip__main">
-                ${ref.preview_ref && kind !== "parent_reference_audio" ? `<img class="upload-thumb" src="${escapeHtml(ref.preview_ref)}" alt="">` : ""}
-                <span>${escapeHtml(ref.asset_ref || `${title} ${index + 1}`)}</span>
-              </span>
-              <button class="icon-mini" type="button" data-action="${removeActions[kind]}" data-kind="${kind}" data-id="${ref.id}" aria-label="Remove ${escapeHtml(title)}">${icons.x}</button>
+            <div class="upload-chip${kind === "parent_reference_audio" ? " upload-chip--stack" : ""}">
+              <div class="upload-chip__row">
+                <span class="upload-chip__main">
+                  ${ref.preview_ref && kind !== "parent_reference_audio" ? `<img class="upload-thumb" src="${escapeHtml(asset(ref.preview_ref))}" alt="">` : ""}
+                  <span>${escapeHtml(ref.asset_ref || `${title} ${index + 1}`)}</span>
+                </span>
+                <button class="icon-mini" type="button" data-action="${removeActions[kind]}" data-kind="${kind}" data-id="${ref.id}" aria-label="Remove ${escapeHtml(title)}">${icons.x}</button>
+              </div>
+              ${ref.preview_ref && kind === "parent_reference_audio" ? `<audio class="upload-audio" controls preload="metadata" src="${escapeHtml(asset(ref.preview_ref))}"></audio>` : ""}
             </div>
           `)
           .join("")
@@ -957,6 +1132,7 @@
         <details class="provenance">
           <summary>Provenance</summary>
           <p>${escapeHtml(goal.provenance.text_model_id)} / ${escapeHtml(goal.provenance.image_model_id)} / ${escapeHtml(goal.provenance.audio_model_id)}</p>
+          <p>${escapeHtml(goal.provenance.image_fallback_source || "generated_v2_fixture")} / ${escapeHtml(goal.provenance.add_elements_contract || "not_applied")}</p>
           <p>fallback_used=${escapeHtml(String(goal.provenance.fallback_used))}</p>
         </details>
         <div class="review-actions">
@@ -1170,19 +1346,28 @@
     return homeHtml();
   }
 
-  function render() {
-    if (!root) return;
-    document.documentElement.dataset.theme = themeToToken[state.active_theme_id];
+  function renderShell() {
     root.innerHTML = `
-      <article class="card screen-in ornate v2-shell">
+      <article class="card ornate v2-shell">
         ${flourishCorners()}
         <div class="card-inner app-shell">
-          ${shellHeader()}
-          ${navHtml()}
-          ${currentScreenHtml()}
+          <div data-shell-region="header"></div>
+          <div data-shell-region="nav"></div>
+          <main class="app-screen" data-shell-region="screen" data-active-tab="${escapeHtml(state.active_tab)}"></main>
         </div>
       </article>
     `;
+  }
+
+  function render() {
+    if (!root) return;
+    document.documentElement.dataset.theme = themeToToken[state.active_theme_id];
+    if (!root.querySelector('[data-shell-region="screen"]')) renderShell();
+    root.querySelector('[data-shell-region="header"]').innerHTML = shellHeader();
+    root.querySelector('[data-shell-region="nav"]').innerHTML = navHtml();
+    const screen = root.querySelector('[data-shell-region="screen"]');
+    screen.dataset.activeTab = state.active_tab;
+    screen.innerHTML = currentScreenHtml();
   }
 
   document.addEventListener("click", (event) => {

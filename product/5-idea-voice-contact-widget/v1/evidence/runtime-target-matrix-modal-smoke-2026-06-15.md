@@ -42,6 +42,9 @@ Important guardrail:
 - `HF personal space` is proxied server-side through
   `APP_HF_PERSONAL_BASE_URL`; browser clients receive only runtime labels, not
   HF or Modal tokens.
+- If the selected runtime is unavailable, the UI disables `Record message` and
+  shows `Why it's disabled: ...`; API calls return `424` with
+  `fallback_used=false` rather than substituting deterministic output.
 
 ## Modal Endpoint
 
@@ -49,13 +52,15 @@ Important guardrail:
 - Endpoint: `https://curious1n--voice-reach-v1-modal-process.modal.run`
 - Endpoint auth: `APP_MODAL_AUTH_TOKEN` bearer secret.
 - Modal HF secret: `voice-reach-v1-hf`
-- Scale-down: `scaledown_window=2`
-- Hardware: CPU app with ONNX ASR and GGUF text path.
+- Latest update on 2026-06-16: `gpu=T4`, `min_containers=1`,
+  `scaledown_window=600`.
+- Latest hardware/runtime: Modal GPU sidecar with NeMo ASR and CUDA
+  llama.cpp text path.
 
 Model artifacts:
 
-- ASR: `onnx-community/nemotron-3.5-asr-streaming-0.6b-onnx-int4`
-- Text: `CohereLabs/tiny-aya-fire-GGUF` / `tiny-aya-fire-q4_k_m.gguf`
+- ASR: `nvidia/nemotron-3.5-asr-streaming-0.6b`
+- Text: `CohereLabs/tiny-aya-fire-GGUF` / `tiny-aya-fire-q8_0.gguf`
 
 No-GPU model file preflight passed:
 

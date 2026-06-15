@@ -51,12 +51,20 @@ class ModalClientConfig:
     @classmethod
     def from_env(cls) -> "ModalClientConfig":
         dry_value = os.environ.get("APP_DRY_RUN", "true").strip().lower()
+        live_value = os.environ.get("EPIC_ENABLE_LIVE_GENERATION", "").strip().lower()
+        dry_run = dry_value not in {"0", "false", "no"}
+        if live_value in {"1", "true", "yes"}:
+            dry_run = False
         return cls(
-            dry_run=dry_value not in {"0", "false", "no"},
-            base_url=os.environ.get("APP_MODAL_BASE_URL", ""),
-            text_url=os.environ.get("APP_MODAL_TEXT_URL", ""),
-            image_url=os.environ.get("APP_MODAL_IMAGE_URL", ""),
-            audio_url=os.environ.get("APP_MODAL_AUDIO_URL", ""),
+            dry_run=dry_run,
+            base_url=os.environ.get("APP_MODAL_BASE_URL", "") or os.environ.get("EPIC_MODAL_BASE_URL", ""),
+            text_url=os.environ.get("APP_MODAL_TEXT_URL", "") or os.environ.get("EPIC_MODAL_TEXT_URL", ""),
+            image_url=os.environ.get("APP_MODAL_IMAGE_URL", "") or os.environ.get("EPIC_MODAL_IMAGE_URL", ""),
+            audio_url=(
+                os.environ.get("APP_MODAL_AUDIO_URL", "")
+                or os.environ.get("EPIC_MODAL_AUDIO_URL", "")
+                or os.environ.get("EPIC_MODAL_VOXCPM2_URL", "")
+            ),
             auth_token=os.environ.get("APP_MODAL_AUTH_TOKEN", ""),
             timeout_seconds=float(os.environ.get("APP_MODAL_TIMEOUT_SECONDS", "45") or 45),
             model_id=os.environ.get("APP_MODAL_MODEL_ID", ""),
@@ -217,7 +225,7 @@ class ModalClient:
 def _metadata_from_modal(result: dict[str, Any]) -> RuntimeMetadata:
     return RuntimeMetadata(
         lifecycle_stage=str(result.get("lifecycle_stage") or "testing"),
-        app_host="local",
+        app_host="hf_space" if os.environ.get("SPACE_ID") else "local",
         model_runtime=str(result.get("model_runtime") or "modal"),
         model_backend=str(result.get("model_backend") or "modal_http"),
         inference_engine=str(result.get("inference_engine") or "unknown"),

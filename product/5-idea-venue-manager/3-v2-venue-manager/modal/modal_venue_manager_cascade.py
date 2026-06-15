@@ -29,6 +29,8 @@ GPU_CONFIG = os.environ.get("VENUE_MODAL_GPU", "H100:2")
 TENSOR_PARALLEL_SIZE = int(os.environ.get("VENUE_CASCADE_TENSOR_PARALLEL", "2"))
 MAX_MODEL_LEN = int(os.environ.get("VENUE_CASCADE_MAX_MODEL_LEN", "4096"))
 MAX_TOKENS = int(os.environ.get("VENUE_CASCADE_MAX_TOKENS", "1200"))
+FUNCTION_TIMEOUT = int(os.environ.get("VENUE_MODAL_FUNCTION_TIMEOUT", "1800"))
+STARTUP_TIMEOUT = int(os.environ.get("VENUE_MODAL_STARTUP_TIMEOUT", str(FUNCTION_TIMEOUT)))
 MIN_CONTAINERS = int(os.environ.get("VENUE_MODAL_MIN_CONTAINERS", "0"))
 BUFFER_CONTAINERS = int(os.environ.get("VENUE_MODAL_BUFFER_CONTAINERS", "0"))
 SCALEDOWN_WINDOW = int(
@@ -141,6 +143,14 @@ def _load_llm() -> Any:
         dtype=os.environ.get("VENUE_CASCADE_DTYPE", "bfloat16"),
     )
     return _LLM
+
+
+def _check_authorization(authorization: str | None) -> None:
+    expected = os.environ.get("APP_MODAL_AUTH_TOKEN", "")
+    if not expected:
+        raise HTTPException(status_code=500, detail="APP_MODAL_AUTH_TOKEN is not set")
+    if authorization != f"Bearer {expected}":
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 def _prompt(payload: dict[str, Any]) -> str:
@@ -277,7 +287,8 @@ def _runtime_config() -> dict[str, Any]:
             "buffer_containers": BUFFER_CONTAINERS,
             "scaledown_window_seconds": SCALEDOWN_WINDOW,
         },
-        "timeout_seconds": 1800,
+        "timeout_seconds": FUNCTION_TIMEOUT,
+        "startup_timeout_seconds": STARTUP_TIMEOUT,
     }
 
 
@@ -491,7 +502,7 @@ def _structured_outputs_params() -> Any | None:
     return StructuredOutputsParams(json=BOOKING_SCHEMA)
 
 
-@app.function(
+@app.cls(
     image=image,
     env={
         "VENUE_MODAL_MIN_CONTAINERS": str(MIN_CONTAINERS),
@@ -499,7 +510,8 @@ def _structured_outputs_params() -> Any | None:
         "VENUE_MODAL_SCALEDOWN_WINDOW": str(SCALEDOWN_WINDOW),
     },
     gpu=GPU_CONFIG,
-    timeout=1800,
+    timeout=FUNCTION_TIMEOUT,
+    startup_timeout=STARTUP_TIMEOUT,
     min_containers=MIN_CONTAINERS or None,
     buffer_containers=BUFFER_CONTAINERS or None,
     scaledown_window=SCALEDOWN_WINDOW,
@@ -509,41 +521,52 @@ def _structured_outputs_params() -> Any | None:
         modal.Secret.from_name(HF_SECRET_NAME),
     ],
 )
-@modal.fastapi_endpoint(method="POST")
+class VenueManagerCascade:
+    @modal.enter()
+    def preload(self) -> None:
+        _load_llm()
+
+    @modal.method()
+    def run(self, payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            if isinstance(payload.get("items"), list):
+                return _run_model_batch(payload)
+            return _run_model(payload)
+        except Exception as exc:
+            return {
+                "ok": False,
+                "trace_id": payload.get("trace_id"),
+                "model_id": MODEL_ID,
+                "model_family": "Nemotron Cascade 2 30B-A3B",
+                "backend": "modal_http",
+                "inference_engine": "vllm",
+                "model_artifact_format": "safetensors",
+                "quantization": "bf16",
+                "gpu": GPU_CONFIG,
+                "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
+                "runtime_config": _runtime_config(),
+                "fallback_used": False,
+                "latency_ms": 0,
+                "timing_ms": {},
+                "validation": {"valid": False, "errors": ["modal_model_exception"]},
+                "booking": None,
+                "raw_text": "",
+                "blocker": f"{type(exc).__name__}: {str(exc)[:1000]}",
+            }
+
+
+@app.function(
+    image=image,
+    timeout=FUNCTION_TIMEOUT,
+    secrets=[modal.Secret.from_name(AUTH_SECRET_NAME)],
+)
+@modal.fastapi_endpoint(method="POST", label="extract-booking")
 def extract_booking(
     payload: dict[str, Any],
     authorization: str | None = Header(default=None),
 ) -> dict[str, Any]:
-    expected = os.environ.get("APP_MODAL_AUTH_TOKEN", "")
-    if not expected:
-        raise HTTPException(status_code=500, detail="APP_MODAL_AUTH_TOKEN is not set")
-    if authorization != f"Bearer {expected}":
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    try:
-        if isinstance(payload.get("items"), list):
-            return _run_model_batch(payload)
-        return _run_model(payload)
-    except Exception as exc:
-        return {
-            "ok": False,
-            "trace_id": payload.get("trace_id"),
-            "model_id": MODEL_ID,
-            "model_family": "Nemotron Cascade 2 30B-A3B",
-            "backend": "modal_http",
-            "inference_engine": "vllm",
-            "model_artifact_format": "safetensors",
-            "quantization": "bf16",
-            "gpu": GPU_CONFIG,
-            "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
-            "runtime_config": _runtime_config(),
-            "fallback_used": False,
-            "latency_ms": 0,
-            "timing_ms": {},
-            "validation": {"valid": False, "errors": ["modal_model_exception"]},
-            "booking": None,
-            "raw_text": "",
-            "blocker": f"{type(exc).__name__}: {str(exc)[:1000]}",
-        }
+    _check_authorization(authorization)
+    return VenueManagerCascade().run.remote(payload)
 
 
 @app.local_entrypoint()
@@ -556,4 +579,9 @@ def main(message: str = SAMPLE_MESSAGE) -> None:
             "slots": ["8 AM - 12 PM", "2 PM - 6 PM"],
         },
     }
-    print(json.dumps(extract_booking.remote(payload, authorization="Bearer local-entrypoint"), indent=2))
+    token = os.environ.get("APP_MODAL_AUTH_TOKEN", "local-entrypoint")
+    result = extract_booking.remote(
+        payload,
+        authorization=f"Bearer {token}",
+    )
+    print(json.dumps(result, indent=2))

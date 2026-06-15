@@ -1,4 +1,4 @@
-"""Run one Epic Errands V2 model-backed row through the existing Modal functions.
+"""Run one Epic Errands V2 model-backed row through the app-owned Modal functions.
 
 This is a bounded paid smoke for V2 proof only: one goal, one theme, one text
 model call, one image, and one audio clip. It records fresh V2 evidence and
@@ -25,9 +25,8 @@ from huggingface_hub import get_hf_file_metadata, hf_hub_url
 APP_ROOT = Path(__file__).resolve().parents[1]
 IDEA_ROOT = APP_ROOT.parent
 REPO_ROOT = APP_ROOT.parents[2]
-V1_ROOT = APP_ROOT.parent / "5-v1-epic-errands-app"
-V1_SPACE_ROOT = V1_ROOT / "space"
-V1_MODAL_ROOT = V1_ROOT / "modal"
+V1_SPACE_ROOT = APP_ROOT.parent / "5-v1-epic-errands-app" / "space"
+V2_MODAL_ROOT = APP_ROOT / "modal"
 OUT_ROOT = APP_ROOT / "evidence" / "live-model-smoke-2026-06-15"
 RAW_ROOT = OUT_ROOT / "raw_modal_responses"
 REQUEST_ROOT = OUT_ROOT / "modal_requests"
@@ -248,7 +247,7 @@ def main() -> int:
         ],
     }
     text_body = modal_run(
-        V1_MODAL_ROOT / "modal_epic_errands_text.py",
+        V2_MODAL_ROOT / "modal_epic_errands_text.py",
         text_payload,
         "text",
         command_env,
@@ -276,7 +275,7 @@ def main() -> int:
                 }
             ],
         }
-        image_body = modal_run(V1_MODAL_ROOT / "modal_epic_errands_image.py", image_payload, "image", command_env)
+        image_body = modal_run(V2_MODAL_ROOT / "modal_epic_errands_image.py", image_payload, "image", command_env)
         image_outputs = image_body.get("outputs") or []
         image_output = image_outputs[0] if image_outputs else {}
         if image_output.get("image_png_base64"):
@@ -301,7 +300,7 @@ def main() -> int:
                 }
             ],
         }
-        audio_body = modal_run(V1_MODAL_ROOT / "modal_epic_errands_voxcpm2.py", audio_payload, "audio", command_env)
+        audio_body = modal_run(V2_MODAL_ROOT / "modal_epic_errands_voxcpm2.py", audio_payload, "audio", command_env)
         audio_outputs = audio_body.get("outputs") or []
         audio_output = audio_outputs[0] if audio_outputs else {}
         if audio_output.get("audio_wav_base64"):
