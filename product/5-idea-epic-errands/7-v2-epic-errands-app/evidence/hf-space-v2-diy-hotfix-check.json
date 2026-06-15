@@ -1,0 +1,20 @@
+{
+  "attempt": 3,
+  "checked_at": "2026-06-15T14:58:12.917990+00:00",
+  "component_count": 1,
+  "config_url": "https://build-small-hackathon-epic-errands.hf.space/config",
+  "has_diy_inline_copy": true,
+  "has_embedded_space_mode_guard": true,
+  "has_epic_iframe": true,
+  "has_legacy_absolute_diy_navigation_in_srcdoc": true,
+  "legacy_absolute_diy_navigation_note": "Expected: the source keeps local custom-server /diy navigation, but hosted srcdoc sets EPIC_EMBEDDED_SPACE_MODE so the guarded inline DIY branch runs instead.",
+  "metadata_checked_at": "2026-06-15T14:59:24.850177+00:00",
+  "observed_sha": "973de9f8c42c8720accb52202e469f774374f25c",
+  "private": true,
+  "proof_scope": "authenticated hosted Gradio config check for embedded DIY hotfix; not full browser proof of private hosted Space",
+  "repo_id": "build-small-hackathon/epic-errands",
+  "sdk": "gradio",
+  "space_url": "https://build-small-hackathon-epic-errands.hf.space/",
+  "status": "pass",
+  "title": "Epic Errands V2"
+}

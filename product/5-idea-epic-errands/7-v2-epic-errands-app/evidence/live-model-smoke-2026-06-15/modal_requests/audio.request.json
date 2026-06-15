@@ -1,0 +1,18 @@
+{
+  "cfg_value": 2.0,
+  "inference_timesteps": 10,
+  "items": [
+    {
+      "audio_prompt": "Generate a friendly spoken version of the Epic Errand produced by the text model. Plain goal: \"Read for 20 minutes\". Theme: Comic. Voice direction: upbeat comic narrator, energetic but not loud or frantic, clear and encouraging. Speak only the title and short narration from this generated card text: Comic Quest. Read for 20 minutes and earn a comic badge! Do not add internal field names, warnings, or unrelated commentary.",
+      "card_text": {
+        "narration": "Read for 20 minutes and earn a comic badge!",
+        "reward_label": "Comic Badge",
+        "title": "Comic Quest"
+      },
+      "goal_id": "read-20-comic",
+      "narration": "Comic Quest Read for 20 minutes and earn a comic badge!",
+      "ordinary_goal": "Read for 20 minutes",
+      "theme": "comic"
+    }
+  ]
+}

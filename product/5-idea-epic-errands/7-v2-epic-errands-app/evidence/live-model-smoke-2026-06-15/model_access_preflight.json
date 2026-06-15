@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-06-15T12:32:58.433732+00:00",
+  "paid_run_allowed_now": true,
+  "proof_boundary": "File access only; no model load, inference, Modal GPU, or fallback proof claimed.",
+  "purpose": "Fresh token-backed no-GPU required-file access check before approved Modal GPU smoke.",
+  "results": [
+    {
+      "etag_present": true,
+      "repo_id": "black-forest-labs/FLUX.2-klein-9B",
+      "required_file": "model_index.json",
+      "runtime": "Diffusers safetensors bf16 image generation",
+      "size": 446,
+      "status": "ok"
+    },
+    {
+      "etag_present": true,
+      "repo_id": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+      "required_file": "NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf",
+      "runtime": "llama.cpp GGUF Q4_K_M text generation",
+      "size": 2837072864,
+      "status": "ok"
+    },
+    {
+      "etag_present": true,
+      "repo_id": "openbmb/VoxCPM2",
+      "required_file": "config.json",
+      "runtime": "voxcpm safetensors bf16 audio generation",
+      "size": 4336,
+      "status": "ok"
+    }
+  ],
+  "token_source": "HF_TOKEN/HF_TOKEN_2/HF_TOKEN_1 from repo environment; value not printed"
+}

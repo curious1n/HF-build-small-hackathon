@@ -1,0 +1,92 @@
+/* ============================================================
+   TOKENS — two layers
+   ------------------------------------------------------------
+   LAYER 1  Brand primitives  (--fl-*)   raw palette of ONE design system
+   LAYER 2  Semantic tokens   (--c-*, --t-*, --font-*, --r-*, --sp-*)
+            Components reference ONLY layer 2.
+            Swap design systems by re-pointing layer 2 at a
+            different primitive set — components never change.
+   ============================================================ */
+
+/* ───────────── LAYER 1 · BRAND PRIMITIVES ─────────────
+   Floodlight — extracted palette. A second brand would
+   declare its own --xx-* block under another [data-ds] value. */
+:root[data-ds="floodlight"]{
+  --fl-lime:        #C1E047;
+  --fl-lime-bright: #DDFF4F;
+  --fl-lime-dim:    #9DB73B;
+  --fl-on-lime:     #0B1410;
+
+  --fl-ink-900: #080E12;
+  --fl-ink-850: #0B1117;
+  --fl-ink-800: #0E1419;
+  --fl-ink-700: #131B22;
+  --fl-ink-600: #1B242B;
+
+  --fl-line:        rgba(255,255,255,.07);
+  --fl-line-strong: rgba(255,255,255,.13);
+
+  --fl-tx-hi:  #FFFFFF;
+  --fl-tx:     #C7CCD0;
+  --fl-tx-mut: #8C9298;
+  --fl-tx-dim: #5B6266;
+
+  --fl-danger: #E0614A;
+  --fl-ball:   #C0322A;
+
+  --fl-font-display: 'Saira Condensed', system-ui, sans-serif;
+  --fl-font-body:    'Barlow', system-ui, sans-serif;
+  --fl-font-label:   'Barlow Semi Condensed', 'Barlow', sans-serif;
+}
+
+/* ───────────── LAYER 2 · SEMANTIC TOKENS ─────────────
+   The contract every component speaks. Mapped here onto the
+   Floodlight primitives. Re-map this block → reskin the app. */
+:root[data-ds="floodlight"]{
+  /* surfaces */
+  --c-canvas:          var(--fl-ink-900);
+  --c-header:          var(--fl-ink-900);
+  --c-surface:         var(--fl-ink-800);
+  --c-surface-raised:  var(--fl-ink-700);
+  --c-surface-sunken:  var(--fl-ink-850);
+  --c-surface-strong:  var(--fl-ink-600);
+
+  /* borders */
+  --c-border:          var(--fl-line);
+  --c-border-strong:   var(--fl-line-strong);
+
+  /* accent */
+  --c-accent:          var(--fl-lime);
+  --c-accent-hover:    var(--fl-lime-bright);
+  --c-accent-muted:    var(--fl-lime-dim);
+  --c-on-accent:       var(--fl-on-lime);
+  --c-accent-wash:     rgba(193,224,71,.08);
+  --c-accent-ring:     rgba(193,224,71,.35);
+
+  /* text */
+  --t-primary:         var(--fl-tx-hi);
+  --t-secondary:       var(--fl-tx);
+  --t-muted:           var(--fl-tx-mut);
+  --t-disabled:        var(--fl-tx-dim);
+  --t-on-accent:       var(--fl-on-lime);
+
+  /* status */
+  --c-danger:          var(--fl-danger);
+  --c-brand-mark:      var(--fl-ball);
+
+  /* type */
+  --font-display: var(--fl-font-display);
+  --font-body:    var(--fl-font-body);
+  --font-label:   var(--fl-font-label);
+
+  /* radius */
+  --r-sm: 6px; --r-md: 9px; --r-lg: 14px; --r-pill: 999px;
+
+  /* spacing · 4px base */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 22px; --sp-6: 32px; --sp-8: 48px;
+
+  /* elevation */
+  --shadow-pop: 0 10px 30px rgba(0,0,0,.45);
+  --glow-accent: 0 0 0 1px var(--c-accent-ring), 0 0 24px rgba(193,224,71,.10);
+}

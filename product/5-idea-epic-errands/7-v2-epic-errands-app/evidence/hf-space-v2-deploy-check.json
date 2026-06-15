@@ -1,0 +1,39 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "component_count": 0,
+      "has_epic": false,
+      "has_iframe": false,
+      "latency_ms": 1146,
+      "runtime": "SpaceRuntime(stage='RUNNING_APP_STARTING', hardware='cpu-basic', requested_hardware='cpu-basic', sleep_time=172800, storage=None, dev_mode=False, hot_reloading=None, volumes=None, raw={'stage': 'RUNNING_APP_STARTING', 'hardware': {'current': 'cpu-basic', 'requested': 'cpu-basic'}, 'gcTimeout': 172800, 'replicas': {'current': 1, 'requested': 1}, 'devMode': False, 'domains': [{'domain': 'build-small-hackathon-epic-errands.hf.space', 'stage': 'READY'}], 'sha': 'd63823b9c3186c4e81cfefae5be8a94883d8b313', 'pySpacesVersion': '0.50.4'})",
+      "status": 200,
+      "title": "Gradio"
+    },
+    {
+      "attempt": 2,
+      "component_count": 1,
+      "has_epic": true,
+      "has_iframe": true,
+      "latency_ms": 5446,
+      "runtime": "SpaceRuntime(stage='RUNNING', hardware='cpu-basic', requested_hardware='cpu-basic', sleep_time=172800, storage=None, dev_mode=False, hot_reloading=None, volumes=None, raw={'stage': 'RUNNING', 'hardware': {'current': 'cpu-basic', 'requested': 'cpu-basic'}, 'gcTimeout': 172800, 'replicas': {'current': 1, 'requested': 1}, 'devMode': False, 'domains': [{'domain': 'build-small-hackathon-epic-errands.hf.space', 'stage': 'READY'}], 'sha': 'e643b7b68389ce91e810f3c345407639ab55c40a', 'pySpacesVersion': '0.50.4'})",
+      "status": 200,
+      "title": "Epic Errands V2"
+    }
+  ],
+  "checked_at": "2026-06-15T13:16:45.067725+00:00",
+  "hosted_gradio_config_passed": true,
+  "info": {
+    "last_modified": "2026-06-15 13:15:59+00:00",
+    "private": true,
+    "runtime": "SpaceRuntime(stage='RUNNING', hardware='cpu-basic', requested_hardware='cpu-basic', sleep_time=172800, storage=None, dev_mode=False, hot_reloading=None, volumes=None, raw={'stage': 'RUNNING', 'hardware': {'current': 'cpu-basic', 'requested': 'cpu-basic'}, 'gcTimeout': 172800, 'replicas': {'current': 1, 'requested': 1}, 'devMode': False, 'domains': [{'domain': 'build-small-hackathon-epic-errands.hf.space', 'stage': 'READY'}], 'sha': 'e643b7b68389ce91e810f3c345407639ab55c40a', 'pySpacesVersion': '0.50.4'})",
+    "sdk": "gradio",
+    "sha": "e643b7b68389ce91e810f3c345407639ab55c40a"
+  },
+  "lifecycle_stage": "hosted testing",
+  "namespace_env": "HF_HACKATHON",
+  "space_repo_id": "build-small-hackathon/epic-errands",
+  "space_url": "https://build-small-hackathon-epic-errands.hf.space/",
+  "token_env": "HF_TOKEN_2",
+  "upload_actor_env": "HF_2"
+}

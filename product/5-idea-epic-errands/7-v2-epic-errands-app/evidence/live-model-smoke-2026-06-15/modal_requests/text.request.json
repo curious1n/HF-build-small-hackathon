@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "goal_id": "read-20-comic",
+      "ordinary_goal": "Read for 20 minutes",
+      "text_prompt": "Create a kid-safe Epic Errands goal card for an 8-year-old. Theme: Comic. Plain goal: \"Read for 20 minutes\". Return compact JSON only with keys title, narration, and reward_label. Do not include task lists, verification fields, snake_case, UI copy, or image text. Keep the ordinary goal visible, positive, parent-readable, and achievable. No shame, threats, monsters, weapons, private details, readable image text, or user photo references.",
+      "theme": "comic"
+    }
+  ],
+  "max_new_tokens": 220,
+  "model": "nemotron3"
+}

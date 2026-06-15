@@ -1,0 +1,189 @@
+{
+  "AppState": {
+    "active_tab": "home | parent_goals | kid_goals | settings | diy",
+    "active_theme_id": "classroom | questbook | comic",
+    "generation_mode": "quality",
+    "available_generation_modes": "GenerationMode[]",
+    "parent_profile": "ParentProfile",
+    "children": "ChildProfile[]",
+    "custom_image_reference_refs": "UploadRef[]",
+    "generation_references": "GenerationReference[]",
+    "goal_draft": "GoalDraft",
+    "pending_review_goal": "GeneratedGoal | null",
+    "goals": "Goal[]",
+    "selected_goal_id": "string | null",
+    "pending_review_count": "number",
+    "active_goal_count": "number",
+    "awaiting_approval_count": "number",
+    "approved_rewards_count": "number",
+    "diy": "DIYState"
+  },
+  "GenerationMode": {
+    "id": "quality | speed",
+    "label": "string",
+    "status": "enabled | disabled_planned",
+    "text_model_id": "string",
+    "text_runtime": "string",
+    "text_format": "string",
+    "text_quantization": "string | null",
+    "image_model_id": "string",
+    "image_runtime": "string",
+    "image_format": "string",
+    "image_precision": "string",
+    "image_output_size_px": "number",
+    "audio_model_id": "string",
+    "audio_runtime": "string",
+    "audio_format": "string",
+    "audio_precision": "string",
+    "visible_to_user": "boolean"
+  },
+  "LockedGenerationModes": [
+    {
+      "id": "quality",
+      "label": "Quality",
+      "status": "enabled",
+      "text_model_id": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+      "text_runtime": "llama.cpp",
+      "text_format": "GGUF",
+      "text_quantization": "Q4_K_M",
+      "image_model_id": "black-forest-labs/FLUX.2-klein-9B",
+      "image_runtime": "Diffusers",
+      "image_format": "safetensors",
+      "image_precision": "bf16",
+      "image_output_size_px": 1024,
+      "audio_model_id": "openbmb/VoxCPM2",
+      "audio_runtime": "voxcpm",
+      "audio_format": "safetensors",
+      "audio_precision": "bf16",
+      "visible_to_user": true
+    },
+    {
+      "id": "speed",
+      "label": "Speed",
+      "status": "disabled_planned",
+      "text_model_id": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+      "text_runtime": "llama.cpp",
+      "text_format": "GGUF",
+      "text_quantization": "Q4_K_M",
+      "image_model_id": "black-forest-labs/FLUX.2-klein-4B",
+      "image_runtime": "Diffusers",
+      "image_format": "safetensors",
+      "image_precision": "bf16",
+      "image_output_size_px": 720,
+      "audio_model_id": "openbmb/VoxCPM2",
+      "audio_runtime": "voxcpm",
+      "audio_format": "safetensors",
+      "audio_precision": "bf16",
+      "visible_to_user": true
+    }
+  ],
+  "ParentProfile": {
+    "display_name": "string",
+    "photo_refs": "UploadRef[]",
+    "reference_audio_ref": "UploadRef | null",
+    "reference_audio_optional": true
+  },
+  "ChildProfile": {
+    "id": "string",
+    "display_name": "string",
+    "photo_refs": "UploadRef[]"
+  },
+  "UploadRef": {
+    "id": "string",
+    "kind": "parent_photo | child_photo | parent_reference_audio | custom_image_reference",
+    "asset_ref": "string",
+    "preview_ref": "string | null",
+    "privacy_scope": "session_only",
+    "created_at": "string"
+  },
+  "GenerationReference": {
+    "id": "string",
+    "source": "parent_photo | child_photo | custom_image_reference",
+    "upload_ref_id": "string",
+    "selected": "boolean"
+  },
+  "GoalDraft": {
+    "ordinary_goal": "string",
+    "selected_generation_reference_ids": "string[]",
+    "generation_mode": "quality"
+  },
+  "GeneratedGoal": {
+    "id": "string",
+    "ordinary_goal": "string",
+    "generation_mode": "quality",
+    "theme_id_at_creation": "classroom | questbook | comic",
+    "selected_generation_reference_ids": "string[]",
+    "generated_title": "string",
+    "generated_narration": "string",
+    "generated_reward_label": "string",
+    "overlay_text": "EditableTextLayer",
+    "media": "GeneratedMedia",
+    "provenance": "GenerationProvenance",
+    "review_state": "pending | accepted | canceled",
+    "created_at": "string"
+  },
+  "EditableTextLayer": {
+    "text": "string",
+    "theme_style_id": "classroom | questbook | comic",
+    "position": "top | center | bottom | custom",
+    "max_lines": "number",
+    "is_app_owned": true,
+    "mutates_image_pixels": false,
+    "mutates_audio": false
+  },
+  "GeneratedMedia": {
+    "image_asset_ref": "string",
+    "image_output_size_px": 1024,
+    "image_mutable_from_review": false,
+    "audio_asset_ref": "string",
+    "audio_enabled": true,
+    "audio_used_parent_reference": "boolean",
+    "audio_mutable_from_review": false
+  },
+  "GenerationProvenance": {
+    "text_model_id": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+    "text_runtime": "llama.cpp",
+    "text_format": "GGUF",
+    "text_quantization": "Q4_K_M",
+    "image_model_id": "black-forest-labs/FLUX.2-klein-9B",
+    "image_runtime": "Diffusers",
+    "image_format": "safetensors",
+    "image_precision": "bf16",
+    "audio_model_id": "openbmb/VoxCPM2",
+    "audio_runtime": "voxcpm",
+    "audio_format": "safetensors",
+    "audio_precision": "bf16",
+    "fallback_used": "boolean | null",
+    "trace_id": "string | null"
+  },
+  "Goal": {
+    "id": "string",
+    "source_generated_goal_id": "string",
+    "ordinary_goal": "string",
+    "generated_title": "string",
+    "generated_narration": "string",
+    "generated_reward_label": "string",
+    "overlay_text": "EditableTextLayer",
+    "media": "GeneratedMedia",
+    "kid_completion_state": "not_started | in_progress | completed",
+    "parent_reward_state": "not_reviewed | waiting_for_approval | approved_reward_given",
+    "created_at": "string",
+    "updated_at": "string"
+  },
+  "DIYState": {
+    "isolated_surface": true,
+    "workflow_draft": "DIYWorkflowDraft",
+    "preview": "GeneratedGoal | null",
+    "trace_json": "object",
+    "save_to_app_status": "coming_soon"
+  },
+  "DIYWorkflowDraft": {
+    "ordinary_goal": "string",
+    "selected_theme_id": "classroom | questbook | comic",
+    "selected_generation_reference_ids": "string[]",
+    "text_step": "object",
+    "image_step": "object",
+    "audio_step": "object",
+    "composed_card_step": "object"
+  }
+}

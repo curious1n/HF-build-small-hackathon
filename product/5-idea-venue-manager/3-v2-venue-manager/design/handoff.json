@@ -1,0 +1,89 @@
+{
+  "mode": "detailed_design",
+  "depth": "medium",
+  "stages": {
+    "B1": "carried_forward_floodlight_source",
+    "B2": "selected_floodlight_console",
+    "B3": "v2_demo_world_flow_refreshed",
+    "B4": "carried_forward_floodlight_brand",
+    "B5": "compact_v2_contract",
+    "B6": "active_custom_frontend_in_space"
+  },
+  "canonical_source": "space/frontend/assets/floodlight-source-reference.png",
+  "token_source": "space/frontend/styles/tokens.css",
+  "must_preserve": [
+    {
+      "id": "immutable_demo_world_reload",
+      "decision": "V2 uses one immutable demo-world snapshot and a top-right Reload Demo control instead of judge-facing scenario modes.",
+      "implementation_anchors": [
+        "state_snapshot.v1.json",
+        "/api/reload-demo",
+        "'data-design-id': 'reload-demo'"
+      ],
+      "evidence_refs": [
+        "design/demo-world.md",
+        "evidence/local-uat.md"
+      ],
+      "status": "implemented_v2"
+    },
+    {
+      "id": "floodlight_console_shell",
+      "decision": "The Floodlight shell remains the visible product: brand masthead, queue, conversation stage, detail panel, calendar, and owner actions.",
+      "implementation_anchors": [
+        "'data-design-id': 'brand-header'",
+        "'data-design-id': 'request-queue'",
+        "'data-design-id': 'conversation-stage'",
+        "'data-design-id': 'booking-detail-panel'",
+        "'data-design-id': 'approval-actions'"
+      ],
+      "evidence_refs": [
+        "design/ux-flow.md",
+        "evidence/local-uat.md"
+      ],
+      "status": "implemented_v2"
+    },
+    {
+      "id": "human_approval_before_send",
+      "decision": "Outbound replies remain drafts until the owner approves, clarifies, or rejects through the backend owner-review endpoint.",
+      "implementation_anchors": [
+        "'data-design-id': 'reply-draft'",
+        "/api/conversations/{session_id}/owner-review",
+        "confirmed_simulated"
+      ],
+      "evidence_refs": [
+        "design/ux-flow.md",
+        "evidence/local-uat.md"
+      ],
+      "status": "implemented_v2"
+    },
+    {
+      "id": "simulator_boundary_visible",
+      "decision": "The app labels WhatsApp behavior as simulator/demo and keeps future integrations disabled or not connected.",
+      "implementation_anchors": [
+        "'data-design-id': 'channel-status'",
+        "WhatsApp simulator",
+        "'data-design-id': 'disabled-integrations'"
+      ],
+      "evidence_refs": [
+        "README.md",
+        "evidence/local-uat.md"
+      ],
+      "status": "implemented_v2"
+    },
+    {
+      "id": "model_front_not_mislabeled",
+      "decision": "Modal/Nemotron remains the model front, but fixture-shaped simulator flows are not claimed as fresh model proof.",
+      "implementation_anchors": [
+        "nvidia/Nemotron-Cascade-2-30B-A3B",
+        "fallback_used",
+        "fixture_model_shaped_input"
+      ],
+      "evidence_refs": [
+        "implementation-readiness.md",
+        "evidence/local-uat.md"
+      ],
+      "status": "implemented_v2"
+    }
+  ],
+  "proof_claim": "V2 claims a clean active local app folder, immutable demo-world reset behavior, and fixture-backed browser/API UX proof after local verification. It does not claim public HF Space deploy, fresh Modal/Nemotron proof, live WhatsApp, or judge readiness."
+}

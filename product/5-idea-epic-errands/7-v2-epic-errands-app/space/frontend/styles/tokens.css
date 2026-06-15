@@ -1,0 +1,325 @@
+/* ============================================================================
+   EPIC ERRANDS — THEMEABLE TOKEN SYSTEM
+   ----------------------------------------------------------------------------
+   One app, three skins. The whole UI is painted from a single SEMANTIC token
+   contract (declared in :root below as documentation defaults). Each theme is
+   a complete re-binding of those tokens, scoped under [data-theme="…"], plus a
+   small block of theme-scoped "flourish" rules for decoration that a flat
+   token cannot express (halftone, speech bubbles, ornate frames, lined paper).
+
+   The DOM never changes between themes — only the values behind these names.
+
+   THEMES
+     storybook  — crayon / kids' picture-book      (Baloo 2 · Nunito)
+     comic      — comic-book command center         (Bangers · Hanken Grotesk)
+     atelier    — parchment questbook               (Playfair Display · Lora)
+   ========================================================================== */
+
+/* ============================================================================
+   SEMANTIC TOKEN CONTRACT  (names every component is allowed to reference)
+   The values here are neutral fallbacks; a theme always overrides them.
+   ========================================================================== */
+:root {
+  /* — Type — */
+  --font-display: system-ui, sans-serif;
+  --font-body: system-ui, sans-serif;
+  --display-weight: 800;
+  --display-transform: none;     /* none | uppercase */
+  --display-tracking: 0;
+  --display-line: 1.05;
+  --display-stroke: 0;           /* px of -webkit-text-stroke on display text */
+  --display-stroke-color: transparent;
+
+  /* — Page & surfaces — */
+  --page-bg: #f4f5f7;
+  --page-fg-pattern: none;       /* optional page texture overlay */
+  --card-bg: #ffffff;
+  --card-radius: 24px;
+  --card-border-width: 0px;
+  --card-border-color: transparent;
+  --card-shadow: 0 24px 60px -22px rgba(30,40,60,.4);
+  --card-texture: none;          /* background-image overlay inside the card */
+  --card-max: 540px;
+
+  --panel-bg: #f3f4f6;           /* raised inner panels: status bar, parent box */
+  --panel-border-color: #e5e7eb;
+  --field-bg: #fcfcfd;           /* text inputs / goal rows */
+  --field-border-color: #e2e5e9;
+  --field-fg: #353a42;           /* text ON a field surface (may differ from body) */
+  --field-fg-muted: #8b9097;     /* placeholder / secondary text on a field */
+
+  /* — Text roles — */
+  --heading-color: #1f2430;
+  --body-color: #353a42;
+  --muted-color: #8b9097;
+  --faint-color: #b3b8bf;
+  --on-primary: #ffffff;
+
+  /* — Accent + primary action — */
+  --accent: #2f7fd6;             /* selection ring, links, secondary highlight */
+  --accent-soft: #e7f0fb;        /* selected chip fill */
+  --accent-ink: #1d4f88;         /* text/icon on accent-soft */
+  --primary: #2f7fd6;            /* CTA fill (may be a gradient) */
+  --primary-edge: #1d5fa8;       /* 3D bottom edge under CTA */
+  --primary-text: #ffffff;
+
+  /* — Semantic status colors — */
+  --success: #2f9e4e;            /* checks and completed states */
+  --reward: #f6b81e;             /* points, stars, ribbons */
+  --quest-title-color: #1f2430;  /* the big generated quest title */
+  --banner-bg: #2f7fd6;          /* top banner on the quest screen */
+  --banner-text: #ffffff;
+
+  /* — Controls — */
+  --control-radius: 14px;
+  --chip-radius: 14px;
+  --pill-radius: 999px;
+  --control-border-color: #e2e5e9;
+  --control-shadow: 0 2px 5px -2px rgba(30,40,60,.12);
+
+  /* — Button geometry per theme — */
+  --primary-radius: 999px;
+  --primary-shadow: 0 10px 22px -8px rgba(47,127,214,.55);
+
+  /* image-slot theming hook */
+  --is-bg: #eef1f5;
+}
+
+/* ============================================================================
+   THEME 1 — STORYBOOK   (crayon, picture-book, soft & sunny)
+   ========================================================================== */
+[data-theme="storybook"] {
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'Nunito', system-ui, sans-serif;
+  --display-weight: 800;
+  --display-transform: none;
+  --display-tracking: -.01em;
+  --display-line: 1.02;
+  --display-stroke: 0;
+
+  --page-bg: radial-gradient(125% 90% at 50% 0%, #eef6fd 0%, #e4eff9 50%, #d9e7f4 100%);
+  --card-bg: #ffffff;
+  --card-radius: 30px;
+  --card-border-width: 0px;
+  --card-border-color: transparent;
+  --card-shadow: 0 24px 60px -22px rgba(40,55,80,.42);
+  --card-texture:
+    radial-gradient(60px 34px at 16% 5%, rgba(120,180,230,.10), transparent 70%),
+    radial-gradient(80px 40px at 88% 8%, rgba(120,180,230,.09), transparent 70%),
+    repeating-linear-gradient(180deg, transparent 0 33px, rgba(120,150,180,.045) 33px 34px);
+  --card-max: 500px;
+
+  --panel-bg: #f3f7fb;
+  --panel-border-color: #e4e9ef;
+  --field-bg: #fcfcfd;
+  --field-border-color: #e4e6e9;
+  --field-fg: #34373a;
+  --field-fg-muted: #a9aeb4;
+
+  --heading-color: #163154;
+  --body-color: #34373a;
+  --muted-color: #8b9097;
+  --faint-color: #a9aeb4;
+  --on-primary: #ffffff;
+
+  --accent: #e9382d;
+  --accent-soft: #eaf5ee;
+  --accent-ink: #2f7f47;
+  --primary: linear-gradient(180deg, #e9382d 0%, #c52b22 100%);
+  --primary-edge: #a82018;
+  --primary-text: #ffffff;
+  --primary-radius: 999px;
+  --primary-shadow: 0 7px 0 var(--primary-edge), 0 10px 22px -8px rgba(233,56,45,.55);
+
+  --success: #46a05d;
+  --reward: #f6b81e;
+  --quest-title-color: #3a2a15;
+  --banner-bg: #f4e8c8;
+  --banner-text: #3a2a15;
+
+  --control-radius: 13px;
+  --chip-radius: 13px;
+  --control-border-color: #e4e6e9;
+  --control-shadow: 0 2px 5px -2px rgba(40,55,80,.12);
+
+  --is-bg: #eaf2fa;
+}
+
+/* ============================================================================
+   THEME 2 — COMIC   (dark command center, halftone, bursts, bold ink)
+   ========================================================================== */
+[data-theme="comic"] {
+  --font-display: 'Bangers', system-ui, sans-serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --display-weight: 400;
+  --display-transform: uppercase;
+  --display-tracking: .04em;
+  --display-line: .92;
+  --display-stroke: 0;
+
+  --page-bg: radial-gradient(120% 80% at 50% -10%, #1a1a1f 0%, #0a0a0b 55%);
+  --card-bg: #121214;
+  --card-radius: 26px;
+  --card-border-width: 6px;
+  --card-border-color: #f6a81d;
+  --card-shadow: 0 30px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.6);
+  --card-texture: radial-gradient(rgba(255,255,255,.035) 1px, transparent 1.4px);
+  --card-max: 620px;
+
+  --panel-bg: #1b1b1f;
+  --panel-border-color: rgba(255,255,255,.12);
+  --field-bg: #f1ecdd;            /* cream input plates */
+  --field-border-color: rgba(0,0,0,.15);
+  --field-fg: #1a1a1a;            /* dark ink on cream plates */
+  --field-fg-muted: #8a8268;
+
+  --heading-color: #f6a81d;       /* gold display headings */
+  --body-color: #ededf0;
+  --muted-color: #a6a6ad;
+  --faint-color: #6f6f77;
+  --on-primary: #1a1208;
+
+  --accent: #2cb4e8;
+  --accent-soft: rgba(44,180,232,.12);
+  --accent-ink: #2cb4e8;
+  --primary: #f6a81d;
+  --primary-edge: #b9790a;
+  --primary-text: #1a1208;
+  --primary-radius: 16px;
+  --primary-shadow: 0 8px 0 var(--primary-edge), 0 16px 30px -8px rgba(246,168,29,.5);
+
+  --success: #74b62e;
+  --reward: #f6a81d;
+  --quest-title-color: #e23a2c;
+  --banner-bg: #f1ecdd;
+  --banner-text: #1a1a1a;
+
+  --control-radius: 12px;
+  --chip-radius: 12px;
+  --control-border-color: rgba(255,255,255,.16);
+  --control-shadow: 0 6px 18px rgba(0,0,0,.35);
+
+  --is-bg: #1b1b1f;
+}
+
+/* ============================================================================
+   THEME 3 — ATELIER   (parchment questbook, serif, ornate gold, calm)
+   ========================================================================== */
+[data-theme="atelier"] {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Lora', Georgia, serif;
+  --display-weight: 800;
+  --display-transform: none;
+  --display-tracking: 0;
+  --display-line: 1.05;
+  --display-stroke: 0;
+
+  --page-bg:
+    radial-gradient(120% 80% at 50% -10%, rgba(255,250,238,.9), transparent 60%),
+    radial-gradient(100% 60% at 100% 110%, rgba(214,196,156,.35), transparent 55%),
+    radial-gradient(80% 50% at 0% 100%, rgba(214,196,156,.25), transparent 55%),
+    #f3ead6;
+  --card-bg: #f8f1e1;
+  --card-radius: 22px;
+  --card-border-width: 1px;
+  --card-border-color: #e3d6b8;
+  --card-shadow: 0 2px 4px rgba(70,50,20,.12), 0 18px 40px -16px rgba(70,50,20,.40);
+  --card-texture:
+    radial-gradient(140% 90% at 50% 0%, rgba(255,251,242,.7), transparent 55%),
+    radial-gradient(100% 70% at 100% 100%, rgba(220,202,162,.25), transparent 60%);
+  --card-max: 600px;
+
+  --panel-bg: #f1e7cf;
+  --panel-border-color: #e3d6b8;
+  --field-bg: #fcf8ee;
+  --field-border-color: #d4c39c;
+  --field-fg: #574b39;
+  --field-fg-muted: #b0a286;
+
+  --heading-color: #2d2417;
+  --body-color: #574b39;
+  --muted-color: #8c7e66;
+  --faint-color: #b0a286;
+  --on-primary: #f4efd9;
+
+  --accent: #c8a25c;
+  --accent-soft: #f1e4c5;
+  --accent-ink: #8a6c3c;
+  --primary: linear-gradient(180deg, #4e6038 0%, #43542f 100%);
+  --primary-edge: #283318;
+  --primary-text: #f4efd9;
+  --primary-radius: 12px;
+  --primary-shadow: 0 2px 0 var(--primary-edge), 0 8px 18px -4px rgba(40,55,25,.5);
+
+  --success: #2e9e6a;
+  --reward: #e5b23c;
+  --quest-title-color: #573b7e;
+  --banner-bg: transparent;
+  --banner-text: #2d2417;
+
+  --control-radius: 12px;
+  --chip-radius: 12px;
+  --control-border-color: #d4c39c;
+  --control-shadow: 0 1px 2px rgba(80,60,30,.05), 0 8px 24px -12px rgba(80,60,30,.18);
+
+  --is-bg: #f1e7cf;
+}
+
+/* ============================================================================
+   FLOURISHES — theme-scoped decoration on the SHARED DOM.
+   These do not change structure; they layer ornament that flat tokens cannot.
+   ========================================================================== */
+
+/* ---- STORYBOOK: chunky candy buttons, dashed dividers, sunny chips ---- */
+[data-theme="storybook"] .divider { border: none; border-top: 2px dashed var(--field-border-color); }
+[data-theme="storybook"] .btn-primary:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--primary-edge), 0 6px 12px -8px rgba(233,56,45,.5); }
+[data-theme="storybook"] .quest-headline { background: linear-gradient(180deg,#fbf3dd,#f4e8c8 55%,#e8d6a8); border-radius: 14px; padding: 22px 26px; box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -10px 22px -10px rgba(150,120,60,.35), 0 14px 26px -14px rgba(80,60,20,.5); }
+[data-theme="storybook"] .tone-chip[aria-pressed="true"] { border-color: var(--success); background: var(--accent-soft); }
+[data-theme="storybook"] .banner { border-radius: 999px; }
+
+/* ---- COMIC: halftone, black outlines, speech bubble, burst CTA ---- */
+[data-theme="comic"] .halftone { background-image: radial-gradient(rgba(0,0,0,.20) 1.3px, transparent 1.6px); background-size: 8px 8px; }
+[data-theme="comic"] .card-inner > * { color: inherit; }
+[data-theme="comic"] .btn-primary {
+  -webkit-text-stroke: 1px rgba(0,0,0,.25); paint-order: stroke fill;
+}
+[data-theme="comic"] .btn-primary:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--primary-edge), 0 8px 14px -8px rgba(0,0,0,.4); }
+[data-theme="comic"] .tone-chip { border-width: 2px; }
+[data-theme="comic"] .tone-chip[aria-pressed="true"] { border-color: var(--reward); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--reward) inset; }
+/* cream banner with torn comic edge */
+[data-theme="comic"] .banner {
+  transform: rotate(-1.2deg);
+  background-image: radial-gradient(rgba(0,0,0,.10) 1.1px, transparent 1.4px);
+  background-size: 8px 8px;
+  clip-path: polygon(0 14%, 6% 0, 22% 10%, 40% 2%, 62% 11%, 82% 1%, 96% 12%, 100% 4%, 99% 84%, 92% 100%, 74% 90%, 52% 99%, 30% 89%, 12% 100%, 3% 88%, 0 96%);
+}
+/* quest headline becomes a speech bubble */
+[data-theme="comic"] .quest-headline {
+  background: var(--banner-bg);
+  color: var(--banner-text);
+  padding: 26px 30px 30px;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,.4));
+  clip-path: polygon(3% 18%, 12% 6%, 22% 16%, 33% 2%, 45% 14%, 57% 0%, 68% 13%, 80% 3%, 90% 15%, 99% 8%, 96% 30%, 100% 44%, 95% 58%, 100% 72%, 90% 80%, 94% 96%, 78% 90%, 70% 100%, 60% 90%, 50% 99%, 40% 89%, 30% 99%, 21% 88%, 10% 96%, 6% 80%, 0% 66%, 4% 50%, 0% 34%);
+}
+[data-theme="comic"] .quest-headline .quest-title { -webkit-text-stroke: 2px #1a1a1a; paint-order: stroke fill; }
+[data-theme="comic"] .divider { border: none; border-top: 1px solid var(--panel-border-color); }
+/* ---- ATELIER: ornate gold inset frame, diamond dividers, serif calm ---- */
+[data-theme="atelier"] .card.ornate {
+  box-shadow: var(--card-shadow), inset 0 0 0 2px var(--accent), inset 0 0 0 3px var(--card-bg), inset 0 0 0 4px rgba(200,162,92,.4);
+}
+[data-theme="atelier"] .card.ornate .corner-flourish { display: block; }
+[data-theme="atelier"] .divider {
+  border: none; height: 1px; background: var(--field-border-color);
+  position: relative; overflow: visible;
+}
+[data-theme="atelier"] .divider::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 9px; height: 9px; transform: translate(-50%,-50%) rotate(45deg);
+  background: var(--accent); box-shadow: 0 0 0 3px var(--card-bg);
+}
+[data-theme="atelier"] .quest-headline { background: linear-gradient(180deg, #fcf7ea, #f6eedb); border-radius: 14px; padding: clamp(20px,3.5vw,30px); box-shadow: 0 -2px 0 rgba(255,255,255,.6), 0 10px 30px -10px rgba(70,50,20,.35), inset 0 0 0 1px rgba(180,150,100,.18); }
+[data-theme="atelier"] .tone-chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+[data-theme="atelier"] .banner { border-radius: 12px; }
+
+/* corner flourishes are hidden unless the atelier ornate card shows them */
+.corner-flourish { display: none; }

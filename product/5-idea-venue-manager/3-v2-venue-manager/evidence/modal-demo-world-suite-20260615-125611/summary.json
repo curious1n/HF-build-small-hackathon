@@ -1,0 +1,56 @@
+{
+  "approval": "User-approved Venue Manager v2 Modal/Nemotron demo-world scenario suite: max $20, max 15 minutes, stop after requested seeded scenarios complete or an exact blocker is recorded.",
+  "attempted": 2,
+  "case_results": [
+    {
+      "backend_action": "ready_for_owner_review",
+      "case_id": "aman-sharma",
+      "expected_backend_action": "ready_for_owner_review",
+      "fallback_used": false,
+      "first_failure": "",
+      "passed": true,
+      "validation": {
+        "errors": [],
+        "valid": true
+      },
+      "wall_clock_seconds": 425.724
+    },
+    {
+      "backend_action": null,
+      "case_id": "rohit-verma",
+      "expected_backend_action": "conflict_possible",
+      "fallback_used": null,
+      "first_failure": "http_200",
+      "passed": false,
+      "validation": {},
+      "wall_clock_seconds": 482.608
+    }
+  ],
+  "failed": 1,
+  "generated_at": "2026-06-15T12:56:11+00:00",
+  "max_seconds": 900.0,
+  "modal_status": {
+    "auth_configured": true,
+    "base_url_configured": true,
+    "configured": true,
+    "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+    "timeout_seconds": 1200.0
+  },
+  "passed": 1,
+  "proof_boundary": "Local v2 seeded demo-world requests through server-side Modal extraction. This is a seed smoke set, not a broad eval, hosted Space proof, live WhatsApp proof, public release, or judge-ready claim.",
+  "requested": 10,
+  "run_label": "venue-manager-v2-demo-world-modal-suite",
+  "runtime_axes": {
+    "app_host": "local",
+    "fallback_used": false,
+    "inference_engine": "vllm",
+    "lifecycle_stage": "testing",
+    "model_artifact_format": "safetensors",
+    "model_backend": "modal_http",
+    "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+    "model_runtime": "modal",
+    "quantization": "bf16"
+  },
+  "stopped_reason": "global_blocker",
+  "wall_clock_seconds": 908.332
+}

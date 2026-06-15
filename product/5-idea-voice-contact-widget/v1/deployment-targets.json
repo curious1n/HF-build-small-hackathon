@@ -1,0 +1,48 @@
+{
+  "modal-test": {
+    "purpose": "Use Modal-hosted model inference for testing while the Hugging Face Space stays on CPU Basic.",
+    "space_repo": "${HF_HACKATHON}/voice-reach",
+    "space_url": "https://build-small-hackathon-voice-reach.hf.space",
+    "namespace_env": "HF_HACKATHON",
+    "token_env": "HF_TOKEN_2",
+    "space_hardware": "cpu-basic",
+    "model_runtime": "modal",
+    "modal_endpoint": "https://curious1n--voice-reach-v1-modal-process.modal.run",
+    "modal_app": "voice-reach-v1-modal",
+    "submission_allowed": false,
+    "notes": [
+      "Testing-only profile.",
+      "Submission must switch VCW_MODEL_RUNTIME away from modal.",
+      "HF Space Modal secrets are APP_MODAL_AUTH_TOKEN only; do not print values."
+    ]
+  },
+  "hf2-t4-test": {
+    "purpose": "Use the HF_2 account namespace to test the Space-local HF GPU path on t4-medium.",
+    "space_repo": "${HF_2}/voice-reach",
+    "space_url": "https://${HF_2}-voice-reach.hf.space",
+    "namespace_env": "HF_2",
+    "token_env": "HF_TOKEN_2",
+    "space_hardware": "t4-medium",
+    "model_runtime": "hf_space",
+    "submission_allowed": false,
+    "notes": [
+      "Testing-only profile for proving the HF GPU path using user-account credits.",
+      "Modal config should be absent or ignored because VCW_MODEL_RUNTIME=hf_space."
+    ]
+  },
+  "hackathon-t4-submit": {
+    "purpose": "Official hackathon-org submission profile using Space-local HF GPU inference.",
+    "space_repo": "${HF_HACKATHON}/voice-reach",
+    "space_url": "https://build-small-hackathon-voice-reach.hf.space",
+    "namespace_env": "HF_HACKATHON",
+    "token_env": "HF_TOKEN_2",
+    "space_hardware": "t4-medium",
+    "model_runtime": "hf_space",
+    "submission_allowed": true,
+    "notes": [
+      "Official submission setting.",
+      "Modal must be disabled: VCW_MODEL_RUNTIME=hf_space.",
+      "Current known blocker: build-small-hackathon org billing canPay=false for current contributor token."
+    ]
+  }
+}

@@ -1,0 +1,317 @@
+{
+  "schema_version": "state_snapshot.v1",
+  "snapshot_id": "floodlight-demo-world-2026-06-15",
+  "description": "Small synthetic venue-ops world used by the local app, simulator model smoke, and future eval replay.",
+  "time_anchor": {
+    "mode": "browser_now",
+    "timezone": "Asia/Kolkata",
+    "fixed_now": null
+  },
+  "runtime": {
+    "app": "floodlight-venue-ops-agent",
+    "version": "v1-design-prototype",
+    "channel_label": "WhatsApp simulator",
+    "channel_status": "simulator-connected",
+    "channel_copy": "Demo channel connected. No live WhatsApp send proof claimed.",
+    "pending_count": 9,
+    "confirmed_today": 12,
+    "occupancy_today": 68,
+    "proof_boundary": "State snapshot prototype; live WhatsApp, external scoring/admin, video, HF deployment, and judge-ready model quality proof are not claimed."
+  },
+  "slots": [
+    {"id": "morning", "label": "8 AM - 12 PM", "period": "Morning"},
+    {"id": "afternoon", "label": "2 PM - 6 PM", "period": "Afternoon"}
+  ],
+  "venues": [
+    {
+      "id": "north-field",
+      "name": "North Field",
+      "surface": "Grass",
+      "grass_type": "Natural",
+      "slots": {
+        "morning": {"status": "available", "rate": 6000, "request_count": 0},
+        "afternoon": {"status": "partial", "rate": 6500, "request_count": 2}
+      }
+    },
+    {
+      "id": "south-field",
+      "name": "South Field",
+      "surface": "Grass",
+      "grass_type": "Astro turf",
+      "slots": {
+        "morning": {"status": "available", "rate": 5500, "request_count": 0},
+        "afternoon": {"status": "partial", "rate": 6000, "request_count": 1}
+      }
+    }
+  ],
+  "bookings": [
+    {
+      "id": "north-afternoon-rohit",
+      "venue_id": "north-field",
+      "slot_id": "afternoon",
+      "date_text": "tomorrow",
+      "status": "pending_owner_review",
+      "team_id": "friends-rohit",
+      "players": 10
+    },
+    {
+      "id": "south-afternoon-local-league",
+      "venue_id": "south-field",
+      "slot_id": "afternoon",
+      "date_text": "tomorrow",
+      "status": "pending_owner_review",
+      "team_id": "league-karan",
+      "players": 14
+    },
+    {
+      "id": "north-morning-old-corporate",
+      "venue_id": "north-field",
+      "slot_id": "morning",
+      "date_text": "yesterday",
+      "status": "confirmed_simulated",
+      "team_id": "corporate-aman",
+      "players": 12
+    }
+  ],
+  "registered_teams": [
+    {
+      "id": "corporate-aman",
+      "name": "Aman Corporate XI",
+      "sport": "cricket",
+      "captain_player_id": "aman-sharma",
+      "usual_players": 12,
+      "notes": "Prefers North Field natural grass."
+    },
+    {
+      "id": "friends-rohit",
+      "name": "Rohit's Friends",
+      "sport": "cricket",
+      "captain_player_id": "rohit-verma",
+      "usual_players": 10,
+      "notes": "Flexible between North Field and South Field."
+    },
+    {
+      "id": "league-karan",
+      "name": "Karan League Squad",
+      "sport": "cricket",
+      "captain_player_id": "karan-mehta",
+      "usual_players": 14,
+      "notes": "League booking; owner approval required."
+    },
+    {
+      "id": "neha-friends",
+      "name": "Neha Weekend Eight",
+      "sport": "cricket",
+      "captain_player_id": "neha-iyer",
+      "usual_players": 8,
+      "notes": "Often asks format details late."
+    }
+  ],
+  "players": [
+    {"id": "aman-sharma", "name": "Aman Sharma", "phone": "+91 98765 43210", "team_id": "corporate-aman"},
+    {"id": "rohit-verma", "name": "Rohit Verma", "phone": "+91 90123 45678", "team_id": "friends-rohit"},
+    {"id": "karan-mehta", "name": "Karan Mehta", "phone": "+91 99887 76655", "team_id": "league-karan"},
+    {"id": "neha-iyer", "name": "Neha Iyer", "phone": "+91 95555 45670", "team_id": "neha-friends"},
+    {"id": "vikas-singh", "name": "Vikas Singh", "phone": "+91 91234 87650", "team_id": null}
+  ],
+  "conversation_threads": [
+    {"id": "aman-sharma", "phone": "+91 98765 43210", "state": "new", "last_message": "Need North Field tomorrow morning for 12 players.", "turn_count": 1},
+    {"id": "rohit-verma", "phone": "+91 90123 45678", "state": "new", "last_message": "Need North Field tomorrow afternoon for 10.", "turn_count": 1},
+    {"id": "karan-mehta", "phone": "+91 99887 76655", "state": "new", "last_message": "South Field morning for league squad.", "turn_count": 1},
+    {"id": "vikas-singh", "phone": "+91 91234 87650", "state": "conflict", "last_message": "South Field afternoon today if possible.", "turn_count": 2},
+    {"id": "neha-iyer", "phone": "+91 95555 45670", "state": "clarification", "last_message": "Can you confirm format/overs first?", "turn_count": 2},
+    {"id": "arjun-nair", "phone": "+91 97400 66778", "state": "new", "last_message": "Football practice tomorrow morning for 16.", "turn_count": 1},
+    {"id": "siddharth-rao", "phone": "+91 96500 88990", "state": "new", "last_message": "Afternoon slot for friends, 11 players.", "turn_count": 1},
+    {"id": "meera-rao", "phone": "+91 77777 88888", "state": "old", "last_message": "Checking availability; phone shared later.", "turn_count": 2},
+    {"id": "priya-menon", "phone": "+91 93333 20009", "state": "confirmed_simulated", "last_message": "Thanks, see you today.", "turn_count": 3},
+    {"id": "dev-arora", "phone": "+91 94444 10004", "state": "old", "last_message": "Will ask the group and come back.", "turn_count": 1}
+  ],
+  "requests": [
+    {
+      "id": "aman-sharma",
+      "customer_name": "Aman Sharma",
+      "phone": "+91 98765 43210",
+      "received_label": "1 min ago",
+      "activity": "Cricket",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "north-field:morning",
+      "players": 12,
+      "group_type": "Corporate",
+      "status": "new",
+      "tone": "ready",
+      "missing_fields": [],
+      "summary": "12 players · Corporate",
+      "reply_draft": "Hi Aman, North Field is available tomorrow from 8 AM - 12 PM. The slot is Rs 6,000 for natural grass. Reply YES and we will hold it after owner approval."
+    },
+    {
+      "id": "rohit-verma",
+      "customer_name": "Rohit Verma",
+      "phone": "+91 90123 45678",
+      "received_label": "3 min ago",
+      "activity": "Cricket",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "north-field:afternoon",
+      "players": 10,
+      "group_type": "Friends",
+      "status": "new",
+      "tone": "partial",
+      "missing_fields": [],
+      "summary": "10 players · Friends",
+      "reply_draft": "Hi Rohit, North Field has partial demand tomorrow from 2 PM - 6 PM at Rs 6,500. We can confirm after owner approval, or offer South Field at Rs 6,000."
+    },
+    {
+      "id": "karan-mehta",
+      "customer_name": "Karan Mehta",
+      "phone": "+91 99887 76655",
+      "received_label": "5 min ago",
+      "activity": "Cricket",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "south-field:morning",
+      "players": 14,
+      "group_type": "League",
+      "status": "new",
+      "tone": "ready",
+      "missing_fields": [],
+      "summary": "14 players · League",
+      "reply_draft": "Hi Karan, South Field is available tomorrow from 8 AM - 12 PM. Astro turf surface, Rs 5,500. I can hold it after owner approval."
+    },
+    {
+      "id": "vikas-singh",
+      "customer_name": "Vikas Singh",
+      "phone": "+91 91234 87650",
+      "received_label": "7 min ago",
+      "activity": "Cricket",
+      "date_label": "Today",
+      "requested_slot_id": "south-field:afternoon",
+      "players": 12,
+      "group_type": "Corporate",
+      "status": "conflict",
+      "tone": "conflict",
+      "missing_fields": [],
+      "summary": "12 players · Corporate",
+      "reply_draft": "Hi Vikas, the requested afternoon slot has other demand. North Field morning is open, or South Field morning is open. Which one should I hold for you?"
+    },
+    {
+      "id": "neha-iyer",
+      "customer_name": "Neha Iyer",
+      "phone": "+91 95555 45670",
+      "received_label": "9 min ago",
+      "activity": "Cricket",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "south-field:afternoon",
+      "players": 8,
+      "group_type": "Friends",
+      "status": "clarification",
+      "tone": "clarification",
+      "missing_fields": ["format/overs"],
+      "summary": "8 players · Friends",
+      "reply_draft": "Hi Neha, South Field afternoon is available with one existing request. Could you confirm format or overs before I ask the owner to hold it?"
+    },
+    {
+      "id": "arjun-nair",
+      "customer_name": "Arjun Nair",
+      "phone": "+91 97400 66778",
+      "received_label": "12 min ago",
+      "activity": "Football",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "south-field:morning",
+      "players": 16,
+      "group_type": "League",
+      "status": "new",
+      "tone": "ready",
+      "missing_fields": [],
+      "summary": "16 players · League",
+      "reply_draft": "Hi Arjun, South Field morning is open for football practice at Rs 5,500, pending owner approval."
+    },
+    {
+      "id": "siddharth-rao",
+      "customer_name": "Siddharth Rao",
+      "phone": "+91 96500 88990",
+      "received_label": "15 min ago",
+      "activity": "Cricket",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "north-field:afternoon",
+      "players": 11,
+      "group_type": "Friends",
+      "status": "conflict",
+      "tone": "conflict",
+      "missing_fields": [],
+      "summary": "11 players · Friends",
+      "reply_draft": "Hi Siddharth, North Field afternoon already has competing demand. South Field morning is cleanly open."
+    },
+    {
+      "id": "meera-rao",
+      "customer_name": "Meera Rao",
+      "phone": "+91 77777 88888",
+      "received_label": "22 min ago",
+      "activity": "Cricket",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "north-field:morning",
+      "players": 8,
+      "group_type": "Friends",
+      "status": "clarification",
+      "tone": "clarification",
+      "missing_fields": ["time_window"],
+      "summary": "8 players · Friends",
+      "reply_draft": "Hi Meera, could you confirm the exact time window so I can check the booking?"
+    },
+    {
+      "id": "priya-menon",
+      "customer_name": "Priya Menon",
+      "phone": "+91 93333 20009",
+      "received_label": "36 min ago",
+      "activity": "Cricket",
+      "date_label": "Today",
+      "requested_slot_id": "north-field:morning",
+      "players": 9,
+      "group_type": "Corporate",
+      "status": "sent",
+      "tone": "ready",
+      "missing_fields": [],
+      "summary": "9 players · Confirmed",
+      "reply_draft": "Confirmed via simulator after owner approval."
+    },
+    {
+      "id": "dev-arora",
+      "customer_name": "Dev Arora",
+      "phone": "+91 94444 10004",
+      "received_label": "48 min ago",
+      "activity": "Hockey",
+      "date_label": "Tomorrow",
+      "requested_slot_id": "south-field:morning",
+      "players": 10,
+      "group_type": "Practice",
+      "status": "old",
+      "tone": "partial",
+      "missing_fields": [],
+      "summary": "10 players · Practice",
+      "reply_draft": "Hi Dev, South Field morning can work for hockey practice at Rs 5,500 after owner approval."
+    }
+  ],
+  "decision": {
+    "selected_request_id": "aman-sharma",
+    "selected_slot_id": "north-field:morning",
+    "selected_price": 6000,
+    "notes": "",
+    "state": "ready"
+  },
+  "integrations": [
+    {"id": "video", "label": "Video Telecast", "state": "disabled", "copy": "Disabled"},
+    {"id": "external-scoring", "label": "External scoring/admin app", "state": "not-connected", "copy": "Not connected · Disabled"}
+  ],
+  "trace": [
+    {"id": "snapshot", "label": "State snapshot loaded", "tone": "neutral", "timestamp_label": "now"},
+    {"id": "intake", "label": "Intake received from simulator", "tone": "neutral", "timestamp_label": "now"},
+    {"id": "policy", "label": "Approval required before outbound reply", "tone": "warning", "timestamp_label": "now"},
+    {"id": "draft", "label": "Reply drafted and pending owner review", "tone": "neutral", "timestamp_label": "now"}
+  ],
+  "scenarios": [
+    {"id": "normal", "label": "Live queue"},
+    {"id": "clarification", "label": "Clarification"},
+    {"id": "conflict", "label": "Slot conflict"},
+    {"id": "provider-error", "label": "Provider error"},
+    {"id": "empty", "label": "Empty queue"}
+  ],
+  "active_scenario": "normal",
+  "proof_boundary": "Synthetic state only. Use model-backed simulation smoke/eval traces for model claims."
+}

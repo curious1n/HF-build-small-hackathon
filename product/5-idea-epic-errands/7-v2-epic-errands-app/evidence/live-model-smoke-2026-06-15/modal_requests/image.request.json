@@ -1,0 +1,20 @@
+{
+  "guidance": 1.0,
+  "height": 768,
+  "items": [
+    {
+      "card_text": {
+        "narration": "Read for 20 minutes and earn a comic badge!",
+        "reward_label": "Comic Badge",
+        "title": "Comic Quest"
+      },
+      "goal_id": "read-20-comic",
+      "ordinary_goal": "Read for 20 minutes",
+      "prompt": "Generate an image-only hero illustration for a child goal app. Tone: cozy. Bright cartoon action illustration, bold shapes, clean motion lines, cheerful everyday hero energy, full-bleed scene, no frame, no panel, no banner, no speech bubble. Show a child enjoying a quiet reading moment in a cozy seat with warm light and a single plain book. Use a simple background with no bookshelf, no book spines, no posters, and no decorative labels. The book cover, book pages, and all background surfaces are completely blank. This is not a poster, title card, label, worksheet, book cover, or UI. Do not render any words, alphabet letters, numerals, captions, labels, signs, handwriting, book titles, speech bubbles, sound effects, logos, or UI text. Use image composition only; all paper and book surfaces stay blank; no user photos, no monsters or threats.",
+      "seed": 26002,
+      "theme": "comic"
+    }
+  ],
+  "steps": 4,
+  "width": 768
+}

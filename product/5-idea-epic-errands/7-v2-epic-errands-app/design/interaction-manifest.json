@@ -1,0 +1,205 @@
+{
+  "manifest_id": "epic-errands-v2-detailed-design",
+  "product": "Epic Errands V2",
+  "mode": "design_artifact",
+  "proof_claim": "Design artifact readiness only. Implementation, browser/mobile UAT, hosted proof, model proof, public release, and judge-ready status are not claimed.",
+  "mobile_target": {
+    "primary_width_px": 390,
+    "minimum_width_px": 360
+  },
+  "surfaces": [
+    {
+      "id": "home",
+      "label": "Home",
+      "purpose": "Quick status view for parent and child.",
+      "availability": "enabled",
+      "states": ["theme_selected", "active_goals", "pending_review", "awaiting_approval", "rewards_approved"]
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "purpose": "Configure app styling and generation inputs.",
+      "availability": "enabled",
+      "states": ["theme_selected", "uploads_empty", "uploads_ready", "quality_enabled", "speed_disabled_planned"]
+    },
+    {
+      "id": "parent_goals",
+      "label": "Parent Goals",
+      "purpose": "Create, generate, review, accept/cancel, and approve goals.",
+      "availability": "enabled",
+      "states": ["draft_empty", "draft_ready", "generating", "review_goal_ready", "awaiting_approval", "approved"]
+    },
+    {
+      "id": "review_goal",
+      "label": "Review Goal",
+      "purpose": "Approve or discard generated goal before kid publication.",
+      "availability": "modal_or_panel",
+      "states": ["image_ready", "editable_overlay_ready", "audio_ready", "provenance_visible", "accepted", "canceled"]
+    },
+    {
+      "id": "kid_goals",
+      "label": "Kid Goals",
+      "purpose": "Kid opens approved goal cards, listens, completes, and sees reward status.",
+      "availability": "enabled",
+      "states": ["thumbnail_grid", "goal_card_open", "audio_ready", "completed", "waiting_for_parent", "reward_given"]
+    },
+    {
+      "id": "diy",
+      "label": "DIY",
+      "purpose": "Isolated parent lab mirroring the generation pipeline.",
+      "availability": "enabled_isolated_surface",
+      "states": ["workflow_draft_loaded", "editing", "preview_updated", "trace_visible", "save_back_coming_soon"]
+    }
+  ],
+  "style_modes": [
+    {
+      "id": "classroom",
+      "label": "Classroom",
+      "goal_noun": "Quest",
+      "parent_title": "Classroom Captain",
+      "kid_title": "Star Student",
+      "reward_noun": "Badge"
+    },
+    {
+      "id": "questbook",
+      "label": "Questbook",
+      "goal_noun": "Quest",
+      "parent_title": "Quest Keeper",
+      "kid_title": "Young Adventurer",
+      "reward_noun": "Crest",
+      "default": true
+    },
+    {
+      "id": "comic",
+      "label": "Comic",
+      "goal_noun": "Mission",
+      "parent_title": "Comic Editor",
+      "kid_title": "Panel Hero",
+      "reward_noun": "Starburst"
+    }
+  ],
+  "components": [
+    {
+      "id": "app-theme-picker",
+      "type": "segmented-control",
+      "surface": "settings",
+      "role": "parent",
+      "states": ["classroom_selected", "questbook_selected", "comic_selected"],
+      "data_bindings": ["active_theme_id"],
+      "engine_checks": ["theme-updates-shell", "theme-does-not-regenerate-media"]
+    },
+    {
+      "id": "generation-mode-control",
+      "type": "segmented-control",
+      "surface": "settings",
+      "role": "parent",
+      "states": ["quality_selected_enabled", "speed_visible_disabled_planned"],
+      "data_bindings": ["generation_mode", "image_output_size_px"],
+      "engine_checks": ["quality-only-enabled", "speed-disabled", "quality-shows-1024", "speed-shows-720-planned"]
+    },
+    {
+      "id": "media-upload-panels",
+      "type": "upload-remove-group",
+      "surface": "settings",
+      "role": "parent",
+      "states": ["empty", "uploaded", "preview_visible", "remove_ready", "upload_error"],
+      "data_bindings": ["parent_photo_refs[]", "child_photo_refs[]", "custom_image_reference_refs[]", "parent_reference_audio_ref", "generation_references[]"],
+      "engine_checks": ["reference-audio-optional", "custom-image-reference-upload", "session-only-inputs"]
+    },
+    {
+      "id": "create-goal-form",
+      "type": "form",
+      "surface": "parent_goals",
+      "role": "parent",
+      "states": ["empty_draft", "draft_ready", "generating", "generation_error", "review_ready"],
+      "data_bindings": ["goal_draft", "selected_generation_reference_ids", "generation_mode"],
+      "engine_checks": ["quality-generation-only", "text-image-audio-pipeline"]
+    },
+    {
+      "id": "review-goal-panel",
+      "type": "review-panel",
+      "surface": "review_goal",
+      "role": "parent",
+      "states": ["image_ready", "overlay_editing", "audio_ready", "accepted", "canceled"],
+      "data_bindings": ["pending_review_goal", "pending_review_goal.overlay_text", "pending_review_goal.media", "pending_review_goal.provenance"],
+      "engine_checks": ["accept-publishes", "cancel-discards", "no-image-edit", "no-audio-edit"]
+    },
+    {
+      "id": "editable-goal-overlay",
+      "type": "editable-text-layer",
+      "surface": "review_goal",
+      "role": "parent",
+      "states": ["ready", "focused", "editing", "wraps_on_mobile", "contrast_guard_visible"],
+      "data_bindings": ["overlay_text.text", "overlay_text.theme_style_id"],
+      "engine_checks": ["app-owned-text", "does-not-mutate-image", "does-not-mutate-audio"]
+    },
+    {
+      "id": "read-only-goal-overlay",
+      "type": "read-only-text-layer",
+      "surface": "kid_goals",
+      "role": "kid",
+      "states": ["ready", "wraps_on_mobile", "contrast_guard_visible"],
+      "data_bindings": ["overlay_text.text", "overlay_text.theme_style_id"],
+      "engine_checks": ["read-only-for-kid", "app-owned-text", "does-not-mutate-image", "does-not-mutate-audio"]
+    },
+    {
+      "id": "kid-goal-card",
+      "type": "detail-card",
+      "surface": "kid_goals",
+      "role": "kid",
+      "states": ["open", "image_ready", "overlay_text_ready", "audio_ready", "kid_can_complete", "waiting_for_parent", "reward_given"],
+      "data_bindings": ["selected_goal_id", "goals[]"],
+      "engine_checks": ["no-generated-steps", "no-raw-json", "no-arbitrary-model-ids", "large-tap-targets"]
+    },
+    {
+      "id": "diy-workflow-mirror",
+      "type": "isolated-workflow-lab",
+      "surface": "diy",
+      "role": "parent",
+      "states": ["draft_loaded", "editing", "preview_updated", "trace_visible", "save_back_coming_soon"],
+      "data_bindings": ["diy.workflow_draft", "diy.preview", "diy.trace_json", "diy.save_to_app_status"],
+      "engine_checks": ["isolated-from-main-app", "mirrors-main-generation-flow", "save-back-disabled-coming-soon"]
+    }
+  ],
+  "flows": [
+    {
+      "id": "settings-to-review-flow",
+      "states": [
+        "settings_configured",
+        "quality_selected",
+        "parent_goal_draft_ready",
+        "generation_running_text_image_audio",
+        "review_goal_ready",
+        "overlay_text_edited",
+        "accepted_or_canceled"
+      ],
+      "terminal_success": "Parent accepts a generated goal and it appears in Kid Goals.",
+      "terminal_cancel": "Parent cancels a generated goal and it is not published."
+    },
+    {
+      "id": "kid-completion-parent-approval-flow",
+      "states": [
+        "kid_thumbnail_grid",
+        "kid_goal_card_open",
+        "audio_preview_available",
+        "kid_marks_complete",
+        "waiting_for_parent_approval",
+        "parent_approves_reward",
+        "reward_given_terminal"
+      ],
+      "terminal_success": "Kid sees reward granted after parent approval."
+    },
+    {
+      "id": "diy-isolated-flow",
+      "states": [
+        "diy_surface_loaded",
+        "hardcoded_workflow_draft_visible",
+        "draft_edited",
+        "local_preview_updated",
+        "trace_visible",
+        "save_back_label_coming_soon"
+      ],
+      "terminal_success": "DIY preview and trace update locally without changing the main app."
+    }
+  ]
+}

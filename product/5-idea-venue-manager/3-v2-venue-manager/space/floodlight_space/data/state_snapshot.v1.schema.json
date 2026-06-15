@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://floodlight.local/schema/state_snapshot.v1.json",
+  "title": "Floodlight State Snapshot v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "runtime",
+    "slots",
+    "venues",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "state_snapshot.v1"
+    },
+    "snapshot_id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "time_anchor": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": ["browser_now", "fixed_eval"]
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "fixed_now": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "runtime": {
+      "type": "object"
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label"]
+      }
+    },
+    "venues": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "slots"]
+      }
+    },
+    "bookings": {
+      "type": "array"
+    },
+    "registered_teams": {
+      "type": "array"
+    },
+    "players": {
+      "type": "array"
+    },
+    "conversation_threads": {
+      "type": "array"
+    },
+    "requests": {
+      "type": "array"
+    },
+    "decision": {
+      "type": "object",
+      "required": ["selected_request_id", "selected_slot_id", "state"]
+    },
+    "integrations": {
+      "type": "array"
+    },
+    "trace": {
+      "type": "array"
+    },
+    "scenarios": {
+      "type": "array"
+    },
+    "active_scenario": {
+      "type": "string"
+    },
+    "proof_boundary": {
+      "type": "string"
+    }
+  }
+}

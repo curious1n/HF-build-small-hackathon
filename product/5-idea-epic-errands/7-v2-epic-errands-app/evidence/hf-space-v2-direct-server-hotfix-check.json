@@ -1,0 +1,11 @@
+{
+  "checked_at": "2026-06-15T15:22:02.051197+00:00",
+  "last_error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+  "observed_sha": "20be504954b2faa2199f881e4c4ee9d010244daf",
+  "private": true,
+  "proof_scope": "authenticated hosted route smoke for private direct-server hotfix; not browser UAT, public release, judge-ready, or hosted live-model proof",
+  "repo_id": "build-small-hackathon/epic-errands",
+  "sdk": "gradio",
+  "space_url": "https://build-small-hackathon-epic-errands.hf.space/",
+  "status": "fail"
+}

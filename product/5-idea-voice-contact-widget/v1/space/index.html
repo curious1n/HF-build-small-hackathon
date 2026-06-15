@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voice Reach V1</title>
+    <link rel="stylesheet" href="/static/widget.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="widget-shell" aria-labelledby="widget-heading">
+        <div class="widget-topline">
+          <span class="brand-pill" id="brand-name">metime.to</span>
+          <span class="destination" id="contact-email">founders@metime.to</span>
+        </div>
+
+        <header class="widget-header">
+          <h1 id="widget-heading">Tell us what you need</h1>
+          <p id="widget-subheading">Speak in Hindi or Hinglish. We will draft an English message.</p>
+        </header>
+
+        <section class="notice" id="eval-notice" aria-live="polite">
+          metime.to allows recordings to be used to improve this demo. Do not share sensitive information.
+        </section>
+
+        <section class="control-block" aria-label="Speech mode">
+          <div class="field-label">Speech mode</div>
+          <div class="segmented" role="radiogroup" aria-label="Speech mode">
+            <button class="segment" type="button" role="radio" aria-checked="false" data-mode="hindi">Hindi</button>
+            <button class="segment is-selected" type="button" role="radio" aria-checked="true" data-mode="hinglish">Hinglish</button>
+          </div>
+        </section>
+
+        <section class="recorder-panel" aria-live="polite">
+          <div class="status-row">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="state-label">Ready to record</span>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <button class="record-button" id="record-button" type="button">Record message</button>
+          <p class="helper-copy" id="helper-copy">Review happens before anything is sent.</p>
+        </section>
+
+        <section class="processing-panel" id="processing-panel" hidden>
+          <ol class="progress-list">
+            <li data-step="prepare">Preparing your recording</li>
+            <li data-step="listen">Listening to your message</li>
+            <li data-step="draft">Drafting your English message</li>
+          </ol>
+        </section>
+
+        <section class="review-panel" id="review-panel" hidden>
+          <div class="review-head">
+            <h2>Review your English message</h2>
+            <p>Please review before sending. Some details may be missing.</p>
+          </div>
+          <textarea id="message-editor" rows="8" aria-label="Editable English message"></textarea>
+          <div class="action-row">
+            <button class="primary" id="send-button" type="button">Send message</button>
+            <button class="secondary" id="record-again-button" type="button">Record again</button>
+          </div>
+          <details class="transcript-details">
+            <summary>Show transcript</summary>
+            <p id="transcript-output"></p>
+          </details>
+        </section>
+
+        <section class="terminal-panel" id="terminal-panel" hidden>
+          <h2 id="terminal-title">Message sent.</h2>
+          <p id="terminal-copy">Thanks. The team will get back to you.</p>
+          <button class="secondary" id="new-message-button" type="button">Send another message</button>
+        </section>
+
+        <section class="error-panel" id="error-panel" hidden>
+          <h2 id="error-title">Could not continue</h2>
+          <p id="error-copy"></p>
+          <div class="action-row">
+            <button class="primary" id="retry-button" type="button">Try again</button>
+            <button class="secondary" id="copy-button" type="button" hidden>Copy message</button>
+          </div>
+        </section>
+
+        <details class="debug-details" id="debug-details">
+          <summary>Debug provenance</summary>
+          <pre id="debug-output">{}</pre>
+          <div class="debug-actions" aria-label="State test controls">
+            <button type="button" data-simulate="mic-denied">Mic denied</button>
+            <button type="button" data-simulate="empty-audio">Empty audio</button>
+            <button type="button" data-simulate="asr-failure">ASR failure</button>
+            <button type="button" data-simulate="text-failure">Text failure</button>
+            <button type="button" data-simulate="send-failure">Send failure</button>
+          </div>
+        </details>
+      </section>
+    </main>
+    <script src="/static/widget.js" defer></script>
+  </body>
+</html>

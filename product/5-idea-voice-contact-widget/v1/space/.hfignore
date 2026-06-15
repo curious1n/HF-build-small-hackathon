@@ -1,0 +1,7 @@
+.git
+.cache
+.model-cache
+__pycache__/
+*.pyc
+demo-ledger.jsonl
+*.jsonl

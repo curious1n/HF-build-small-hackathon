@@ -1,0 +1,123 @@
+{
+  "package_id": "epic-errands-v2-detailed-design",
+  "idea": "Epic Errands",
+  "version": "V2",
+  "design_mode": "detailed_design_medium",
+  "visual_direction": "Preserve V1 Questbook-first mobile app with selectable Classroom and Comic app UI themes.",
+  "source_artifacts": [
+    {
+      "id": "v2_readme",
+      "path": "../README.md",
+      "role": "Locked V2 product decisions and proof boundary."
+    },
+    {
+      "id": "v2_ux_flow",
+      "path": "../UX_FLOW.md",
+      "role": "Final V2 UX contract."
+    },
+    {
+      "id": "v2_implementation_readiness",
+      "path": "../implementation-readiness.md",
+      "role": "Buildability and model/runtime contract."
+    },
+    {
+      "id": "v1_visual_design",
+      "path": "../../5-v1-epic-errands-app/design/visual-design.md",
+      "role": "Visual direction to preserve."
+    },
+    {
+      "id": "v1_style_modes",
+      "path": "../../5-v1-epic-errands-app/design/style-modes.md",
+      "role": "Theme copy, tone, and semantic roles."
+    },
+    {
+      "id": "v1_token_css",
+      "path": "../../5-v1-epic-errands-app/static/styles/tokens.css",
+      "role": "Existing CSS token system."
+    },
+    {
+      "id": "text_overlay_prototype",
+      "path": "../../6-spike-add-elements-assets/text-overlay-prototype/index.html",
+      "role": "App-owned editable overlay source."
+    }
+  ],
+  "flow": {
+    "entry_screen": "HomeScreen",
+    "primary_nav": ["Home", "Parent Goals", "Kid Goals", "Settings", "DIY"],
+    "primary_parent_success": "Parent configures inputs, generates in Quality mode, edits app-owned overlay text, accepts the goal, and sees it published to Kid Goals.",
+    "primary_kid_success": "Kid opens an approved goal, listens to audio, completes it, and receives reward status after parent approval.",
+    "diy_success": "Parent edits the hardcoded DIY workflow draft and sees local preview/trace updates with save-back labelled coming soon.",
+    "out_of_scope": [
+      "new visual direction",
+      "Review Goal image editing",
+      "Review Goal audio editing",
+      "Speed mode enablement",
+      "public hosted proof",
+      "live model proof",
+      "judge-ready claim"
+    ]
+  },
+  "screens": [
+    {
+      "id": "home",
+      "label": "Home",
+      "purpose": "Show active theme styling, active goals, waiting approvals, approved rewards, and a quick kid-goal shortcut.",
+      "primary_components": ["HomeStatusSummary", "CurrentKidGoalShortcut"],
+      "states": ["theme_selected", "active_goals", "pending_review", "awaiting_approval", "rewards_approved"]
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "purpose": "Configure app UI theme and generation inputs before creating goals.",
+      "primary_components": ["AppThemePicker", "ParentDetailsPanel", "ChildrenDetailsPanel", "CustomImageReferencePanel", "GenerationReferencePicker", "GenerationModeControl"],
+      "states": ["theme_selected", "uploads_empty", "uploads_ready", "quality_selected_enabled", "speed_visible_disabled_planned"]
+    },
+    {
+      "id": "parent_goals",
+      "label": "Parent Goals",
+      "purpose": "Create ordinary goals, run Quality generation, review output, and approve completed goals.",
+      "primary_components": ["CreateGoalForm", "ReviewGoalPanel", "ParentApprovalQueue"],
+      "states": ["draft_empty", "draft_ready", "generating", "review_goal_ready", "awaiting_approval", "approved"]
+    },
+    {
+      "id": "review_goal",
+      "label": "Review Goal",
+      "purpose": "Let the parent edit app-owned overlay text, preview immutable image/audio, and Accept or Cancel.",
+      "primary_components": ["GeneratedImageFrame", "EditableGoalOverlay", "GeneratedCopySummary", "AudioPreview", "ProvenanceSummary", "AcceptCancelActions"],
+      "states": ["image_ready", "overlay_editing", "audio_ready", "provenance_visible", "accepted", "canceled"]
+    },
+    {
+      "id": "kid_goals",
+      "label": "Kid Goals",
+      "purpose": "Show approved goal thumbnails and goal cards for completion and reward status.",
+      "primary_components": ["KidGoalThumbnailGrid", "KidGoalCard", "AudioPlayer", "CompletionAction"],
+      "states": ["thumbnail_grid", "goal_card_open", "audio_ready", "completed", "waiting_for_parent", "reward_given"]
+    },
+    {
+      "id": "diy",
+      "label": "DIY",
+      "purpose": "Inspect and customize the hardcoded V2 generation workflow in an isolated parent-facing lab.",
+      "primary_components": ["DIYWorkflowMirror", "DIYDraftEditor", "DIYStepTrace", "DIYComposedPreview", "DIYSaveBackNotice"],
+      "states": ["draft_loaded", "editing", "preview_updated", "trace_visible", "save_back_coming_soon"]
+    }
+  ],
+  "responsive_targets": [
+    {
+      "name": "mobile-primary",
+      "width": 390
+    },
+    {
+      "name": "mobile-minimum",
+      "width": 360
+    }
+  ],
+  "proof_claim": {
+    "design_artifact_readiness": true,
+    "implementation": false,
+    "browser_uat": false,
+    "hosted_space": false,
+    "model_proof": false,
+    "public_release": false,
+    "judge_ready": false
+  }
+}

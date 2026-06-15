@@ -1,0 +1,10 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gradio==5.9.1
+huggingface_hub[hf_transfer]==0.32.6
+pydantic==2.10.6
+llama-cpp-python==0.3.29
+Cython==3.0.11
+packaging==24.2
+soundfile==0.12.1
+nemo_toolkit[asr] @ git+https://github.com/NVIDIA/NeMo.git@95f92737cfb8ee0123bb328b07a2d24c6d859aff

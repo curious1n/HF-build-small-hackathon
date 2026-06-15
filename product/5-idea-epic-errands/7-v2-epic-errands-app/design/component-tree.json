@@ -1,0 +1,145 @@
+{
+  "root": {
+    "component": "EpicErrandsV2MobileApp",
+    "purpose": "Owns the mobile app shell, five-tab navigation, app theme styling, settings inputs, parent review flow, kid goal flow, and isolated DIY entry.",
+    "responsive_target": {
+      "primary_width_px": 390,
+      "minimum_width_px": 360
+    },
+    "children": [
+      {
+        "component": "MobileTabNav",
+        "purpose": "Primary navigation across Home, Parent Goals, Kid Goals, Settings, and DIY.",
+        "states": ["home_selected", "parent_goals_selected", "kid_goals_selected", "settings_selected", "diy_selected", "badge_pending_review", "badge_awaiting_approval", "focus_visible"],
+        "data_bindings": ["active_tab", "pending_review_count", "awaiting_approval_count"],
+        "implementation_anchors": ["data-design-id=\"mobile-tab-nav\"", "data-action=\"select-tab\""]
+      },
+      {
+        "component": "HomeScreen",
+        "purpose": "Shows active theme styling, goal status, rewards approved, and quick access to the current kid goal card.",
+        "children": [
+          {
+            "component": "HomeStatusSummary",
+            "states": ["no_goals", "active_goals", "pending_review", "awaiting_parent_approval", "rewards_approved"],
+            "data_bindings": ["goals[]", "pending_review_goals[]", "approved_rewards_count"],
+            "implementation_anchors": ["data-design-id=\"home-status-summary\""]
+          },
+          {
+            "component": "CurrentKidGoalShortcut",
+            "states": ["empty", "thumbnail_ready", "opens_kid_goal"],
+            "data_bindings": ["current_kid_goal_id", "generated_goal_cards[]"],
+            "implementation_anchors": ["data-design-id=\"current-kid-goal-shortcut\"", "data-action=\"open-kid-goal\""]
+          }
+        ]
+      },
+      {
+        "component": "SettingsScreen",
+        "purpose": "Configures app UI theme, uploads/removes parent and child inputs, chooses generation references, and displays Quality/Speed mode policy.",
+        "children": [
+          {
+            "component": "AppThemePicker",
+            "states": ["classroom_selected", "questbook_selected", "comic_selected"],
+            "data_bindings": ["active_theme_id"],
+            "must_preserve": ["visual_theme_switching", "visual_theme_independent_from_generation"],
+            "implementation_anchors": ["data-design-id=\"app-theme-picker\"", "data-action=\"select-theme\""]
+          },
+          {
+            "component": "ParentDetailsPanel",
+            "states": ["photos_empty", "photos_uploaded", "reference_audio_empty_optional", "reference_audio_uploaded", "remove_ready", "upload_error"],
+            "data_bindings": ["parent_photo_refs[]", "parent_reference_audio_ref"],
+            "implementation_anchors": ["data-design-id=\"parent-details-panel\"", "data-action=\"upload-parent-photo\"", "data-action=\"upload-parent-audio\""]
+          },
+          {
+            "component": "ChildrenDetailsPanel",
+            "states": ["photos_empty", "photos_uploaded", "remove_ready", "upload_error"],
+            "data_bindings": ["child_photo_refs[]"],
+            "implementation_anchors": ["data-design-id=\"children-details-panel\"", "data-action=\"upload-child-photo\""]
+          },
+          {
+            "component": "CustomImageReferencePanel",
+            "states": ["empty", "uploaded", "preview_visible", "remove_ready", "upload_error"],
+            "data_bindings": ["custom_image_reference_refs[]"],
+            "implementation_anchors": ["data-design-id=\"custom-image-reference-panel\"", "data-action=\"upload-custom-image-reference\"", "data-action=\"remove-custom-image-reference\""]
+          },
+          {
+            "component": "GenerationReferencePicker",
+            "states": ["parent_photo_selected", "child_photo_selected", "custom_image_selected", "missing_reference_warning"],
+            "data_bindings": ["generation_references[]"],
+            "implementation_anchors": ["data-design-id=\"generation-reference-picker\"", "data-action=\"select-generation-reference\""]
+          },
+          {
+            "component": "GenerationModeControl",
+            "states": ["quality_selected_enabled", "speed_visible_disabled_planned"],
+            "data_bindings": ["generation_mode", "image_output_size"],
+            "must_preserve": ["quality_only_hackathon"],
+            "implementation_anchors": ["data-design-id=\"generation-mode-control\"", "data-mode=\"quality\"", "data-mode=\"speed\""]
+          }
+        ]
+      },
+      {
+        "component": "ParentGoalsScreen",
+        "purpose": "Creates ordinary goals, starts Quality generation, reviews generated goals, and approves kid-completed rewards.",
+        "children": [
+          {
+            "component": "CreateGoalForm",
+            "states": ["empty_draft", "draft_ready", "invalid_empty", "ready_to_generate", "generating", "generation_error", "review_ready"],
+            "data_bindings": ["goal_draft", "selected_generation_reference_ids", "generation_mode"],
+            "implementation_anchors": ["data-design-id=\"create-goal-form\"", "data-action=\"generate-goal\""]
+          },
+          {
+            "component": "ReviewGoalPanel",
+            "states": ["closed", "loading", "ready", "overlay_editing", "audio_playing", "accepted", "canceled"],
+            "data_bindings": ["pending_review_goal", "pending_review_goal.overlay_text", "pending_review_goal.media.image_asset_ref", "pending_review_goal.media.audio_asset_ref"],
+            "must_preserve": ["review_text_overlay", "review_media_immutable"],
+            "implementation_anchors": ["data-design-id=\"review-goal-panel\"", "data-design-id=\"editable-goal-overlay\"", "data-action=\"accept-goal\"", "data-action=\"cancel-goal\""]
+          },
+          {
+            "component": "ParentApprovalQueue",
+            "states": ["empty", "awaiting_approval", "approving", "approved"],
+            "data_bindings": ["goals[].kid_completion_state", "goals[].parent_reward_state"],
+            "must_preserve": ["parent_kid_approval_loop"],
+            "implementation_anchors": ["data-design-id=\"parent-approval-queue\"", "data-action=\"approve-goal\""]
+          }
+        ]
+      },
+      {
+        "component": "KidGoalsScreen",
+        "purpose": "Lets the child open approved goal thumbnails, play audio, complete a goal, and see reward status.",
+        "children": [
+          {
+            "component": "KidGoalThumbnailGrid",
+            "states": ["empty", "has_goals", "thumbnail_only", "opens_goal_card", "completed", "awaiting_approval", "reward_given"],
+            "data_bindings": ["accepted_goals[]", "selected_goal_id"],
+            "implementation_anchors": ["data-design-id=\"kid-goal-thumbnail-grid\"", "data-action=\"open-goal-card\""]
+          },
+          {
+            "component": "KidGoalCard",
+            "states": ["closed", "open", "image_ready", "overlay_text_ready", "audio_ready", "kid_can_complete", "waiting_for_parent", "reward_given"],
+            "data_bindings": ["selected_goal_id", "generated_goal_cards[]", "goals[].kid_completion_state", "goals[].parent_reward_state"],
+            "must_preserve": ["generated_card_no_steps", "playable_goal_audio", "parent_kid_approval_loop"],
+            "implementation_anchors": ["data-design-id=\"kid-goal-card\"", "data-design-id=\"read-only-goal-overlay\"", "data-design-id=\"audio-play-hook\"", "data-action=\"complete-goal\""]
+          }
+        ]
+      },
+      {
+        "component": "DIYScreen",
+        "purpose": "Routes to an isolated parent-facing DIY surface that mirrors the app generation flow and lets the parent edit the hardcoded workflow draft.",
+        "children": [
+          {
+            "component": "DIYWorkflowMirror",
+            "states": ["isolated_loaded", "draft_loaded", "editing", "preview_updated", "trace_visible"],
+            "data_bindings": ["diy_workflow_draft", "diy_trace", "diy_preview"],
+            "must_preserve": ["isolated_diy_same_package"],
+            "implementation_anchors": ["data-design-id=\"diy-workflow-mirror\"", "data-action=\"update-diy-preview\""]
+          },
+          {
+            "component": "DIYSaveBackNotice",
+            "states": ["coming_soon_disabled", "focus_visible"],
+            "data_bindings": ["save_to_app_status"],
+            "implementation_anchors": ["data-design-id=\"diy-save-back-notice\"", "data-action=\"save-to-app\""]
+          }
+        ]
+      }
+    ]
+  }
+}

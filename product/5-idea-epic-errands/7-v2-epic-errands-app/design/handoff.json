@@ -1,0 +1,218 @@
+{
+  "mode": "detailed_design",
+  "depth": "medium",
+  "stages": {
+    "B1": "reused_existing_v1_direction_no_new_concepts",
+    "B2": "selected_v1_questbook_default_with_classroom_and_comic_support",
+    "B3": "v2_interaction_design_artifacts_created",
+    "B4": "v1_three_theme_identity_retained_with_v2_boundaries",
+    "B5": "v2_hifi_design_contract_created",
+    "B6": "pending_implementation"
+  },
+  "canonical_source": "../5-v1-epic-errands-app/design/visual-design.md",
+  "token_source": "../5-v1-epic-errands-app/static/styles/tokens.css",
+  "interaction_source": "design/interaction-manifest.json",
+  "component_source": "design/component-tree.json",
+  "data_source": "design/data-contract.json",
+  "screen_package": "design/screen-package.json",
+  "supporting_sources": [
+    "../5-v1-epic-errands-app/design/style-modes.md",
+    "../5-v1-epic-errands-app/design/handoff.json",
+    "../5-v1-epic-errands-app/design/implementation-trace.md",
+    "../6-spike-add-elements-assets/text-overlay-prototype/index.html",
+    "UX_FLOW.md",
+    "implementation-readiness.md",
+    "initial-inputs/models.md"
+  ],
+  "must_preserve": [
+    {
+      "id": "visual_theme_switching",
+      "decision": "V2 preserves the V1 app UI themes: Questbook default plus selectable Classroom and Comic.",
+      "implementation_anchors": [
+        "data-design-id=\"app-theme-picker\"",
+        "data-action=\"select-theme\"",
+        "active_theme_id",
+        "classroom | questbook | comic"
+      ],
+      "evidence_refs": [
+        "design/visual-design.md",
+        "design/style-modes.md"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "visual_theme_independent_from_generation",
+      "decision": "App UI styling changes shell tokens, copy tone, and overlay styling only; it does not change generation mode or mutate accepted image/audio assets.",
+      "implementation_anchors": [
+        "active_theme_id",
+        "generation_mode",
+        "accepted_goals[]",
+        "data-design-id=\"app-theme-picker\""
+      ],
+      "evidence_refs": [
+        "design/data-contract.json",
+        "design/interaction-manifest.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "quality_only_hackathon",
+      "decision": "Quality mode is selected and enabled for the hackathon; Speed mode is visible/planned but disabled.",
+      "implementation_anchors": [
+        "data-design-id=\"generation-mode-control\"",
+        "data-mode=\"quality\"",
+        "data-mode=\"speed\"",
+        "speed_visible_disabled_planned"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/data-contract.json",
+        "initial-inputs/models.md"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "quality_model_contract",
+      "decision": "Quality text uses nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF through llama.cpp, GGUF, Q4_K_M; Quality images are 1024 x 1024.",
+      "implementation_anchors": [
+        "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+        "llama.cpp",
+        "Q4_K_M",
+        "image_output_size_px"
+      ],
+      "evidence_refs": [
+        "design/data-contract.json",
+        "initial-inputs/models.md"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "audio_enabled_reference_optional",
+      "decision": "Audio generation is enabled; parent reference audio is optional and default voice behavior is used when no reference audio exists.",
+      "implementation_anchors": [
+        "parent_reference_audio_ref",
+        "reference_audio_optional",
+        "audio_enabled",
+        "audio_used_parent_reference"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/data-contract.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "review_text_overlay",
+      "decision": "Review Goal renders goal text as an editable app-owned layer over the generated image; editing it does not mutate image pixels or audio.",
+      "implementation_anchors": [
+        "data-design-id=\"review-goal-panel\"",
+        "data-design-id=\"editable-goal-overlay\"",
+        "overlay_text",
+        "mutates_image_pixels"
+      ],
+      "evidence_refs": [
+        "design/visual-design.md",
+        "design/data-contract.json",
+        "../6-spike-add-elements-assets/text-overlay-prototype/index.html"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "review_media_immutable",
+      "decision": "Generated image and generated audio are immutable from Review Goal; parent can edit only the app-owned overlay text, then Accept or Cancel.",
+      "implementation_anchors": [
+        "data-design-id=\"review-goal-panel\"",
+        "image_mutable_from_review",
+        "audio_mutable_from_review",
+        "data-action=\"accept-goal\"",
+        "data-action=\"cancel-goal\""
+      ],
+      "evidence_refs": [
+        "design/visual-design.md",
+        "design/states.md",
+        "design/data-contract.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "review_accept_cancel_only",
+      "decision": "Review Goal offers Accept and Cancel; generated image and generated audio cannot be changed from Review Goal.",
+      "implementation_anchors": [
+        "data-action=\"accept-goal\"",
+        "data-action=\"cancel-goal\"",
+        "image_mutable_from_review",
+        "audio_mutable_from_review"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/interaction-manifest.json",
+        "design/data-contract.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "playable_goal_audio",
+      "decision": "Accepted kid goal cards include playable generated audio, while hiding raw model controls and keeping audio immutable from the kid-facing card.",
+      "implementation_anchors": [
+        "data-design-id=\"kid-goal-card\"",
+        "data-design-id=\"audio-play-hook\"",
+        "audio_enabled",
+        "audio_asset_ref"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/interaction-manifest.json",
+        "design/component-tree.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "generated_card_no_steps",
+      "decision": "Kid goal cards show generated image, overlay text, title, narration, reward, audio, and completion state only; they do not show steps, completion checks, raw JSON, prompt text, or arbitrary model IDs.",
+      "implementation_anchors": [
+        "data-design-id=\"kid-goal-card\"",
+        "generated_narration",
+        "generated_reward_label",
+        "no-generated-steps"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/interaction-manifest.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "parent_kid_approval_loop",
+      "decision": "The V1 parent/kid loop remains: kid completes a goal, parent sees it awaiting approval, and parent approval grants the reward.",
+      "implementation_anchors": [
+        "data-action=\"complete-goal\"",
+        "data-action=\"approve-goal\"",
+        "waiting_for_parent",
+        "approved_reward_given"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/component-tree.json",
+        "../5-v1-epic-errands-app/design/handoff.json"
+      ],
+      "status": "design_ready_pending_implementation"
+    },
+    {
+      "id": "isolated_diy_same_package",
+      "decision": "DIY lives inside the same app package but remains isolated; it mirrors the generation flow, lets the parent edit a hardcoded workflow draft, and labels save-back as coming soon.",
+      "implementation_anchors": [
+        "data-design-id=\"diy-workflow-mirror\"",
+        "data-design-id=\"diy-save-back-notice\"",
+        "save_to_app_status",
+        "coming_soon"
+      ],
+      "evidence_refs": [
+        "design/states.md",
+        "design/component-tree.json",
+        "SOURCE_MAP.md"
+      ],
+      "status": "design_ready_pending_implementation"
+    }
+  ],
+  "proof_claim": "Design artifact readiness only. This handoff does not claim app implementation, browser/mobile UAT, hosted Space proof, sponsor/model proof, public release, or judge-ready status."
+}

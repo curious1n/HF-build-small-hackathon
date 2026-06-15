@@ -1,0 +1,69 @@
+.diy-route {
+  --card-max: min(1180px, calc(100vw - 24px));
+}
+
+.diy-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.diy-step-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.diy-native-panel {
+  overflow-wrap: anywhere;
+}
+
+.diy-native-note {
+  margin-top: -2px;
+}
+
+.diy-step {
+  border: 1px solid var(--field-border-color);
+  border-radius: var(--control-radius);
+  background: var(--field-bg);
+  color: var(--field-fg);
+  padding: 10px 12px;
+}
+
+.diy-step b,
+.diy-step span,
+.diy-step small {
+  display: block;
+}
+
+.diy-step span {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.diy-step small {
+  margin-top: 5px;
+  color: var(--muted-color);
+  font-weight: 800;
+}
+
+.diy-ref-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diy-ref-list span {
+  border: 1px solid var(--field-border-color);
+  border-radius: var(--pill-radius);
+  padding: 7px 10px;
+  background: var(--field-bg);
+  color: var(--field-fg);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.diy-preview .audio-shell {
+  margin-bottom: 0;
+}

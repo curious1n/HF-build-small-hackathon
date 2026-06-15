@@ -1,0 +1,231 @@
+{
+  "available": true,
+  "graph": {
+    "edges": [
+      {
+        "from_node_id": "fn_plain_goal_input",
+        "from_port_id": "out_0",
+        "id": "edge_0",
+        "to_node_id": "fn_generate_text",
+        "to_port_id": "in_goal_json",
+        "type": "text"
+      },
+      {
+        "from_node_id": "fn_generate_text",
+        "from_port_id": "out_0",
+        "id": "edge_1",
+        "to_node_id": "fn_generate_image",
+        "to_port_id": "in_text_json",
+        "type": "text"
+      },
+      {
+        "from_node_id": "fn_generate_text",
+        "from_port_id": "out_0",
+        "id": "edge_2",
+        "to_node_id": "fn_generate_audio",
+        "to_port_id": "in_text_json",
+        "type": "text"
+      },
+      {
+        "from_node_id": "fn_plain_goal_input",
+        "from_port_id": "out_0",
+        "id": "edge_3",
+        "to_node_id": "fn_compose_outputs",
+        "to_port_id": "in_goal_json",
+        "type": "text"
+      },
+      {
+        "from_node_id": "fn_generate_text",
+        "from_port_id": "out_0",
+        "id": "edge_4",
+        "to_node_id": "fn_compose_outputs",
+        "to_port_id": "in_text_json",
+        "type": "text"
+      },
+      {
+        "from_node_id": "fn_generate_image",
+        "from_port_id": "out_0",
+        "id": "edge_5",
+        "to_node_id": "fn_compose_outputs",
+        "to_port_id": "in_image_json",
+        "type": "text"
+      },
+      {
+        "from_node_id": "fn_generate_audio",
+        "from_port_id": "out_0",
+        "id": "edge_6",
+        "to_node_id": "fn_compose_outputs",
+        "to_port_id": "in_audio_json",
+        "type": "text"
+      }
+    ],
+    "name": "Epic Errands DIY Modal Dry Run",
+    "nodes": [
+      {
+        "data": {},
+        "fn": "plain_goal_input",
+        "height": 188,
+        "id": "fn_plain_goal_input",
+        "inputs": [
+          {
+            "id": "in_raw_goal",
+            "label": "raw_goal",
+            "type": "text"
+          },
+          {
+            "id": "in_theme",
+            "label": "theme",
+            "type": "text"
+          },
+          {
+            "id": "in_actor",
+            "label": "actor",
+            "type": "text"
+          }
+        ],
+        "kind": "transform",
+        "label": "plain_goal_input",
+        "outputs": [
+          {
+            "id": "out_0",
+            "label": "output",
+            "type": "text"
+          }
+        ],
+        "source": "fn",
+        "width": 220,
+        "x": 80,
+        "y": 150
+      },
+      {
+        "data": {},
+        "fn": "generate_text",
+        "height": 116,
+        "id": "fn_generate_text",
+        "inputs": [
+          {
+            "id": "in_goal_json",
+            "label": "goal_json",
+            "type": "text"
+          }
+        ],
+        "kind": "transform",
+        "label": "generate_text",
+        "outputs": [
+          {
+            "id": "out_0",
+            "label": "output",
+            "type": "text"
+          }
+        ],
+        "source": "fn",
+        "width": 220,
+        "x": 360,
+        "y": 150
+      },
+      {
+        "data": {},
+        "fn": "generate_image",
+        "height": 116,
+        "id": "fn_generate_image",
+        "inputs": [
+          {
+            "id": "in_text_json",
+            "label": "text_json",
+            "type": "text"
+          }
+        ],
+        "kind": "transform",
+        "label": "generate_image",
+        "outputs": [
+          {
+            "id": "out_0",
+            "label": "output",
+            "type": "text"
+          }
+        ],
+        "source": "fn",
+        "width": 220,
+        "x": 640,
+        "y": 150
+      },
+      {
+        "data": {},
+        "fn": "generate_audio",
+        "height": 116,
+        "id": "fn_generate_audio",
+        "inputs": [
+          {
+            "id": "in_text_json",
+            "label": "text_json",
+            "type": "text"
+          }
+        ],
+        "kind": "transform",
+        "label": "generate_audio",
+        "outputs": [
+          {
+            "id": "out_0",
+            "label": "output",
+            "type": "text"
+          }
+        ],
+        "source": "fn",
+        "width": 220,
+        "x": 920,
+        "y": 150
+      },
+      {
+        "data": {},
+        "fn": "compose_outputs",
+        "height": 224,
+        "id": "fn_compose_outputs",
+        "inputs": [
+          {
+            "id": "in_goal_json",
+            "label": "goal_json",
+            "type": "text"
+          },
+          {
+            "id": "in_text_json",
+            "label": "text_json",
+            "type": "text"
+          },
+          {
+            "id": "in_image_json",
+            "label": "image_json",
+            "type": "text"
+          },
+          {
+            "id": "in_audio_json",
+            "label": "audio_json",
+            "type": "text"
+          }
+        ],
+        "kind": "transform",
+        "label": "compose_outputs",
+        "outputs": [
+          {
+            "id": "out_0",
+            "label": "output",
+            "type": "text"
+          }
+        ],
+        "source": "fn",
+        "width": 220,
+        "x": 1200,
+        "y": 150
+      }
+    ],
+    "version": "1"
+  },
+  "inspection": {
+    "gradio_version": "6.18.0",
+    "has_workflow_class": true,
+    "has_workflow_module": true,
+    "issues": [],
+    "module_file": "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/.venv/lib/python3.12/site-packages/gradio/workflow.py",
+    "workflow_signature": "(graph: 'str | None' = None, *, bind: 'dict[str, Callable] | list[Callable] | None' = None, edges: 'list[tuple[str, str]] | None' = None)"
+  },
+  "issue": "Graph preview uses Gradio's private _workflow_from_bind helper for evidence only."
+}

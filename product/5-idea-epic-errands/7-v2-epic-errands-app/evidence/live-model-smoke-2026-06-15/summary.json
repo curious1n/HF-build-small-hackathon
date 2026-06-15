@@ -1,0 +1,107 @@
+{
+  "approved_budget_usd": 20,
+  "audio": {
+    "asset_path": "assets/audio/read-20-comic-eb3cdca0fd.wav",
+    "client_latency_ms": 131870,
+    "latency_ms": 118089,
+    "model_id": "openbmb/VoxCPM2",
+    "runtime_axes": {
+      "app_host": "local",
+      "fallback_used": false,
+      "inference_engine": "voxcpm",
+      "lifecycle_stage": "testing",
+      "model_artifact_format": "safetensors",
+      "model_backend": "modal_function",
+      "model_runtime": "modal",
+      "quantization": "bf16"
+    }
+  },
+  "card_text": {
+    "narration": "Read for 20 minutes and earn a comic badge!",
+    "reward_label": "Comic Badge",
+    "title": "Comic Quest"
+  },
+  "duration_ms": 276561,
+  "evidence_files": {
+    "assets": "evidence/live-model-smoke-2026-06-15/assets",
+    "raw_responses": "evidence/live-model-smoke-2026-06-15/raw_modal_responses",
+    "requests": "evidence/live-model-smoke-2026-06-15/modal_requests",
+    "summary": "evidence/live-model-smoke-2026-06-15/summary.json"
+  },
+  "fallback_used": false,
+  "generated_at": "2026-06-15T12:32:58.434663+00:00",
+  "goal_id": "read-20-comic",
+  "image": {
+    "asset_path": "assets/images/read-20-comic-d1f8d5b053.png",
+    "client_latency_ms": 91127,
+    "latency_ms": 70893,
+    "model_id": "black-forest-labs/FLUX.2-klein-9B",
+    "runtime_axes": {
+      "app_host": "local",
+      "fallback_used": false,
+      "inference_engine": "diffusers",
+      "lifecycle_stage": "testing",
+      "model_artifact_format": "safetensors",
+      "model_backend": "modal_http",
+      "model_runtime": "modal",
+      "quantization": "bf16"
+    }
+  },
+  "max_runtime_minutes": 20,
+  "model_proof_claimed": true,
+  "plain_goal": "Read for 20 minutes",
+  "preflight": {
+    "checked_at": "2026-06-15T12:32:58.433732+00:00",
+    "paid_run_allowed_now": true,
+    "proof_boundary": "File access only; no model load, inference, Modal GPU, or fallback proof claimed.",
+    "purpose": "Fresh token-backed no-GPU required-file access check before approved Modal GPU smoke.",
+    "results": [
+      {
+        "etag_present": true,
+        "repo_id": "black-forest-labs/FLUX.2-klein-9B",
+        "required_file": "model_index.json",
+        "runtime": "Diffusers safetensors bf16 image generation",
+        "size": 446,
+        "status": "ok"
+      },
+      {
+        "etag_present": true,
+        "repo_id": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+        "required_file": "NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf",
+        "runtime": "llama.cpp GGUF Q4_K_M text generation",
+        "size": 2837072864,
+        "status": "ok"
+      },
+      {
+        "etag_present": true,
+        "repo_id": "openbmb/VoxCPM2",
+        "required_file": "config.json",
+        "runtime": "voxcpm safetensors bf16 audio generation",
+        "size": 4336,
+        "status": "ok"
+      }
+    ],
+    "token_source": "HF_TOKEN/HF_TOKEN_2/HF_TOKEN_1 from repo environment; value not printed"
+  },
+  "preflight_path": "evidence/live-model-smoke-2026-06-15/model_access_preflight.json",
+  "run_label": "Local App With Modal",
+  "scope": "one V2 goal-theme row via direct Modal Functions; no hosted Space or judge-ready claim",
+  "stop_condition": "one schema-valid V2 row, first blocker, 20 wall-clock minutes, or $20 spend",
+  "text": {
+    "client_latency_ms": 53559,
+    "latency_ms": 41230,
+    "model_id": "nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF",
+    "runtime_axes": {
+      "app_host": "local",
+      "fallback_used": false,
+      "inference_engine": "llama.cpp",
+      "lifecycle_stage": "testing",
+      "model_artifact_format": "gguf",
+      "model_backend": "modal_function",
+      "model_runtime": "modal",
+      "quantization": "q4_k_m"
+    },
+    "schema_valid": true
+  },
+  "theme": "comic"
+}

@@ -1,0 +1,457 @@
+{
+  "target": "http://127.0.0.1:7860",
+  "runner": "temporary_playwright_chromium",
+  "browserFallbackReason": "in-app Browser connector became unavailable during UAT",
+  "screenshots": [
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/01-home-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/02-settings-questbook-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/03-settings-comic-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/04-settings-uploads-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/05-review-generated-cancel-path-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/06-kid-goal-accepted-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/07-kid-waiting-parent-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/08-parent-approval-queue-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/09-parent-approved-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/10-diy-isolated-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/11-diy-updated-preview-390.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/12-home-360.png",
+    "/Users/cuStd/Desktop/dev/HF-build-small-hackathon/product/5-idea-epic-errands/7-v2-epic-errands-app/evidence/local-browser-mobile-uat-2026-06-15/screenshots/13-settings-360.png"
+  ],
+  "checks": {
+    "themeAfterClassroom": "storybook",
+    "themeAfterComic": "comic",
+    "themeAfterQuestbook": "atelier",
+    "reviewActions": [
+      "cancel-goal",
+      "accept-goal"
+    ],
+    "kidCardAfterAccept": {
+      "text": "Read 20 minutes, then tell your favorite part\nQuest: Small Brave Step\n\nThe questbook opens to today's errand: Read for 20 minutes.\n\nCrest\nI Did It",
+      "overlay": "Read 20 minutes, then tell your favorite part",
+      "image": "frontend/assets/generated-v2/read-20-questbook-39aac8ba25.png",
+      "audio": "frontend/assets/generated-v2/read-20-questbook-5805518930.wav",
+      "leaks": []
+    },
+    "parentApprovalText": "Epic Errands\nQUEST KEEPER / YOUNG ADVENTURER\nHome\nParent\nKid\n1\nSettings\nDIY\nCreate Quest\nQuality\nORDINARY GOAL\nGeneration References\n3 available\nparent photo\nSelected\nchild photo\nSelected\ncustom image reference\nSelected\nGenerate Goal\nReward Queue\n0 waiting\nQuest: Small Brave Step\nRead for 20 minutes - Crest\napproved reward given \nApprove\nQuest: Small Brave Step\nClean up my room before dinner - Crest\nnot reviewed \nApprove",
+    "themeMediaStable": {
+      "before": {
+        "image": "frontend/assets/generated-v2/read-20-questbook-39aac8ba25.png",
+        "audio": "frontend/assets/generated-v2/read-20-questbook-5805518930.wav"
+      },
+      "after": {
+        "image": "frontend/assets/generated-v2/read-20-questbook-39aac8ba25.png",
+        "audio": "frontend/assets/generated-v2/read-20-questbook-5805518930.wav",
+        "themeToken": "comic"
+      },
+      "stable": true
+    },
+    "diy": {
+      "isolated": true,
+      "hasPipeline": true,
+      "hasModelDetails": true,
+      "saveBackComingSoon": true,
+      "draftReflected": true
+    }
+  },
+  "summaries": [
+    {
+      "label": "home initial 390",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": false,
+        "speed720": false,
+        "quality1024": false,
+        "audioEnabled": false,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 0,
+        "uploadInputs": 0,
+        "uploadTriggers": 0,
+        "removeButtons": 0,
+        "generationReferenceButtons": 0,
+        "disabledSpeedButtons": 0,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 0
+      },
+      "media": {
+        "images": [
+          {
+            "src": "frontend/assets/generated-v2/clean-room-questbook-d35e6ee10c.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          }
+        ],
+        "audio": []
+      },
+      "overflow": []
+    },
+    {
+      "label": "settings questbook 390",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": true,
+        "speed720": true,
+        "quality1024": true,
+        "audioEnabled": true,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 3,
+        "uploadInputs": 4,
+        "uploadTriggers": 4,
+        "removeButtons": 0,
+        "generationReferenceButtons": 0,
+        "disabledSpeedButtons": 1,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 0
+      },
+      "media": {
+        "images": [],
+        "audio": []
+      },
+      "overflow": []
+    },
+    {
+      "label": "settings uploads 390",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": true,
+        "speed720": true,
+        "quality1024": true,
+        "audioEnabled": true,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 3,
+        "uploadInputs": 4,
+        "uploadTriggers": 4,
+        "removeButtons": 4,
+        "generationReferenceButtons": 3,
+        "disabledSpeedButtons": 1,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 0
+      },
+      "media": {
+        "images": [
+          {
+            "src": "blob:http://127.0.0.1:7860/eea13077-4b5d-4799-9355-706b3810b6f2",
+            "complete": true,
+            "naturalWidth": 1,
+            "naturalHeight": 1
+          },
+          {
+            "src": "blob:http://127.0.0.1:7860/8c785bf7-6e11-46f2-8539-73e0d7263358",
+            "complete": true,
+            "naturalWidth": 1,
+            "naturalHeight": 1
+          },
+          {
+            "src": "blob:http://127.0.0.1:7860/0ab65042-bb13-461f-b339-71e8fea9d4f8",
+            "complete": true,
+            "naturalWidth": 1,
+            "naturalHeight": 1
+          }
+        ],
+        "audio": []
+      },
+      "overflow": []
+    },
+    {
+      "label": "settings after optional audio remove 390",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": true,
+        "speed720": true,
+        "quality1024": true,
+        "audioEnabled": true,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 3,
+        "uploadInputs": 4,
+        "uploadTriggers": 4,
+        "removeButtons": 3,
+        "generationReferenceButtons": 3,
+        "disabledSpeedButtons": 1,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 0
+      },
+      "media": {
+        "images": [
+          {
+            "src": "blob:http://127.0.0.1:7860/eea13077-4b5d-4799-9355-706b3810b6f2",
+            "complete": true,
+            "naturalWidth": 1,
+            "naturalHeight": 1
+          },
+          {
+            "src": "blob:http://127.0.0.1:7860/8c785bf7-6e11-46f2-8539-73e0d7263358",
+            "complete": true,
+            "naturalWidth": 1,
+            "naturalHeight": 1
+          },
+          {
+            "src": "blob:http://127.0.0.1:7860/0ab65042-bb13-461f-b339-71e8fea9d4f8",
+            "complete": true,
+            "naturalWidth": 1,
+            "naturalHeight": 1
+          }
+        ],
+        "audio": []
+      },
+      "overflow": []
+    },
+    {
+      "label": "review generated cancel path 390",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": true,
+        "speed720": false,
+        "quality1024": true,
+        "audioEnabled": false,
+        "reviewGoal": true,
+        "provenance": true,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 0,
+        "uploadInputs": 0,
+        "uploadTriggers": 0,
+        "removeButtons": 0,
+        "generationReferenceButtons": 3,
+        "disabledSpeedButtons": 0,
+        "reviewPanels": 1,
+        "editableOverlays": 1,
+        "kidCards": 0,
+        "audioControls": 1
+      },
+      "media": {
+        "images": [
+          {
+            "src": "frontend/assets/generated-v2/clean-room-questbook-d35e6ee10c.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          }
+        ],
+        "audio": [
+          {
+            "src": "frontend/assets/generated-v2/clean-room-questbook-01493f395c.wav",
+            "controls": true
+          }
+        ]
+      },
+      "overflow": []
+    },
+    {
+      "label": "kid goal accepted 390",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": false,
+        "speed720": false,
+        "quality1024": false,
+        "audioEnabled": false,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 0,
+        "uploadInputs": 0,
+        "uploadTriggers": 0,
+        "removeButtons": 0,
+        "generationReferenceButtons": 0,
+        "disabledSpeedButtons": 0,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 1,
+        "audioControls": 1
+      },
+      "media": {
+        "images": [
+          {
+            "src": "frontend/assets/generated-v2/read-20-questbook-39aac8ba25.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          },
+          {
+            "src": "frontend/assets/generated-v2/clean-room-questbook-d35e6ee10c.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          },
+          {
+            "src": "frontend/assets/generated-v2/read-20-questbook-39aac8ba25.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          }
+        ],
+        "audio": [
+          {
+            "src": "frontend/assets/generated-v2/read-20-questbook-5805518930.wav",
+            "controls": true
+          }
+        ]
+      },
+      "overflow": []
+    },
+    {
+      "label": "diy isolated 390",
+      "url": "http://127.0.0.1:7860/diy?theme=comic&goal=Read+for+20+minutes&ref=parent_photo-1781526004882-ae49a&ref=child_photo-1781526004888-140af&ref=custom_image_reference-1781526004897-c3b00",
+      "themeToken": "comic",
+      "textFlags": {
+        "epicErrands": false,
+        "quality": true,
+        "speed720": false,
+        "quality1024": false,
+        "audioEnabled": false,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": true
+      },
+      "counts": {
+        "tabs": 0,
+        "themeButtons": 0,
+        "uploadInputs": 0,
+        "uploadTriggers": 0,
+        "removeButtons": 0,
+        "generationReferenceButtons": 0,
+        "disabledSpeedButtons": 0,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 1
+      },
+      "media": {
+        "images": [
+          {
+            "src": "/assets/generated-v2/read-20-questbook-39aac8ba25.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          }
+        ],
+        "audio": [
+          {
+            "src": "/assets/generated-v2/read-20-questbook-5805518930.wav",
+            "controls": true
+          }
+        ]
+      },
+      "overflow": []
+    },
+    {
+      "label": "home 360",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": false,
+        "speed720": false,
+        "quality1024": false,
+        "audioEnabled": false,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 0,
+        "uploadInputs": 0,
+        "uploadTriggers": 0,
+        "removeButtons": 0,
+        "generationReferenceButtons": 0,
+        "disabledSpeedButtons": 0,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 0
+      },
+      "media": {
+        "images": [
+          {
+            "src": "frontend/assets/generated-v2/clean-room-questbook-d35e6ee10c.png",
+            "complete": true,
+            "naturalWidth": 768,
+            "naturalHeight": 768
+          }
+        ],
+        "audio": []
+      },
+      "overflow": []
+    },
+    {
+      "label": "settings 360",
+      "url": "http://127.0.0.1:7860/",
+      "themeToken": "atelier",
+      "textFlags": {
+        "epicErrands": true,
+        "quality": true,
+        "speed720": true,
+        "quality1024": true,
+        "audioEnabled": true,
+        "reviewGoal": false,
+        "provenance": false,
+        "comingSoon": false
+      },
+      "counts": {
+        "tabs": 5,
+        "themeButtons": 3,
+        "uploadInputs": 4,
+        "uploadTriggers": 4,
+        "removeButtons": 0,
+        "generationReferenceButtons": 0,
+        "disabledSpeedButtons": 1,
+        "reviewPanels": 0,
+        "editableOverlays": 0,
+        "kidCards": 0,
+        "audioControls": 0
+      },
+      "media": {
+        "images": [],
+        "audio": []
+      },
+      "overflow": []
+    }
+  ],
+  "failures": [],
+  "consoleErrors": []
+}
