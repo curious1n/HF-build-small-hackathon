@@ -184,12 +184,33 @@ DEFAULT_GENERATION_REFERENCE_IDS = ["parent-dad-demo", "child-girl-demo"]
 
 SEED_GOALS: list[dict[str, Any]] = [
     {
-        "id": "goal-seed-project-outline",
+        "id": "goal-seed-clean-room",
         "asset_key": "clean-room",
+        "ordinary_goal": "Clean up my room before dinner",
+        "theme_id_at_creation": "questbook",
+        "selected_generation_reference_ids": DEFAULT_GENERATION_REFERENCE_IDS,
+        "audio_used_parent_reference": True,
+        "kid_completion_state": "completed",
+        "parent_reward_state": "waiting_for_approval",
+    },
+    {
+        "id": "goal-seed-project-outline",
+        "asset_key": "project-outline",
         "ordinary_goal": "Finish my class project outline",
         "theme_id_at_creation": "questbook",
-        "generated_title": "Quest: Project Outline",
-        "generated_narration": "A clear outline turns a big class project into a brave first step.",
-        "generated_reward_label": "Planning Crest",
+        "selected_generation_reference_ids": DEFAULT_GENERATION_REFERENCE_IDS,
+        "audio_used_parent_reference": True,
+        "kid_completion_state": "not_started",
+        "parent_reward_state": "not_reviewed",
+    },
+    {
+        "id": "goal-seed-read-20",
+        "asset_key": "read-20",
+        "ordinary_goal": "Read for 20 minutes",
+        "theme_id_at_creation": "questbook",
+        "selected_generation_reference_ids": DEFAULT_GENERATION_REFERENCE_IDS,
+        "audio_used_parent_reference": True,
+        "kid_completion_state": "not_started",
+        "parent_reward_state": "not_reviewed",
     },
 ]

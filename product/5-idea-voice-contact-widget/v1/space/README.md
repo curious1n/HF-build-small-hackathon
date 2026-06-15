@@ -29,6 +29,7 @@ NOTE: This competes for 'Tiny Titan' prize
 ## Links
 
 - App: [build-small-hackathon-voice-reach.hf.space](https://build-small-hackathon-voice-reach.hf.space)
+- Demo video and social-media post: [X post](https://x.com/curious1n/status/2066666105104642515)
 - Source repo: [curious1n/HF-build-small-hackathon](https://github.com/curious1n/HF-build-small-hackathon)
 - HF Article: [Voice Reach Running Notes](https://huggingface.co/blog/build-small-hackathon/voice-reach-running-notes)
 - Agent traces: [build-small-hackathon/voice-reach-agent-traces](https://huggingface.co/datasets/build-small-hackathon/voice-reach-agent-traces)
@@ -121,6 +122,10 @@ Runtime modes:
 - Local Modal config is auto-loaded from
   `product/5-idea-voice-contact-widget/.env.modal.local`.
   Already-exported environment variables take precedence.
+- Local Modal runtime selection, without starting Modal, is captured in
+  `../modal/local-modal-runtime.env.example`. It sets `VCW_MODEL_MODE=real`,
+  `VCW_MODEL_RUNTIME=modal`, and `VCW_ALLOW_RUNTIME_SWITCH=1`; endpoint URL and
+  bearer auth still come from the ignored `.env.modal.local`.
 - HF Space proof: `VCW_MODEL_MODE=real` on `t4-medium`.
 - Model Runtime UI switch:
   - Always shows `HF hackathon space`, `HF personal space`, and `Modal`.

@@ -22,6 +22,10 @@ Optional deploy-helper Modal test config, when explicitly using the `modal-test`
 target, is read from `product/5-idea-voice-contact-widget/.env.modal.local`.
 The V1 submission runtime remains the Space-local `t4-medium` path above.
 
+Local Modal run configuration, without starting it yet, is recorded in
+`modal/local-modal-runtime.env.example`. It selects `VCW_MODEL_RUNTIME=modal`
+and keeps endpoint credentials in the ignored parent `.env.modal.local`.
+
 ## Source Of Truth Files
 
 | File | Purpose |

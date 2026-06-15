@@ -4,97 +4,228 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Voice Reach V1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/static/widget.css" />
   </head>
   <body>
     <main class="page-shell">
-      <section class="widget-shell" aria-labelledby="widget-heading">
-        <div class="widget-topline">
-          <span class="brand-pill" id="brand-name">metime.to</span>
-          <span class="destination" id="contact-email">founders@metime.to</span>
-        </div>
-
-        <header class="widget-header">
-          <h1 id="widget-heading">Tell us what you need</h1>
-          <p id="widget-subheading">Speak in Hindi or Hinglish. We will draft an English message.</p>
+      <section class="voice-widget" aria-labelledby="widget-heading">
+        <header class="brand-header">
+          <div class="brand-mark" aria-hidden="true">m</div>
+          <div class="brand-copy">
+            <span class="brand-name" id="brand-name">metime.to</span>
+          </div>
+          <span class="voice-pill" aria-label="Voice contact widget">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+              <path d="M5 10v1a7 7 0 0 0 14 0v-1"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+            <span id="runtime-pill-label">Voice</span>
+          </span>
         </header>
 
-        <section class="notice" id="eval-notice" aria-live="polite">
-          metime.to allows recordings to be used to improve this demo. Do not share sensitive information.
-        </section>
+        <section class="panel compose-panel" id="compose-panel">
+          <h1 id="widget-heading">Tell us what you need</h1>
+          <p id="widget-subheading">Speak in Hindi or Hinglish. We will draft an English message.</p>
 
-        <section class="control-block" aria-label="Speech mode">
-          <div class="field-label">Speech mode</div>
-          <div class="segmented" role="radiogroup" aria-label="Speech mode">
-            <button class="segment" type="button" role="radio" aria-checked="false" data-mode="hindi">Hindi</button>
-            <button class="segment is-selected" type="button" role="radio" aria-checked="true" data-mode="hinglish">Hinglish</button>
+          <div class="mode-switch" role="radiogroup" aria-label="Speech mode">
+            <button class="mode-button" type="button" role="radio" data-mode="hindi" aria-checked="false">Hindi</button>
+            <button class="mode-button is-selected" type="button" role="radio" data-mode="hinglish" aria-checked="true">Hinglish</button>
           </div>
-        </section>
 
-        <section class="control-block" aria-label="Model Runtime">
-          <div class="field-label">Model Runtime</div>
-          <div class="segmented runtime-segmented" id="runtime-segmented" role="radiogroup" aria-label="Model Runtime"></div>
-        </section>
+          <div class="runtime-block">
+            <div class="runtime-label">Model Runtime</div>
+            <div class="runtime-switch" id="runtime-switch" role="radiogroup" aria-label="Model Runtime"></div>
+          </div>
 
-        <section class="recorder-panel" aria-live="polite">
-          <div class="status-row">
+          <div class="ready-status" aria-live="polite">
             <span class="status-dot" aria-hidden="true"></span>
             <span id="state-label">Ready to record</span>
           </div>
-          <div class="meter" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <button class="record-button" id="record-button" type="button">Record message</button>
-          <p class="record-disabled-reason" id="record-disabled-reason" hidden></p>
+
+          <button class="primary-button record-button" id="record-button" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+              <path d="M5 10v1a7 7 0 0 0 14 0v-1"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+            <span>Record message</span>
+          </button>
+          <p class="disabled-reason" id="record-disabled-reason" hidden></p>
           <p class="helper-copy" id="helper-copy">Review happens before anything is sent.</p>
         </section>
 
-        <section class="processing-panel" id="processing-panel" hidden>
-          <ol class="progress-list">
+        <section class="panel centered-panel" id="mic-panel" hidden>
+          <div class="spinner-orb" aria-hidden="true">
+            <span></span>
+            <div>
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+                <path d="M5 10v1a7 7 0 0 0 14 0v-1"></path>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+              </svg>
+            </div>
+          </div>
+          <h2>Waiting for microphone permission</h2>
+          <p>Your browser will ask for microphone access.</p>
+          <button class="primary-button is-disabled" type="button" disabled>Record message</button>
+        </section>
+
+        <section class="panel centered-panel recording-panel" id="recording-panel" hidden>
+          <div class="recording-orb" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <div>
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+                <path d="M5 10v1a7 7 0 0 0 14 0v-1"></path>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="recording-label">
+            <span aria-hidden="true"></span>
+            <strong>Recording</strong>
+          </div>
+          <div class="waveform" aria-hidden="true" id="waveform"></div>
+          <p>Speak naturally. Stop when you are done.</p>
+          <button class="stop-button" id="stop-button" type="button">
+            <span aria-hidden="true"></span>
+            Stop recording
+          </button>
+        </section>
+
+        <section class="panel processing-panel" id="processing-panel" hidden>
+          <div class="processing-title">
+            <span aria-hidden="true"></span>
+            <strong>Processing your message</strong>
+          </div>
+          <p>We are preparing a draft for review.</p>
+          <ol class="progress-list" aria-label="Processing progress">
             <li data-step="prepare">Preparing your recording</li>
             <li data-step="listen">Listening to your message</li>
             <li data-step="draft">Drafting your English message</li>
           </ol>
         </section>
 
-        <section class="review-panel" id="review-panel" hidden>
-          <div class="review-head">
+        <section class="panel review-panel" id="review-panel" hidden>
+          <div class="review-head" id="review-head">
             <h2>Review your English message</h2>
             <p>Please review before sending. Some details may be missing.</p>
           </div>
-          <textarea id="message-editor" rows="8" aria-label="Editable English message"></textarea>
-          <div class="action-row">
-            <button class="primary" id="send-button" type="button">Send message</button>
-            <button class="secondary" id="record-again-button" type="button">Record again</button>
-          </div>
-          <details class="transcript-details">
-            <summary>Show transcript</summary>
+
+          <aside class="inline-error" id="send-error-banner" hidden>
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"></circle>
+              <line x1="12" y1="8" x2="12" y2="12.5"></line>
+              <line x1="12" y1="16" x2="12" y2="16"></line>
+            </svg>
+            <span>
+              <strong>Could not send. Your message is still here.</strong>
+              <small>Retry send or copy your message.</small>
+            </span>
+          </aside>
+
+          <label class="textarea-label" for="message-editor">
+            <span>English message</span>
+            <small>editable</small>
+          </label>
+          <textarea id="message-editor" rows="6" aria-label="Editable English message"></textarea>
+
+          <button class="text-button" id="transcript-toggle" type="button" aria-expanded="false">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span>Show transcript</span>
+          </button>
+          <div class="transcript-box" id="transcript-box" hidden>
+            <span class="transcript-pill" id="transcript-mode">Hinglish transcript</span>
             <p id="transcript-output"></p>
-          </details>
+          </div>
+
+          <div class="action-stack" id="review-actions">
+            <button class="primary-button" id="send-button" type="button">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M22 2 11 13"></path>
+                <path d="M22 2 15 22l-4-9-9-4 20-7z"></path>
+              </svg>
+              Send message
+            </button>
+            <button class="secondary-button" id="record-again-button" type="button">Record again</button>
+          </div>
+
+          <div class="action-stack" id="sending-actions" hidden>
+            <button class="primary-button is-busy" type="button" disabled>
+              <span aria-hidden="true"></span>
+              Sending
+            </button>
+            <p class="helper-copy">Saving your message.</p>
+          </div>
+
+          <div class="split-actions" id="send-failure-actions" hidden>
+            <button class="primary-button" id="retry-send-button" type="button">Try again</button>
+            <button class="secondary-button" id="copy-button" type="button">Copy message</button>
+          </div>
+          <p class="copy-confirmation" id="copy-confirmation" hidden>Message copied to clipboard.</p>
         </section>
 
-        <section class="terminal-panel" id="terminal-panel" hidden>
+        <section class="panel centered-panel success-panel" id="success-panel" hidden>
+          <div class="success-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
           <h2 id="terminal-title">Message sent.</h2>
           <p id="terminal-copy">Thanks. The team will get back to you.</p>
-          <button class="secondary" id="new-message-button" type="button">Send another message</button>
+          <span class="ledger-pill">
+            <span aria-hidden="true"></span>
+            Saved · demo ledger
+          </span>
+          <button class="secondary-button" id="new-message-button" type="button">Send another message</button>
         </section>
 
-        <section class="error-panel" id="error-panel" hidden>
+        <section class="panel centered-panel simple-error-panel" id="simple-error-panel" hidden>
+          <div class="error-mark" id="simple-error-icon" aria-hidden="true"></div>
           <h2 id="error-title">Could not continue</h2>
           <p id="error-copy"></p>
-          <div class="action-row">
-            <button class="primary" id="retry-button" type="button">Try again</button>
-            <button class="secondary" id="copy-button" type="button" hidden>Copy message</button>
+          <button class="primary-button" id="retry-button" type="button">Try again</button>
+        </section>
+
+        <section class="panel draft-error-panel" id="draft-error-panel" hidden>
+          <aside class="inline-error">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"></circle>
+              <line x1="12" y1="8" x2="12" y2="12.5"></line>
+              <line x1="12" y1="16" x2="12" y2="16"></line>
+            </svg>
+            <span>
+              <strong>We got the transcript but could not draft the message.</strong>
+              <small>Your words were captured. Retry the draft or record again.</small>
+            </span>
+          </aside>
+          <div class="transcript-box is-open">
+            <span class="transcript-pill" id="draft-transcript-mode">Hinglish transcript</span>
+            <button class="text-button compact" id="copy-transcript-button" type="button">Copy</button>
+            <p id="draft-transcript-output"></p>
           </div>
+          <div class="split-actions">
+            <button class="primary-button" id="retry-draft-button" type="button">Retry draft</button>
+            <button class="secondary-button" id="draft-record-again-button" type="button">Record again</button>
+          </div>
+          <p class="copy-confirmation" id="transcript-copy-confirmation" hidden>Transcript copied to clipboard.</p>
         </section>
 
         <details class="debug-details" id="debug-details">
-          <summary>Debug provenance</summary>
-          <pre id="debug-output">{}</pre>
+          <summary>
+            <span>Debug provenance</span>
+          </summary>
+          <dl class="debug-grid" id="debug-grid"></dl>
           <div class="debug-actions" aria-label="State test controls">
             <button type="button" data-simulate="mic-denied">Mic denied</button>
             <button type="button" data-simulate="empty-audio">Empty audio</button>

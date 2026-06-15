@@ -31,14 +31,15 @@ def build_app_bootstrap() -> dict[str, Any]:
             seed["ordinary_goal"],
             seed["theme_id_at_creation"],
             seed["id"],
-            selected_generation_reference_ids=DEFAULT_GENERATION_REFERENCE_IDS,
-            audio_used_parent_reference=True,
+            selected_generation_reference_ids=seed.get("selected_generation_reference_ids", DEFAULT_GENERATION_REFERENCE_IDS),
+            audio_used_parent_reference=bool(seed.get("audio_used_parent_reference", True)),
         )
         for seed in SEED_GOALS
     ]
-    accepted[0]["review_state"] = "accepted"
-    accepted[0]["kid_completion_state"] = "not_started"
-    accepted[0]["parent_reward_state"] = "not_reviewed"
+    for goal, seed in zip(accepted, SEED_GOALS):
+        goal["review_state"] = "accepted"
+        goal["kid_completion_state"] = seed.get("kid_completion_state", "not_started")
+        goal["parent_reward_state"] = seed.get("parent_reward_state", "not_reviewed")
     seeded_uploads = deepcopy(SEEDED_UPLOADS)
     parent_profile = {
         "display_name": "Parent",
@@ -82,7 +83,7 @@ def build_app_bootstrap() -> dict[str, Any]:
         "goals": accepted,
         "accepted_goals": accepted,
         "selected_goal_id": accepted[0]["id"],
-        "diy": build_diy_state("questbook", "Finish my class project outline", DEFAULT_GENERATION_REFERENCE_IDS),
+        "diy": build_diy_state("questbook", accepted[0]["ordinary_goal"], DEFAULT_GENERATION_REFERENCE_IDS),
         "proof_boundary": "local deterministic fallback only; no hosted/model/judge-ready proof",
     }
 

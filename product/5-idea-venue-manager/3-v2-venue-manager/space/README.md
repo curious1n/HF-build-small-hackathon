@@ -26,6 +26,7 @@ calendar context, booking details, reply drafts, and safe approval flow.
 ## Links
 
 - App: [build-small-hackathon-venue-manager-agent.hf.space](https://build-small-hackathon-venue-manager-agent.hf.space)
+- Demo video and social-media post: [X post](https://x.com/curious1n/status/2066666933110612048)
 - Source repo: [curious1n/HF-build-small-hackathon](https://github.com/curious1n/HF-build-small-hackathon)
 - HF Article: [Venue Manager Running Notes](https://huggingface.co/blog/build-small-hackathon/venue-manager-running-notes)
 - Agent traces: [modal demo-world suite rows](https://github.com/curious1n/HF-build-small-hackathon/tree/main/product/5-idea-venue-manager/3-v2-venue-manager/evidence/modal-demo-world-suite-20260615-131029)

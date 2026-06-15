@@ -29,6 +29,7 @@ DIY Lab for editing the workflow draft.
 ## Links
 
 - App: [build-small-hackathon-epic-errands.hf.space](https://build-small-hackathon-epic-errands.hf.space/)
+- Demo video and social-media post: [X post](https://x.com/curious1n/status/2066669594337849624)
 - Source repo: [curious1n/HF-build-small-hackathon](https://github.com/curious1n/HF-build-small-hackathon)
 - HF Article source: [Epic Errands Running Notes](https://github.com/curious1n/HF-build-small-hackathon/blob/main/product/5-idea-epic-errands/articles/running-notes.md)
 - HF Article: [Epic Errands Running Notes](https://huggingface.co/blog/build-small-hackathon/epic-errands-running-notes)

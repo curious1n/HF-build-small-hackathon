@@ -339,7 +339,7 @@ def runtime_controls(default_runtime: str) -> dict[str, Any]:
             {
                 "value": "modal",
                 "label": "Modal",
-                "note": "test runtime",
+                "note": "warm GPU" if modal_availability["available"] else "test runtime",
                 "enabled": allow_switch,
                 "available": allow_switch and modal_availability["available"],
                 "disabled_reason": modal_availability["reason"] if allow_switch else "Enable VCW_ALLOW_RUNTIME_SWITCH=1 to test this runtime.",

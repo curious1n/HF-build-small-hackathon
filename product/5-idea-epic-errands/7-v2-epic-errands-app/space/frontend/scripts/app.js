@@ -194,6 +194,36 @@
 
   const defaultGenerationReferenceIds = ["parent-dad-demo", "child-girl-demo"];
 
+  const seedGoalSpecs = [
+    {
+      id: "goal-seed-clean-room",
+      ordinary_goal: "Clean up my room before dinner",
+      theme_id_at_creation: "questbook",
+      selected_generation_reference_ids: defaultGenerationReferenceIds,
+      audio_used_parent_reference: true,
+      kid_completion_state: "completed",
+      parent_reward_state: "waiting_for_approval",
+    },
+    {
+      id: "goal-seed-project-outline",
+      ordinary_goal: "Finish my class project outline",
+      theme_id_at_creation: "questbook",
+      selected_generation_reference_ids: defaultGenerationReferenceIds,
+      audio_used_parent_reference: true,
+      kid_completion_state: "not_started",
+      parent_reward_state: "not_reviewed",
+    },
+    {
+      id: "goal-seed-read-20",
+      ordinary_goal: "Read for 20 minutes",
+      theme_id_at_creation: "questbook",
+      selected_generation_reference_ids: defaultGenerationReferenceIds,
+      audio_used_parent_reference: true,
+      kid_completion_state: "not_started",
+      parent_reward_state: "not_reviewed",
+    },
+  ];
+
   const qualityMode = {
     id: "quality",
     label: "Quality",
@@ -229,20 +259,27 @@
     check: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.2 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
     sound: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 9.5c.8.7 1.2 1.5 1.2 2.5s-.4 1.8-1.2 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 5h3v14H7V5Zm7 0h3v14h-3V5Z" fill="currentColor"/></svg>',
     plus: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   };
 
   let state = makeFallbackState();
 
   function makeFallbackState() {
-    const seedGoal = createGoal(
-      "Finish my class project outline",
-      "questbook",
-      "goal-seed-project-outline",
-      defaultGenerationReferenceIds,
-      true
-    );
-    seedGoal.review_state = "accepted";
+    const seedGoals = seedGoalSpecs.map((spec) => {
+      const goal = createGoal(
+        spec.ordinary_goal,
+        spec.theme_id_at_creation,
+        spec.id,
+        spec.selected_generation_reference_ids,
+        spec.audio_used_parent_reference
+      );
+      goal.review_state = "accepted";
+      goal.kid_completion_state = spec.kid_completion_state;
+      goal.parent_reward_state = spec.parent_reward_state;
+      return goal;
+    });
     const fallback = {
       active_tab: "home",
       active_theme_id: "questbook",
@@ -269,10 +306,11 @@
         generation_mode: "quality",
       },
       pending_review_goal: null,
-      goals: [seedGoal],
-      accepted_goals: [seedGoal],
-      selected_goal_id: "goal-seed-clean-room",
-      diy: buildLocalDiyState("questbook", "Finish my class project outline", defaultGenerationReferenceIds),
+      kid_modal_goal_id: null,
+      goals: seedGoals,
+      accepted_goals: seedGoals,
+      selected_goal_id: seedGoals[0].id,
+      diy: buildLocalDiyState("questbook", seedGoals[0].ordinary_goal, defaultGenerationReferenceIds),
       generation_status: {
         state: "ready",
         message: "Hosted deterministic generation is ready.",
@@ -639,11 +677,25 @@
     return state.accepted_goals.find((goal) => goal.id === state.selected_goal_id) || state.accepted_goals[0] || null;
   }
 
+  function kidModalGoal() {
+    return state.accepted_goals.find((goal) => goal.id === state.kid_modal_goal_id) || null;
+  }
+
   function setTheme(themeId) {
     if (!themes[themeId]) return;
     state.active_theme_id = themeId;
     document.documentElement.dataset.theme = themeToToken[themeId];
     render();
+  }
+
+  function toggleThemeChoice(themeId) {
+    if (!themes[themeId]) return;
+    setTheme(state.active_theme_id === themeId && themeId !== "questbook" ? "questbook" : themeId);
+  }
+
+  function shortRefLabel(ref) {
+    if (!ref) return "Reference";
+    return String(ref.asset_ref || uploadLabel(ref.kind)).replace(/\s+reference\s+portrait/i, "").replace(/\s+sample/i, "");
   }
 
   function selectTab(tabId) {
@@ -656,18 +708,8 @@
   }
 
   function openDiySurface() {
-    if (EMBEDDED_SPACE_MODE) {
-      state.diy = state.diy || buildLocalDiyState(state.active_theme_id, state.goal_draft.ordinary_goal, state.goal_draft.selected_generation_reference_ids);
-      state.active_tab = "diy";
-      render();
-      return;
-    }
-    const params = new URLSearchParams({
-      theme: state.active_theme_id,
-      goal: state.goal_draft.ordinary_goal || "Clean up my room before dinner",
-    });
-    state.goal_draft.selected_generation_reference_ids.forEach((refId) => params.append("ref", refId));
-    window.location.assign(`/diy?${params.toString()}`);
+    state.active_tab = "diy";
+    render();
   }
 
   async function updateDiyPreview() {
@@ -887,6 +929,48 @@
     render();
   }
 
+  function openKidGoalCard(goalId) {
+    const goal = state.accepted_goals.find((item) => item.id === goalId);
+    if (!goal) return;
+    state.selected_goal_id = goal.id;
+    state.kid_modal_goal_id = goal.id;
+    state.active_tab = "kid_goals";
+    render();
+  }
+
+  function closeKidGoalCard() {
+    state.kid_modal_goal_id = null;
+    render();
+  }
+
+  function setAudioButtonState(button, isPlaying) {
+    if (!button) return;
+    const icon = button.querySelector("[data-audio-icon]");
+    button.setAttribute("aria-pressed", String(isPlaying));
+    button.setAttribute("aria-label", isPlaying ? "Pause audio" : "Play audio");
+    if (icon) icon.innerHTML = isPlaying ? icons.pause : icons.play;
+  }
+
+  function toggleAudio(button) {
+    const shell = button.closest(".audio-shell");
+    const audio = shell?.querySelector("audio");
+    if (!audio) return;
+    document.querySelectorAll(".audio-shell audio").forEach((item) => {
+      if (item !== audio) {
+        item.pause();
+        setAudioButtonState(item.closest(".audio-shell")?.querySelector(".audio-toggle"), false);
+      }
+    });
+    if (audio.paused) {
+      audio.play()
+        .then(() => setAudioButtonState(button, true))
+        .catch(() => setAudioButtonState(button, false));
+    } else {
+      audio.pause();
+      setAudioButtonState(button, false);
+    }
+  }
+
   function flourishCorners() {
     const flourish = '<svg viewBox="0 0 60 60" fill="none"><path d="M8 52c16-3 19-10 20-22 1 12 5 19 24 22M8 8c16 3 19 10 20 22 1-12 5-19 24-22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
     return `
@@ -937,17 +1021,29 @@
           <h2>App Styling</h2>
           <span>${escapeHtml(theme().label)}</span>
         </div>
-        <div class="segmented">
+        <div class="theme-image-grid">
           ${Object.entries(themes)
             .map(([id, item]) => `
-              <button class="seg-btn" type="button" data-action="select-theme" data-theme="${id}" aria-pressed="${state.active_theme_id === id}">
-                <span class="swatch swatch-${id}"></span>
+              <button class="theme-image-btn" type="button" data-action="select-theme" data-theme="${id}" aria-pressed="${state.active_theme_id === id}">
+                <img src="${escapeHtml(asset(addElementsBaseThemeImages[id] || assets["project-outline"][id]?.image || assets["project-outline"].questbook.image))}" alt="">
                 <span>${escapeHtml(item.label)}</span>
               </button>
             `)
             .join("")}
         </div>
       </section>
+    `;
+  }
+
+  function audioControlHtml(src, label, id) {
+    return `
+      <div class="audio-shell" data-design-id="audio-play-hook">
+        <button class="audio-toggle" type="button" data-action="toggle-audio" aria-pressed="false" aria-label="Play ${escapeHtml(label)}">
+          <span class="audio-toggle__icon" data-audio-icon>${icons.play}</span>
+        </button>
+        <span class="audio-label">${escapeHtml(label)}</span>
+        <audio class="visually-hidden-audio" preload="metadata" src="${escapeHtml(asset(src))}" data-audio-id="${escapeHtml(id || src)}"></audio>
+      </div>
     `;
   }
 
@@ -963,7 +1059,7 @@
                 </span>
                 <button class="icon-mini" type="button" data-action="${removeActions[kind]}" data-kind="${kind}" data-id="${ref.id}" aria-label="Remove ${escapeHtml(title)}">${icons.x}</button>
               </div>
-              ${ref.preview_ref && kind === "parent_reference_audio" ? `<audio class="upload-audio" controls preload="metadata" src="${escapeHtml(asset(ref.preview_ref))}"></audio>` : ""}
+              ${ref.preview_ref && kind === "parent_reference_audio" ? audioControlHtml(ref.preview_ref, ref.asset_ref || title, ref.id) : ""}
             </div>
           `)
           .join("")
@@ -982,6 +1078,34 @@
     `;
   }
 
+  function photoUploadPanel(title, designId, kind, refs, accept) {
+    const items = refs.length
+      ? refs
+          .map((ref, index) => `
+            <div class="photo-token">
+              <div class="photo-token__frame">
+                ${ref.preview_ref ? `<img src="${escapeHtml(asset(ref.preview_ref))}" alt="${escapeHtml(ref.asset_ref || `${title} ${index + 1}`)}">` : `<span>${escapeHtml(uploadLabel(kind).slice(0, 1))}</span>`}
+                <button class="icon-mini photo-token__remove" type="button" data-action="${removeActions[kind]}" data-kind="${kind}" data-id="${ref.id}" aria-label="Remove ${escapeHtml(ref.asset_ref || title)}">${icons.x}</button>
+              </div>
+              <span>${escapeHtml(shortRefLabel(ref))}</span>
+            </div>
+          `)
+          .join("")
+      : `<p class="empty-line">Session only</p>`;
+    return `
+      <section class="panel" data-design-id="${designId}">
+        <div class="panel-head">
+          <h2>${escapeHtml(title)}</h2>
+          <label class="btn-ghost compact upload-trigger" data-action="${uploadActions[kind]}">
+            ${icons.plus}<span>Add</span>
+            <input class="visually-hidden-file" type="file" data-upload-kind="${kind}" accept="${escapeHtml(accept)}">
+          </label>
+        </div>
+        <div class="photo-token-grid">${items}</div>
+      </section>
+    `;
+  }
+
   function generationReferencesHtml() {
     const refs = [
       ...state.uploads.parent_photo_refs,
@@ -994,13 +1118,14 @@
           <h2>Generation References</h2>
           <span>${refs.length ? `${refs.length} available` : "Optional"}</span>
         </div>
-        <div class="ref-grid">
+        <div class="reference-avatar-grid">
           ${refs.length
             ? refs
                 .map((ref) => `
-                  <button class="ref-chip" type="button" data-action="select-generation-reference" data-ref-id="${ref.id}" aria-pressed="${state.goal_draft.selected_generation_reference_ids.includes(ref.id)}">
-                    <span>${escapeHtml(ref.kind.replaceAll("_", " "))}</span>
-                    <small>${state.goal_draft.selected_generation_reference_ids.includes(ref.id) ? "Selected" : "Tap to use"}</small>
+                  <button class="reference-avatar" type="button" data-action="select-generation-reference" data-ref-id="${ref.id}" aria-pressed="${state.goal_draft.selected_generation_reference_ids.includes(ref.id)}">
+                    ${ref.preview_ref ? `<img src="${escapeHtml(asset(ref.preview_ref))}" alt="${escapeHtml(ref.asset_ref || uploadLabel(ref.kind))}">` : `<span class="reference-avatar__initial">${escapeHtml(uploadLabel(ref.kind).slice(0, 1))}</span>`}
+                    <span>${escapeHtml(shortRefLabel(ref))}</span>
+                    <small>${state.goal_draft.selected_generation_reference_ids.includes(ref.id) ? "Selected" : "Tap"}</small>
                   </button>
                 `)
                 .join("")
@@ -1074,11 +1199,10 @@
     const audioRefs = state.uploads.parent_reference_audio_ref ? [state.uploads.parent_reference_audio_ref] : [];
     return `
       ${themePickerHtml()}
-      ${uploadPanel("Parent Photos", "parent-details-panel", "parent_photo", state.uploads.parent_photo_refs, "image/*")}
+      ${photoUploadPanel("Parent Photos", "parent-details-panel", "parent_photo", state.uploads.parent_photo_refs, "image/*")}
       ${uploadPanel("Parent Reference Audio", "parent-details-panel", "parent_reference_audio", audioRefs, "audio/*")}
-      ${uploadPanel("Child Photos", "children-details-panel", "child_photo", state.uploads.child_photo_refs, "image/*")}
-      ${uploadPanel("Custom Image Reference", "custom-image-reference-panel", "custom_image_reference", state.uploads.custom_image_reference_refs, "image/*")}
-      ${generationReferencesHtml()}
+      ${photoUploadPanel("Child Photos", "children-details-panel", "child_photo", state.uploads.child_photo_refs, "image/*")}
+      ${photoUploadPanel("Custom Image Reference", "custom-image-reference-panel", "custom_image_reference", state.uploads.custom_image_reference_refs, "image/*")}
       ${generationModeHtml()}
       <div class="statusbar">
         <span class="statusbar__dot"></span>
@@ -1126,9 +1250,7 @@
           <p>${escapeHtml(goal.generated_narration)}</p>
           <b>${escapeHtml(goal.generated_reward_label)}</b>
         </div>
-        <div class="audio-shell" data-design-id="audio-play-hook">
-          <audio controls preload="metadata" src="${asset(goal.media.audio_asset_ref)}"></audio>
-        </div>
+        ${audioControlHtml(goal.media.audio_asset_ref, "Generated narration", `review-${goal.id}`)}
         <details class="provenance">
           <summary>Provenance</summary>
           <p>${escapeHtml(goal.provenance.text_model_id)} / ${escapeHtml(goal.provenance.image_model_id)} / ${escapeHtml(goal.provenance.audio_model_id)}</p>
@@ -1155,6 +1277,7 @@
           ${rows
             .map((goal) => {
               const waiting = goal.parent_reward_state === "waiting_for_approval";
+              const approved = goal.parent_reward_state === "approved_reward_given";
               return `
                 <article class="parent-row">
                   <div>
@@ -1162,9 +1285,9 @@
                     <div class="parent-row__meta">${escapeHtml(goal.ordinary_goal)} - ${escapeHtml(goal.generated_reward_label)}</div>
                   </div>
                   <div class="parent-actions">
-                    <span class="parent-row__status">${escapeHtml(goal.parent_reward_state.replaceAll("_", " "))}</span>
+                    ${waiting ? `<span class="parent-row__status">Waiting</span>` : ""}
                     <button class="btn-ghost" type="button" data-action="approve-goal" data-goal-id="${goal.id}" ${waiting ? "" : "disabled"}>
-                      ${icons.check}<span>Approve</span>
+                      ${icons.check}<span>${approved ? "Approved" : "Approve"}</span>
                     </button>
                   </div>
                 </article>
@@ -1177,8 +1300,9 @@
   }
 
   function goalMiniHtml(goal) {
+    const isSelected = selectedGoal()?.id === goal.id;
     return `
-      <button class="mini-goal" type="button" data-action="open-goal-card" data-goal-id="${goal.id}">
+      <button class="mini-goal" type="button" data-action="open-goal-card" data-goal-id="${goal.id}" aria-pressed="${isSelected}">
         <img src="${asset(goal.media.image_asset_ref)}" alt="${escapeHtml(goal.generated_title)} thumbnail">
         <span>
           <b>${escapeHtml(goal.generated_title)}</b>
@@ -1189,7 +1313,7 @@
   }
 
   function kidGoalsHtml() {
-    const selected = selectedGoal();
+    const modalGoal = kidModalGoal();
     return `
       <section class="panel" data-design-id="kid-goal-thumbnail-grid">
         <div class="panel-head">
@@ -1200,46 +1324,46 @@
           ${state.accepted_goals.length ? state.accepted_goals.map(goalMiniHtml).join("") : `<p class="empty-line">No accepted goals yet.</p>`}
         </div>
       </section>
-      ${selected ? kidGoalCardHtml(selected) : ""}
+      ${modalGoal ? kidGoalModalHtml(modalGoal) : ""}
     `;
   }
 
-  function kidGoalCardHtml(goal) {
+  function kidGoalModalHtml(goal) {
     const waiting = goal.parent_reward_state === "waiting_for_approval";
     const approved = goal.parent_reward_state === "approved_reward_given";
     return `
-      <section class="kid-card no-generated-steps" data-design-id="kid-goal-card">
-        <div class="media-square">
-          <img src="${asset(goal.media.image_asset_ref)}" alt="${escapeHtml(goal.generated_title)} generated image">
-          <div class="goal-overlay readonly" data-design-id="read-only-goal-overlay">${escapeHtml(goal.overlay_text.text)}</div>
-        </div>
-        <div class="copy-block">
-          <h3>${escapeHtml(goal.generated_title)}</h3>
-          <p>${escapeHtml(goal.generated_narration)}</p>
-          <b>${escapeHtml(goal.generated_reward_label)}</b>
-        </div>
-        <div class="audio-shell" data-design-id="audio-play-hook">
-          <audio controls preload="metadata" src="${asset(goal.media.audio_asset_ref)}"></audio>
-        </div>
-        <button class="btn-primary" type="button" data-action="complete-goal" data-goal-id="${goal.id}" ${waiting || approved ? "disabled" : ""}>
-          ${icons.check}<span>${approved ? "Reward Given" : waiting ? "Waiting" : "I Did It"}</span>
-        </button>
-        ${waiting ? `<p class="state-note"><strong>${escapeHtml(themes[goal.theme_id_at_creation].parentTitle)}:</strong> ${escapeHtml(themes[goal.theme_id_at_creation].waitingCopy)}</p>` : ""}
-        ${approved ? `<p class="state-note"><strong>${escapeHtml(goal.generated_reward_label)} granted.</strong></p>` : ""}
-      </section>
+      <div class="kid-modal" data-design-id="kid-goal-card-modal" role="presentation">
+        <section class="kid-card kid-card-modal no-generated-steps" data-design-id="kid-goal-card" role="dialog" aria-modal="true" aria-labelledby="kid-goal-title">
+          <button class="icon-mini kid-modal__close" type="button" data-action="close-kid-goal" aria-label="Close goal card">${icons.x}</button>
+          <div class="media-square">
+            <img src="${asset(goal.media.image_asset_ref)}" alt="${escapeHtml(goal.generated_title)} generated image">
+            <div class="goal-overlay readonly" data-design-id="read-only-goal-overlay">${escapeHtml(goal.overlay_text.text)}</div>
+          </div>
+          <div class="copy-block">
+            <h3 id="kid-goal-title">${escapeHtml(goal.generated_title)}</h3>
+            <p>${escapeHtml(goal.generated_narration)}</p>
+            <b>${escapeHtml(goal.generated_reward_label)}</b>
+          </div>
+          ${audioControlHtml(goal.media.audio_asset_ref, "Goal narration", `kid-${goal.id}`)}
+          <button class="btn-primary" type="button" data-action="complete-goal" data-goal-id="${goal.id}" ${waiting || approved ? "disabled" : ""}>
+            ${icons.check}<span>${approved ? "Reward Given" : waiting ? "Waiting" : "I Did It"}</span>
+          </button>
+          ${waiting ? `<p class="state-note"><strong>${escapeHtml(themes[goal.theme_id_at_creation].parentTitle)}:</strong> ${escapeHtml(themes[goal.theme_id_at_creation].waitingCopy)}</p>` : ""}
+        </section>
+      </div>
     `;
   }
 
   function diyRedirectHtml() {
-    if (EMBEDDED_SPACE_MODE) return diyInlineHtml();
     return `
-      <section class="panel diy-route-panel">
+      <section class="panel diy-frame-panel" data-design-id="diy-workflow-embed">
         <div class="panel-head">
           <h2>DIY Lab</h2>
-          <span>Separate surface</span>
+          <span>Workflow canvas</span>
         </div>
-        <p class="empty-line">Opening the isolated DIY workflow mirror.</p>
-        <button class="btn-primary" type="button" data-action="open-diy-surface">${icons.lab}<span>Open DIY</span></button>
+        <div class="diy-frame-wrap">
+          <iframe class="diy-workflow-frame" src="/diy-workflow/" title="Epic Errands DIY workflow canvas" loading="lazy"></iframe>
+        </div>
       </section>
     `;
   }
@@ -1319,9 +1443,7 @@
             <p>${escapeHtml(preview.generated_narration)}</p>
             <b>${escapeHtml(preview.generated_reward_label)}</b>
           </div>
-          <div class="audio-shell" data-design-id="audio-play-hook">
-            <audio controls preload="metadata" src="${asset(preview.media.audio_asset_ref)}"></audio>
-          </div>
+          ${audioControlHtml(preview.media.audio_asset_ref, "Preview narration", "diy-preview")}
         </section>
       ` : ""}
       <section class="panel" data-design-id="diy-save-back-notice">
@@ -1375,21 +1497,20 @@
     if (!button || button.disabled) return;
     const action = button.dataset.action;
     if (action === "select-tab") selectTab(button.dataset.tab);
-    if (action === "select-theme") setTheme(button.dataset.theme);
+    if (action === "select-theme") toggleThemeChoice(button.dataset.theme);
     if (Object.values(removeActions).includes(action)) removeUpload(button.dataset.kind, button.dataset.id);
     if (action === "select-generation-reference") toggleGenerationReference(button.dataset.refId);
     if (action === "generate-goal") generateGoal();
     if (action === "accept-goal") acceptGoal();
     if (action === "cancel-goal") cancelGoal();
+    if (action === "toggle-audio") toggleAudio(button);
     if (action === "open-diy-surface") openDiySurface();
     if (action === "back-main-app") selectTab("home");
     if (action === "diy-theme") setDiyTheme(button.dataset.theme);
     if (action === "update-diy-preview") updateDiyPreview();
     if (action === "open-kid-goal") selectTab("kid_goals");
-    if (action === "open-goal-card") {
-      state.selected_goal_id = button.dataset.goalId;
-      selectTab("kid_goals");
-    }
+    if (action === "open-goal-card") openKidGoalCard(button.dataset.goalId);
+    if (action === "close-kid-goal") closeKidGoalCard();
     if (action === "complete-goal") completeGoal(button.dataset.goalId);
     if (action === "approve-goal") approveGoal(button.dataset.goalId);
   });
@@ -1410,6 +1531,12 @@
       state.diy.workflow_draft.ordinary_goal = field.value;
     }
   });
+
+  document.addEventListener("ended", (event) => {
+    const audio = event.target.closest(".audio-shell audio");
+    if (!audio) return;
+    setAudioButtonState(audio.closest(".audio-shell")?.querySelector(".audio-toggle"), false);
+  }, true);
 
   document.addEventListener("blur", (event) => {
     const overlay = event.target.closest('[data-design-id="editable-goal-overlay"]');
