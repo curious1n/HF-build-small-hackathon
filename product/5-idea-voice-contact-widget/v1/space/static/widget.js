@@ -6,6 +6,7 @@ const state = {
   startedAt: 0,
   lastTrace: null,
   modelMessage: "",
+  modelRuntime: "hf_space",
   simulateNextSendFailure: false,
 };
 
@@ -16,6 +17,7 @@ const els = {
   subheading: document.querySelector("#widget-subheading"),
   evalNotice: document.querySelector("#eval-notice"),
   segments: [...document.querySelectorAll(".segment")],
+  runtimeSegmented: document.querySelector("#runtime-segmented"),
   recorderPanel: document.querySelector(".recorder-panel"),
   recordButton: document.querySelector("#record-button"),
   stateLabel: document.querySelector("#state-label"),
@@ -80,6 +82,8 @@ function updateDebug(extra = {}) {
     contact_email: state.packet.contact_email,
     packet_version: state.packet.schema_version,
     speech_mode: state.mode,
+    selected_model_runtime: state.modelRuntime,
+    runtime_switch_allowed: Boolean(state.packet.runtime_controls?.allow_switch),
     asr_language_hint: state.mode === "hindi" || state.mode === "hinglish" ? "hi-IN" : "hi-IN",
     asr_model_id: runtime.asr_model_id,
     text_model_id: runtime.text_model_id,
@@ -118,7 +122,9 @@ function applyPacket(packet) {
   els.evalNotice.textContent = packet.audio_eval_notice;
   els.evalNotice.hidden = !packet.audio_eval_consent;
   state.mode = packet.locale_defaults.default_speech_mode;
+  state.modelRuntime = packet.runtime_controls?.selected || packet.provenance?.model_runtime || "hf_space";
   selectMode(state.mode);
+  renderRuntimeControls(packet.runtime_controls);
   updateDebug({ packet_loaded: true });
 }
 
@@ -130,6 +136,51 @@ function selectMode(mode) {
     button.setAttribute("aria-checked", String(selected));
   });
   updateDebug();
+}
+
+function renderRuntimeControls(controls = {}) {
+  if (!els.runtimeSegmented) return;
+  const options = Array.isArray(controls.options) ? controls.options : [];
+  els.runtimeSegmented.replaceChildren();
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.className = "segment runtime-segment";
+    button.type = "button";
+    button.role = "radio";
+    button.dataset.runtime = option.value;
+    button.disabled = !option.enabled;
+    button.title = option.enabled ? option.label : "Enable VCW_ALLOW_RUNTIME_SWITCH=1 to test this runtime";
+
+    const label = document.createElement("span");
+    label.className = "segment-label";
+    label.textContent = option.label;
+    button.append(label);
+
+    if (option.note) {
+      const note = document.createElement("span");
+      note.className = "segment-note";
+      note.textContent = option.note;
+      button.append(note);
+    }
+
+    button.addEventListener("click", () => selectModelRuntime(option.value));
+    els.runtimeSegmented.append(button);
+  });
+  selectModelRuntime(state.modelRuntime, { silent: true });
+}
+
+function selectModelRuntime(runtime, { silent = false } = {}) {
+  const buttons = [...els.runtimeSegmented.querySelectorAll("[data-runtime]")];
+  const requested = buttons.find((button) => button.dataset.runtime === runtime);
+  const enabledRequested = requested && !requested.disabled;
+  state.modelRuntime = enabledRequested ? runtime : "hf_space";
+  buttons.forEach((button) => {
+    const selected = button.dataset.runtime === state.modelRuntime;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-checked", String(selected));
+  });
+  if (!silent) resetFlow();
+  updateDebug({ model_runtime_changed: !silent });
 }
 
 async function api(path, payload) {
@@ -253,6 +304,7 @@ async function processRecording(extra = {}) {
     startProcessing();
     const requestPromise = api("/api/process", {
       speech_mode: state.mode,
+      model_runtime: state.modelRuntime,
       visitor_notice_shown: !els.evalNotice.hidden,
       ...extra,
     });

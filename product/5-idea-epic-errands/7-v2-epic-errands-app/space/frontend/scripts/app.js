@@ -6,6 +6,7 @@
   const ASSET_MANIFEST = window.EPIC_ASSET_MANIFEST || {};
   const API_BASE = window.EPIC_API_BASE || "";
   const EMBEDDED_SPACE_MODE = Boolean(window.EPIC_EMBEDDED_SPACE_MODE);
+  const GRADIO_API_PREFIX = window.EPIC_GRADIO_API_PREFIX || "/gradio_api";
   const QUALITY_MEDIA_VARIANT_ID = "questbook";
   const root = document.getElementById("app");
 
@@ -163,6 +164,12 @@
       accepted_goals: [seedGoal],
       selected_goal_id: "goal-seed-clean-room",
       diy: buildLocalDiyState("questbook", "Clean up my room before dinner", []),
+      generation_status: {
+        state: "ready",
+        message: "Hosted deterministic generation is ready.",
+        backend_transport: "browser_fallback",
+        fallback_used: true,
+      },
     };
     syncGenerationReferences(fallback);
     return fallback;
@@ -395,12 +402,54 @@
         ...(payload.goal_draft || {}),
       },
       diy: payload.diy || fallback.diy,
+      generation_status: payload.generation_status || fallback.generation_status,
     };
     syncStateAliases(nextState);
     return nextState;
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function gradioEndpointFor(path) {
+    if (path === "/api/bootstrap") return "epic_bootstrap";
+    if (path === "/api/generate-goal") return "epic_generate_goal";
+    if (path === "/api/diy-preview") return "epic_diy_preview";
+    return "";
+  }
+
+  function parseSseData(text) {
+    const lines = String(text || "").split(/\r?\n/);
+    const eventLine = lines.find((line) => line.startsWith("event: error"));
+    const dataLine = lines.find((line) => line.startsWith("data: "));
+    if (!dataLine) throw new Error("Gradio response did not include data.");
+    const parsed = JSON.parse(dataLine.slice(6));
+    if (eventLine) throw new Error(Array.isArray(parsed) ? parsed.join(" ") : String(parsed));
+    const value = Array.isArray(parsed) ? parsed[0] : parsed;
+    return typeof value === "string" ? JSON.parse(value) : value;
+  }
+
+  async function gradioApiJson(apiName, payload = {}) {
+    const callResponse = await fetch(`${GRADIO_API_PREFIX}/call/${apiName}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ data: [JSON.stringify(payload || {})] }),
+    });
+    if (!callResponse.ok) throw new Error(`Gradio call failed: ${callResponse.status}`);
+    const callBody = await callResponse.json();
+    if (!callBody.event_id) throw new Error("Gradio call did not return an event id.");
+    const eventResponse = await fetch(`${GRADIO_API_PREFIX}/call/${apiName}/${callBody.event_id}`);
+    if (!eventResponse.ok) throw new Error(`Gradio event failed: ${eventResponse.status}`);
+    return parseSseData(await eventResponse.text());
+  }
+
   async function apiJson(path, options = {}) {
+    const gradioEndpoint = EMBEDDED_SPACE_MODE ? gradioEndpointFor(path) : "";
+    if (gradioEndpoint) {
+      const payload = options.body ? JSON.parse(options.body) : {};
+      return gradioApiJson(gradioEndpoint, payload);
+    }
     const response = await fetch(`${API_BASE}${path}`, options);
     if (!response.ok) throw new Error(`Request failed: ${response.status}`);
     return response.json();
@@ -569,8 +618,19 @@
   async function generateGoal() {
     const goalText = state.goal_draft.ordinary_goal.trim();
     if (!goalText) return;
+    const started = performance.now();
+    state.generation_status = {
+      state: "generating",
+      message: EMBEDDED_SPACE_MODE
+        ? "Generating through the hosted Gradio backend..."
+        : "Generating through the local app backend...",
+      backend_transport: EMBEDDED_SPACE_MODE ? "gradio_blocks_named_api" : "fastapi_route",
+      fallback_used: null,
+    };
+    render();
     try {
-      state.pending_review_goal = normalizeGoal(await apiJson("/api/generate-goal", {
+      const [generated] = await Promise.all([
+        apiJson("/api/generate-goal", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -579,7 +639,17 @@
           selected_generation_reference_ids: state.goal_draft.selected_generation_reference_ids,
           audio_used_parent_reference: Boolean(state.uploads.parent_reference_audio_ref),
         }),
-      }));
+        }),
+        sleep(500),
+      ]);
+      state.pending_review_goal = normalizeGoal(generated);
+      state.generation_status = {
+        state: "success",
+        message: `Generated through ${state.pending_review_goal.provenance.backend_transport || "app backend"}; fallback_used=${String(Boolean(state.pending_review_goal.provenance.fallback_used))}.`,
+        backend_transport: state.pending_review_goal.provenance.backend_transport || "app_backend",
+        fallback_used: Boolean(state.pending_review_goal.provenance.fallback_used),
+        latency_ms: Math.round(performance.now() - started),
+      };
     } catch (error) {
       state.pending_review_goal = createGoal(
         goalText,
@@ -588,6 +658,15 @@
         state.goal_draft.selected_generation_reference_ids,
         Boolean(state.uploads.parent_reference_audio_ref)
       );
+      state.pending_review_goal.provenance.backend_transport = "browser_fallback";
+      state.pending_review_goal.provenance.fallback_reason = String(error?.message || error || "backend unavailable");
+      state.generation_status = {
+        state: "fallback",
+        message: "Hosted backend was unavailable, so this preview used browser fallback.",
+        backend_transport: "browser_fallback",
+        fallback_used: true,
+        latency_ms: Math.round(performance.now() - started),
+      };
     }
     state.active_tab = "parent_goals";
     render();
@@ -777,6 +856,22 @@
     `;
   }
 
+  function generationStatusHtml() {
+    const status = state.generation_status;
+    if (!status || status.state === "ready") return "";
+    const label = status.state === "fallback" ? "Fallback" : "Backend";
+    return `
+      <div class="statusbar generation-status" data-generation-status="${escapeHtml(status.state)}">
+        <span class="statusbar__dot"></span>
+        <div class="statusbar__info">
+          <b>${escapeHtml(label)}</b>
+          ${escapeHtml(status.message)}
+          ${status.latency_ms ? `<small>${escapeHtml(status.latency_ms)}ms</small>` : ""}
+        </div>
+      </div>
+    `;
+  }
+
   function homeHtml() {
     const c = counts();
     const current = selectedGoal();
@@ -818,6 +913,7 @@
   }
 
   function parentGoalsHtml() {
+    const isGenerating = state.generation_status?.state === "generating";
     return `
       <section class="panel" data-design-id="create-goal-form">
         <div class="panel-head">
@@ -829,7 +925,10 @@
           <textarea class="field__input goal-textarea" data-field="goal-draft">${escapeHtml(state.goal_draft.ordinary_goal)}</textarea>
         </label>
         ${generationReferencesHtml()}
-        <button class="btn-primary" type="button" data-action="generate-goal">${icons.wand}<span>Generate Goal</span></button>
+        <button class="btn-primary" type="button" data-action="generate-goal" ${isGenerating ? "disabled" : ""}>
+          ${icons.wand}<span>${isGenerating ? "Generating..." : "Generate Goal"}</span>
+        </button>
+        ${generationStatusHtml()}
       </section>
       ${state.pending_review_goal ? reviewGoalHtml(state.pending_review_goal) : ""}
       ${approvalQueueHtml()}

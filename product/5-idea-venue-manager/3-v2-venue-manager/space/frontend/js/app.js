@@ -44,6 +44,10 @@ const APP_TODAY = currentDay();
 const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 const slotIdxOf = label => (label && label.trim().startsWith('8 AM')) ? 0 : 1;
 const TRY_ME_ID = 'try-me-live-model';
+const DETAIL_WIDTH_KEY = 'fl-detail-w-v2-max';
+let seedBootstrapPayload = null;
+let activeSyncController = null;
+let modelRunTicker = null;
 
 function tryMeRequest() {
   const rawMessage = 'Hi, can we book South Field tomorrow afternoon for a cricket match with 12 players? Budget is around Rs 5500.';
@@ -128,6 +132,42 @@ function applyModelBookingToState(req, conversation) {
 
 function shouldAutoSyncSelectedRequest() {
   return !isModelBackedRequest(currentRequest(state));
+}
+
+function cloneJson(value) {
+  return value == null ? value : JSON.parse(JSON.stringify(value));
+}
+
+function modelTimeoutMs() {
+  const seconds = Number(state.modalStatus?.timeout_seconds || 90);
+  return Math.max(15000, Math.round((seconds + 5) * 1000));
+}
+
+function cancelActiveSync() {
+  if (activeSyncController) {
+    activeSyncController.abort();
+    activeSyncController = null;
+  }
+  stopModelRunTicker();
+}
+
+function startModelRunTicker() {
+  stopModelRunTicker();
+  modelRunTicker = setInterval(() => {
+    const req = currentRequest(state);
+    if (!req?.modelBacked || state.syncStatus !== 'syncing') {
+      stopModelRunTicker();
+      return;
+    }
+    renderDetail();
+  }, 1000);
+}
+
+function stopModelRunTicker() {
+  if (modelRunTicker) {
+    clearInterval(modelRunTicker);
+    modelRunTicker = null;
+  }
 }
 
 /* baseline (pre-edit) value of an editable field */
@@ -346,14 +386,43 @@ function requestFromBackend(req) {
   };
 }
 
-async function fetchJson(path, options) {
-  const response = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
+async function fetchJson(path, options = {}) {
+  const {
+    timeoutMs = 20000,
+    signal,
+    headers = {},
+    ...fetchOptions
+  } = options || {};
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener('abort', onAbort, { once: true });
+  }
+  const timeoutId = timeoutMs
+    ? setTimeout(() => controller.abort(), timeoutMs)
+    : null;
+  let response;
+  try {
+    response = await fetch(path, {
+      headers: { 'Content-Type': 'application/json', ...headers },
+      signal: controller.signal,
+      ...fetchOptions,
+    });
+  } catch (error) {
+    if (error?.name === 'AbortError') throw new Error('Request timed out or was cancelled');
+    throw error;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (signal) signal.removeEventListener('abort', onAbort);
+  }
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(body.error || body.message || `HTTP ${response.status}`);
+    const blocker = body.conversation?.model_extraction?.blocker
+      || body.error
+      || body.message
+      || `HTTP ${response.status}`;
+    throw new Error(blocker);
   }
   return body;
 }
@@ -361,6 +430,7 @@ async function fetchJson(path, options) {
 async function loadBootstrap() {
   try {
     const payload = await fetchJson('/api/bootstrap');
+    seedBootstrapPayload = cloneJson(payload);
     applyBootstrap(payload);
     renderAll();
     await syncSelectedRequest();
@@ -373,17 +443,28 @@ async function loadBootstrap() {
 
 async function reloadDemo() {
   if (state.demoReloading) return;
+  cancelActiveSync();
+  state.requestSeq += 1;
   state.demoReloading = true;
   renderTopBar();
   try {
-    const payload = await fetchJson('/api/reload-demo', { method: 'POST', body: JSON.stringify({}) });
+    const payload = await fetchJson('/api/reload-demo', { method: 'POST', body: JSON.stringify({}), timeoutMs: 8000 });
     resetRuntimeState();
     applyBootstrap(payload);
     state.demoReloading = false;
     renderAll();
-    await syncSelectedRequest();
-    toast('Demo data reloaded');
+    if (shouldAutoSyncSelectedRequest()) syncSelectedRequest();
+    toast('Demo data reset');
   } catch (error) {
+    if (seedBootstrapPayload) {
+      resetRuntimeState();
+      applyBootstrap(cloneJson(seedBootstrapPayload));
+      state.demoReloading = false;
+      state.backendError = '';
+      renderAll();
+      toast('Reset locally; backend reset did not answer');
+      return;
+    }
     state.demoReloading = false;
     state.backendError = error.message || 'Reload failed';
     renderAll();
@@ -423,7 +504,7 @@ function replyDraftForState(s) {
     return '';
   }
   if (isModelBackedRequest(req) && s.syncStatus === 'syncing' && !conversation) {
-    return 'Calling the Modal model for this booking request now.';
+    return '';
   }
   if (isModelBackedRequest(req) && !conversation && s.modelRuns[req.id]?.status === 'error') {
     return 'The live model call did not complete. The trace panel has the blocker.';
@@ -445,12 +526,15 @@ function draftLabelForState(s) {
   if (conversation?.status === 'failed_model') return 'Model blocked · not sent';
   if (conversation?.status === 'conflict_possible') return 'Conflict draft · not sent';
   if (conversation?.status === 'needs_player_info') return 'Clarification draft · not sent';
-  return 'Draft reply · not sent';
+  return 'Draft reply · Not sent as WhatsApp / Baileys not set up';
 }
 
 async function syncSelectedRequest() {
   const req = currentRequest(state);
   if (!req) return null;
+  cancelActiveSync();
+  const controller = new AbortController();
+  activeSyncController = controller;
   const seq = ++state.requestSeq;
   state.syncStatus = 'syncing';
   state.backendError = '';
@@ -466,8 +550,10 @@ async function syncSelectedRequest() {
       traceId,
       startedAt,
       endpoint: '/api/whatsapp/simulated-model-message',
+      timeoutSeconds: Number(state.modalStatus?.timeout_seconds || 90),
       message,
     };
+    startModelRunTicker();
     renderQueue();
     renderStage();
   }
@@ -490,6 +576,8 @@ async function syncSelectedRequest() {
     const body = await fetchJson(modelBacked ? '/api/whatsapp/simulated-model-message' : '/api/whatsapp/simulated-message', {
       method: 'POST',
       body: JSON.stringify(payload),
+      signal: controller.signal,
+      timeoutMs: modelBacked ? modelTimeoutMs() : 15000,
     });
     if (seq !== state.requestSeq || req.id !== state.selectedId) return null;
     storeConversation(req.id, body.conversation);
@@ -512,6 +600,8 @@ async function syncSelectedRequest() {
       };
     }
     state.syncStatus = 'ready';
+    if (activeSyncController === controller) activeSyncController = null;
+    if (modelBacked) stopModelRunTicker();
     renderAll();
     return body.conversation;
   } catch (error) {
@@ -521,6 +611,8 @@ async function syncSelectedRequest() {
     if (modelBacked) {
       req.status = 'demo_error';
       req.badge = 'Error';
+      req.chatDraft = req.rawMessage;
+      if (req.id === state.selectedId) state.demoChatDraft = req.rawMessage;
       state.modelRuns[req.id] = {
         ...(state.modelRuns[req.id] || {}),
         status: 'error',
@@ -530,6 +622,8 @@ async function syncSelectedRequest() {
         completedAt: Date.now(),
       };
     }
+    if (activeSyncController === controller) activeSyncController = null;
+    if (modelBacked) stopModelRunTicker();
     renderAll();
     return null;
   }
@@ -541,6 +635,7 @@ async function sendDemoChatMessage(text) {
   const clean = String(text || '').trim();
   if (!clean) return null;
   req.rawMessage = clean;
+  req.pendingInboundMessage = clean;
   req.chatDraft = '';
   state.demoChatDraft = '';
   delete state.conversations[req.id];
@@ -847,7 +942,7 @@ function startResize(e) {
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     const cur = getComputedStyle(document.documentElement).getPropertyValue('--detail-w').trim();
-    if (cur) { try { localStorage.setItem('fl-detail-w', cur); } catch (_) {} }
+    if (cur) { try { localStorage.setItem(DETAIL_WIDTH_KEY, cur); } catch (_) {} }
   };
   window.addEventListener('pointermove', move);
   window.addEventListener('pointerup', up);
@@ -855,7 +950,8 @@ function startResize(e) {
 
 /* restore persisted width */
 try {
-  const saved = localStorage.getItem('fl-detail-w');
+  document.documentElement.style.setProperty('--detail-w', DETAIL_MAX + 'px');
+  const saved = localStorage.getItem(DETAIL_WIDTH_KEY);
   if (saved) document.documentElement.style.setProperty('--detail-w', saved);
 } catch (_) {}
 

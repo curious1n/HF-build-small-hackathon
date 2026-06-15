@@ -1,0 +1,56 @@
+{
+  "backend_transport": "gradio_blocks_named_api",
+  "checked_at": "2026-06-15T18:20:51.722644+00:00",
+  "component_count": 6,
+  "dependency_api_names": [
+    "epic_bootstrap",
+    "epic_generate_goal",
+    "epic_diy_preview"
+  ],
+  "expected_sha": "36d237625793c842601ec3209f6a255fa9e82060",
+  "fallback_reason": "deterministic hosted dry-run; Modal/live model not wired to hosted app",
+  "fallback_used": true,
+  "hardware": "cpu-basic",
+  "has_epic_bootstrap": true,
+  "has_epic_diy_preview": true,
+  "has_epic_generate_goal": true,
+  "hosted_generate_goal_status": 200,
+  "hosted_generated_title": "Mission: Everyday Hero",
+  "hosted_goal_theme": "comic",
+  "mode": "blocks",
+  "model_backend": "static_review_asset",
+  "model_id": "none",
+  "model_runtime": "none",
+  "namespace_env": "HF_HACKATHON",
+  "observed_sha": "36d237625793c842601ec3209f6a255fa9e82060",
+  "poll_attempts": [
+    {
+      "attempt": 1,
+      "deps": [],
+      "ok": false,
+      "sha": "36d237625793c842601ec3209f6a255fa9e82060",
+      "stage": "RUNNING_APP_STARTING",
+      "status": 200
+    },
+    {
+      "attempt": 2,
+      "deps": [
+        "epic_bootstrap",
+        "epic_generate_goal",
+        "epic_diy_preview"
+      ],
+      "ok": true,
+      "sha": "36d237625793c842601ec3209f6a255fa9e82060",
+      "stage": "RUNNING",
+      "status": 200
+    }
+  ],
+  "proof_scope": "authenticated hosted Gradio config and named API smoke; not hosted browser UAT, live-model proof, public release, or judge-ready proof",
+  "repo_id": "build-small-hackathon/epic-errands",
+  "runtime_stage": "RUNNING",
+  "sdk": "gradio",
+  "space_url": "https://build-small-hackathon-epic-errands.hf.space/",
+  "status": "pass",
+  "token_env": "HF_TOKEN_2",
+  "visibility": "private"
+}

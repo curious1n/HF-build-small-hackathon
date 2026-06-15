@@ -29,6 +29,7 @@ T4_MEDIUM_USD_PER_HOUR = 0.60
 DEFAULT_MODAL_BASE_URL = "https://curious1n--voice-reach-v1-modal-process.modal.run"
 DEFAULT_MODAL_ASR_MODEL_ID = "onnx-community/nemotron-3.5-asr-streaming-0.6b-onnx-int4"
 DEFAULT_MODAL_TEXT_MODEL_ID = "CohereLabs/tiny-aya-fire-GGUF"
+DEFAULT_HF_PERSONAL_BASE_URL = "https://curieous-voice-reach.hf.space"
 TARGET_PROFILES = {
     "modal-test": {
         "description": "HF hackathon Space on CPU Basic calling Modal for model testing. Not for submission.",
@@ -39,6 +40,7 @@ TARGET_PROFILES = {
         "hardware": CPU_HARDWARE,
         "sleep_time": 172800,
         "modal": True,
+        "allow_runtime_switch": True,
     },
     "hf2-t4-test": {
         "description": "HF_2-owned Space on t4-medium for testing the Space-local HF GPU path.",
@@ -49,6 +51,7 @@ TARGET_PROFILES = {
         "hardware": DEFAULT_HARDWARE,
         "sleep_time": 900,
         "modal": False,
+        "allow_runtime_switch": True,
     },
     "hackathon-t4-submit": {
         "description": "Official hackathon-org Space on t4-medium with Modal disabled.",
@@ -59,6 +62,7 @@ TARGET_PROFILES = {
         "hardware": DEFAULT_HARDWARE,
         "sleep_time": -1,
         "modal": False,
+        "allow_runtime_switch": False,
     },
 }
 UPLOAD_IGNORE_PATTERNS = [
@@ -98,7 +102,13 @@ def merged_env() -> dict[str, str]:
     values = load_env(ENV_PATH)
     values.update(load_env(LOCAL_MODAL_ENV))
     for key, value in os.environ.items():
-        if key.startswith("HF") or key.startswith("APP_MODAL") or key.startswith("VCW_MODEL"):
+        if (
+            key.startswith("HF")
+            or key.startswith("APP_MODAL")
+            or key.startswith("APP_HF_PERSONAL")
+            or key.startswith("VCW_MODEL")
+            or key.startswith("VCW_ALLOW_RUNTIME_SWITCH")
+        ):
             values[key] = value
     return values
 
@@ -215,7 +225,20 @@ def configure_target_runtime(
     }
     secrets: list[str] = []
     removed: list[str] = []
-    if profile.get("modal"):
+    allow_runtime_switch = bool(profile.get("allow_runtime_switch"))
+    if allow_runtime_switch:
+        variables["VCW_ALLOW_RUNTIME_SWITCH"] = "1"
+        variables["APP_HF_PERSONAL_BASE_URL"] = values.get("APP_HF_PERSONAL_BASE_URL", DEFAULT_HF_PERSONAL_BASE_URL)
+        api.add_space_secret(repo_id=repo_id, key="APP_HF_PERSONAL_TOKEN", value=token)
+        secrets.append("APP_HF_PERSONAL_TOKEN")
+    else:
+        for key in ("VCW_ALLOW_RUNTIME_SWITCH", "APP_HF_PERSONAL_BASE_URL"):
+            ignore_missing_hf_delete(api.delete_space_variable, repo_id=repo_id, key=key)
+            removed.append(key)
+        ignore_missing_hf_delete(api.delete_space_secret, repo_id=repo_id, key="APP_HF_PERSONAL_TOKEN")
+        removed.append("APP_HF_PERSONAL_TOKEN")
+
+    if profile.get("modal") or allow_runtime_switch:
         auth_token = values.get("APP_MODAL_AUTH_TOKEN", "").strip()
         if not auth_token:
             raise SystemExit(f"Missing APP_MODAL_AUTH_TOKEN in {LOCAL_MODAL_ENV} or environment.")
@@ -241,7 +264,7 @@ def configure_target_runtime(
     return {
         "variables": {key: "<set>" for key in sorted(variables)},
         "secrets": secrets,
-        "removed_modal_keys": removed,
+        "removed_runtime_keys": removed,
     }
 
 

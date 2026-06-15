@@ -117,3 +117,46 @@ def test_guardrail_allows_support_terms_when_source_contains_them() -> None:
 
     assert parsed["needs_edit"] is False
     assert parsed["guardrail_flags"] == []
+
+
+def test_runtime_controls_gate_test_only_options(monkeypatch) -> None:
+    app = load_app_module()
+    monkeypatch.setenv("VCW_MODEL_MODE", "real")
+    monkeypatch.setenv("VCW_MODEL_RUNTIME", "hf_space")
+    monkeypatch.delenv("VCW_ALLOW_RUNTIME_SWITCH", raising=False)
+
+    controls = app.runtime_controls(app.selected_model_runtime())
+
+    assert controls["selected"] == "hf_space"
+    assert controls["allow_switch"] is False
+    enabled = {option["value"]: option["enabled"] for option in controls["options"]}
+    assert enabled == {"hf_space": True, "hf_personal_space": False, "modal": False}
+
+
+def test_runtime_override_requires_switch(monkeypatch) -> None:
+    app = load_app_module()
+    monkeypatch.setenv("VCW_MODEL_MODE", "real")
+    monkeypatch.setenv("VCW_MODEL_RUNTIME", "hf_space")
+    monkeypatch.delenv("VCW_ALLOW_RUNTIME_SWITCH", raising=False)
+
+    try:
+        app.selected_model_runtime("modal")
+    except app.HTTPException as exc:
+        assert exc.status_code == 403
+    else:
+        raise AssertionError("modal override should be rejected when switch is disabled")
+
+    monkeypatch.setenv("VCW_ALLOW_RUNTIME_SWITCH", "1")
+    assert app.selected_model_runtime("modal") == "modal"
+    assert app.selected_model_runtime("hf_personal_space") == "hf_personal_space"
+
+
+def test_local_deterministic_hf_space_request_uses_safe_fallback(monkeypatch) -> None:
+    app = load_app_module()
+    monkeypatch.setenv("VCW_MODEL_MODE", "deterministic")
+    monkeypatch.setenv("VCW_MODEL_RUNTIME", "hf_space")
+    monkeypatch.setenv("VCW_ALLOW_RUNTIME_SWITCH", "1")
+
+    assert app.selected_model_runtime() == "none"
+    assert app.selected_model_runtime("hf_space") == "none"
+    assert app.selected_model_runtime("modal") == "modal"

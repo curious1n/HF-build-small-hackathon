@@ -66,10 +66,10 @@ def wav_duration_ms(path: Path) -> int | None:
         return round((handle.getnframes() / rate) * 1000)
 
 
-def process_payload(audio_file: Path, speech_mode: str, duration_ms: int | None) -> dict:
+def process_payload(audio_file: Path, speech_mode: str, duration_ms: int | None, model_runtime: str | None) -> dict:
     audio_bytes = audio_file.read_bytes()
     mime = mimetypes.guess_type(audio_file.name)[0] or "application/octet-stream"
-    return {
+    payload = {
         "speech_mode": speech_mode,
         "visitor_notice_shown": True,
         "audio_duration_ms": duration_ms or wav_duration_ms(audio_file) or 0,
@@ -77,14 +77,20 @@ def process_payload(audio_file: Path, speech_mode: str, duration_ms: int | None)
         "audio_mime": mime,
         "audio_base64": base64.b64encode(audio_bytes).decode("ascii"),
     }
+    if model_runtime:
+        payload["model_runtime"] = model_runtime
+    return payload
 
 
-def text_smoke_payload(transcript: str, speech_mode: str) -> dict:
-    return {
+def text_smoke_payload(transcript: str, speech_mode: str, model_runtime: str | None) -> dict:
+    payload = {
         "speech_mode": speech_mode,
         "visitor_notice_shown": True,
         "transcript": transcript,
     }
+    if model_runtime:
+        payload["model_runtime"] = model_runtime
+    return payload
 
 
 def summarize_trace(trace: dict) -> dict:
@@ -114,6 +120,7 @@ def main() -> int:
     parser.add_argument("--process-audio", type=Path, help="Optional real audio file for /api/process.")
     parser.add_argument("--text-transcript", help="Optional supplied transcript for a tiny-aya-only /api/text-smoke request.")
     parser.add_argument("--speech-mode", default="hinglish", choices=["hindi", "hinglish"])
+    parser.add_argument("--model-runtime", choices=["hf_space", "hf_personal_space", "modal"])
     parser.add_argument("--audio-duration-ms", type=int)
     parser.add_argument(
         "--allow-model-request",
@@ -144,7 +151,7 @@ def main() -> int:
     if args.process_audio:
         if not args.allow_model_request:
             raise SystemExit("--process-audio requires --allow-model-request")
-        payload = process_payload(args.process_audio, args.speech_mode, args.audio_duration_ms)
+        payload = process_payload(args.process_audio, args.speech_mode, args.audio_duration_ms, args.model_runtime)
         process = request_json(args.base_url, "/api/process", token, payload=payload, timeout=args.timeout)
         body = process.get("body") or {}
         if isinstance(body, dict) and "trace" in body:
@@ -155,7 +162,7 @@ def main() -> int:
     if args.text_transcript:
         if not args.allow_model_request:
             raise SystemExit("--text-transcript requires --allow-model-request")
-        payload = text_smoke_payload(args.text_transcript, args.speech_mode)
+        payload = text_smoke_payload(args.text_transcript, args.speech_mode, args.model_runtime)
         text_smoke = request_json(args.base_url, "/api/text-smoke", token, payload=payload, timeout=args.timeout)
         body = text_smoke.get("body") or {}
         if isinstance(body, dict) and "trace" in body:

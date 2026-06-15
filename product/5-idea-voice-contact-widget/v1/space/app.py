@@ -52,6 +52,7 @@ TEXT_MODEL_LABEL = "CohereLabs/tiny-aya-fire-GGUF:Q8_0"
 MODAL_ASR_MODEL_ID = "onnx-community/nemotron-3.5-asr-streaming-0.6b-onnx-int4"
 MODAL_TEXT_MODEL_ID = TEXT_MODEL_ID
 MODAL_TEXT_MODEL_LABEL = "CohereLabs/tiny-aya-fire-GGUF:Q4_K_M"
+DEFAULT_HF_PERSONAL_BASE_URL = "https://curieous-voice-reach.hf.space"
 MAX_AUDIO_BYTES = int(os.environ.get("VCW_MAX_AUDIO_BYTES", str(16 * 1024 * 1024)))
 MAX_AUDIO_SECONDS = int(os.environ.get("VCW_MAX_AUDIO_SECONDS", "45"))
 
@@ -183,13 +184,109 @@ def model_mode() -> str:
     return "real" if detect_app_host() == "hf_space" else "deterministic"
 
 
-def selected_model_runtime() -> str:
+def runtime_switch_allowed() -> bool:
+    return os.environ.get("VCW_ALLOW_RUNTIME_SWITCH", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def selected_model_runtime(override: Any = None) -> str:
+    requested = str(override or "").strip().lower()
+    aliases = {
+        "hf_hackathon_space": "hf_space",
+        "hf_personal": "hf_personal_space",
+        "deterministic": "none",
+    }
+    requested = aliases.get(requested, requested)
+    if requested:
+        if model_mode() == "deterministic" and requested == "hf_space":
+            return "none"
+        if requested == "hf_space":
+            return "hf_space"
+        if requested in {"hf_personal_space", "modal"} and runtime_switch_allowed():
+            return requested
+        if requested in {"hf_personal_space", "modal"}:
+            raise HTTPException(status_code=403, detail="Model runtime switch is disabled")
+        raise HTTPException(status_code=400, detail="Unsupported model runtime")
+
     runtime = os.environ.get("VCW_MODEL_RUNTIME", "").strip().lower()
-    if runtime in {"modal", "hf_space", "deterministic", "none"}:
-        return "none" if runtime == "deterministic" else runtime
+    runtime = aliases.get(runtime, runtime)
+    if model_mode() == "deterministic" and runtime == "hf_space":
+        return "none"
+    if runtime in {"modal", "hf_personal_space", "hf_space", "none"}:
+        return runtime
     if model_mode() == "deterministic":
         return "none"
     return "hf_space"
+
+
+def runtime_axes(runtime: str) -> dict[str, Any]:
+    if runtime == "modal":
+        return {
+            "model_backend": "modal_http",
+            "inference_engine": "onnxruntime+llama.cpp",
+            "model_artifact_format": "onnx+gguf",
+            "quantization": "int4+q4_k_m",
+            "asr_model_id": os.environ.get("APP_MODAL_ASR_MODEL_ID", MODAL_ASR_MODEL_ID),
+            "text_model_id": os.environ.get("APP_MODAL_MODEL_ID", MODAL_TEXT_MODEL_LABEL),
+            "fallback_used": False,
+        }
+    if runtime == "hf_personal_space":
+        return {
+            "model_backend": "hf_space_proxy",
+            "inference_engine": "remote_space_api",
+            "model_artifact_format": "remote_space",
+            "quantization": "remote",
+            "asr_model_id": ASR_MODEL_ID,
+            "text_model_id": TEXT_MODEL_LABEL,
+            "fallback_used": False,
+        }
+    if runtime == "hf_space":
+        return {
+            "model_backend": "nemo+llama.cpp",
+            "inference_engine": "nemo+llama.cpp",
+            "model_artifact_format": "nemo_archive+gguf",
+            "quantization": "unknown+q8_0",
+            "asr_model_id": ASR_MODEL_ID,
+            "text_model_id": TEXT_MODEL_LABEL,
+            "fallback_used": False,
+        }
+    return {
+        "model_backend": "template",
+        "inference_engine": "none",
+        "model_artifact_format": "none",
+        "quantization": "none",
+        "asr_model_id": ASR_MODEL_ID,
+        "text_model_id": TEXT_MODEL_LABEL,
+        "fallback_used": True,
+    }
+
+
+def runtime_controls(default_runtime: str) -> dict[str, Any]:
+    allow_switch = runtime_switch_allowed()
+    return {
+        "label": "Model Runtime",
+        "allow_switch": allow_switch,
+        "selected": default_runtime,
+        "options": [
+            {
+                "value": "hf_space",
+                "label": "HF hackathon space",
+                "note": "credit issue",
+                "enabled": True,
+            },
+            {
+                "value": "hf_personal_space",
+                "label": "HF personal space",
+                "note": "test runtime",
+                "enabled": allow_switch,
+            },
+            {
+                "value": "modal",
+                "label": "Modal",
+                "note": "test runtime",
+                "enabled": allow_switch,
+            },
+        ],
+    }
 
 
 def hf_token() -> str | None:
@@ -246,43 +343,24 @@ def asr_hint_for_mode(speech_mode: str) -> str:
 def public_packet(packet: dict[str, Any]) -> dict[str, Any]:
     mode = model_mode()
     runtime = selected_model_runtime()
-    if runtime == "modal":
-        backend = "modal_http"
-        engine = "onnxruntime+llama.cpp"
-        artifact_format = "onnx+gguf"
-        quantization = "int4+q4_k_m"
-        asr_model_id = os.environ.get("APP_MODAL_ASR_MODEL_ID", MODAL_ASR_MODEL_ID)
-        text_model_id = os.environ.get("APP_MODAL_MODEL_ID", MODAL_TEXT_MODEL_LABEL)
-    elif runtime == "hf_space":
-        backend = "nemo+llama.cpp"
-        engine = "nemo+llama.cpp"
-        artifact_format = "nemo_archive+gguf"
-        quantization = "unknown+q8_0"
-        asr_model_id = ASR_MODEL_ID
-        text_model_id = TEXT_MODEL_LABEL
-    else:
-        backend = "template"
-        engine = "none"
-        artifact_format = "none"
-        quantization = "none"
-        asr_model_id = ASR_MODEL_ID
-        text_model_id = TEXT_MODEL_LABEL
+    axes = runtime_axes(runtime)
     return {
         **packet,
+        "runtime_controls": runtime_controls(runtime),
         "provenance": {
             "packet_path": "product/5-idea-voice-contact-widget/v1/onboarding/metime-to.json",
             "app_version": APP_VERSION,
             "lifecycle_stage": lifecycle_stage(),
             "app_host": detect_app_host(),
             "model_runtime": runtime,
-            "model_backend": backend,
-            "inference_engine": engine,
-            "model_artifact_format": artifact_format,
-            "quantization": quantization,
+            "model_backend": axes["model_backend"],
+            "inference_engine": axes["inference_engine"],
+            "model_artifact_format": axes["model_artifact_format"],
+            "quantization": axes["quantization"],
             "mock_mode": "deterministic" if mode == "deterministic" else "off",
-            "fallback_used": runtime == "none",
-            "asr_model_id": asr_model_id,
-            "text_model_id": text_model_id,
+            "fallback_used": axes["fallback_used"],
+            "asr_model_id": axes["asr_model_id"],
+            "text_model_id": axes["text_model_id"],
             "concurrency": 1,
         },
     }
@@ -822,6 +900,108 @@ def call_modal(payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
         raise RuntimeError(f"modal_http_{exc.code}:{body}") from exc
 
 
+def hf_personal_base_url() -> str:
+    return os.environ.get("APP_HF_PERSONAL_BASE_URL", DEFAULT_HF_PERSONAL_BASE_URL).strip().rstrip("/")
+
+
+def hf_personal_auth_token() -> str:
+    return (
+        os.environ.get("APP_HF_PERSONAL_TOKEN", "").strip()
+        or os.environ.get("HF_TOKEN_2", "").strip()
+        or os.environ.get("HF_TOKEN", "").strip()
+    )
+
+
+def call_hf_personal(path: str, payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
+    base_url = hf_personal_base_url()
+    if not base_url:
+        raise RuntimeError("APP_HF_PERSONAL_BASE_URL is not set")
+    token = hf_personal_auth_token()
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    proxied_payload = dict(payload)
+    proxied_payload.pop("model_runtime", None)
+    started = time.time()
+    request = urllib.request.Request(
+        f"{base_url}{path}",
+        data=json.dumps(proxied_payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=modal_timeout_seconds()) as response:
+            body = response.read().decode("utf-8", errors="replace")
+            parsed = json.loads(body)
+            if not isinstance(parsed, dict):
+                raise RuntimeError("hf_personal_response_not_json_object")
+            return parsed, round((time.time() - started) * 1000)
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")[:500]
+        raise RuntimeError(f"hf_personal_http_{exc.code}:{body}") from exc
+
+
+def hf_personal_result_to_response(
+    local_trace: dict[str, Any],
+    result: dict[str, Any],
+    latency_ms: int,
+    *,
+    text_only: bool,
+) -> dict[str, Any]:
+    remote_trace = result.get("trace") if isinstance(result.get("trace"), dict) else {}
+    transcript = str(result.get("transcript") or remote_trace.get("transcript") or "").strip()
+    text_json = result.get("text") if isinstance(result.get("text"), dict) else {}
+    if not text_json:
+        text_json = ((remote_trace.get("text") or {}).get("output") or {}) if isinstance(remote_trace.get("text"), dict) else {}
+    text_json = normalize_text_output(text_json, transcript)
+    local_trace.update(
+        {
+            "text_only_smoke": text_only,
+            "model_runtime": "hf_personal_space",
+            "model_backend": "hf_space_proxy",
+            "inference_engine": "remote_space_api",
+            "model_artifact_format": "remote_space",
+            "quantization": "remote",
+            "model_id": f"{hf_personal_base_url()}:{'text-smoke' if text_only else 'process'}",
+            "fallback_used": bool(remote_trace.get("fallback_used")),
+            "fallback_reason": remote_trace.get("fallback_reason"),
+            "blocker": remote_trace.get("blocker"),
+            "timings_ms": {
+                "hf_personal_http": latency_ms,
+                "remote_total": (remote_trace.get("timings_ms") or {}).get("total"),
+            },
+            "remote_trace_id": remote_trace.get("trace_id"),
+            "asr": remote_trace.get("asr")
+            or {
+                "model_id": "supplied-transcript" if text_only else ASR_MODEL_ID,
+                "backend": "hf_space_proxy",
+                "inference_engine": "remote_space_api",
+                "model_artifact_format": "remote_space",
+                "quantization": "remote",
+                "target_lang": local_trace["asr_language_hint"],
+                "fallback_used": False,
+                "transcript": transcript,
+            },
+            "text": remote_trace.get("text")
+            or {
+                "model_id": TEXT_MODEL_LABEL,
+                "backend": "hf_space_proxy",
+                "inference_engine": "remote_space_api",
+                "model_artifact_format": "remote_space",
+                "quantization": "remote",
+                "fallback_used": bool(remote_trace.get("fallback_used")),
+                "output": text_json,
+            },
+        }
+    )
+    return {
+        "transcript": transcript,
+        "model_message_en": text_json["message_en"],
+        "text": text_json,
+        "trace": local_trace,
+    }
+
+
 def modal_result_to_response(
     packet: dict[str, Any],
     payload: dict[str, Any],
@@ -948,27 +1128,7 @@ def index() -> FileResponse:
 def health() -> dict[str, Any]:
     mode = model_mode()
     runtime = selected_model_runtime()
-    if runtime == "modal":
-        model_backend = "modal_http"
-        inference_engine = "onnxruntime+llama.cpp"
-        artifact_format = "onnx+gguf"
-        quantization = "int4+q4_k_m"
-        text_model_id = os.environ.get("APP_MODAL_MODEL_ID", MODAL_TEXT_MODEL_LABEL)
-        asr_model_id = os.environ.get("APP_MODAL_ASR_MODEL_ID", MODAL_ASR_MODEL_ID)
-    elif runtime == "hf_space":
-        model_backend = "nemo+llama.cpp"
-        inference_engine = "nemo+llama.cpp"
-        artifact_format = "nemo_archive+gguf"
-        quantization = "unknown+q8_0"
-        text_model_id = TEXT_MODEL_LABEL
-        asr_model_id = ASR_MODEL_ID
-    else:
-        model_backend = "template"
-        inference_engine = "none"
-        artifact_format = "none"
-        quantization = "none"
-        text_model_id = TEXT_MODEL_LABEL
-        asr_model_id = ASR_MODEL_ID
+    axes = runtime_axes(runtime)
     return {
         "ok": True,
         "app": "voice-reach-v1",
@@ -976,15 +1136,17 @@ def health() -> dict[str, Any]:
         "lifecycle_stage": lifecycle_stage(),
         "app_host": detect_app_host(),
         "model_runtime": runtime,
-        "model_backend": model_backend,
-        "inference_engine": inference_engine,
-        "model_artifact_format": artifact_format,
-        "quantization": quantization,
+        "model_backend": axes["model_backend"],
+        "inference_engine": axes["inference_engine"],
+        "model_artifact_format": axes["model_artifact_format"],
+        "quantization": axes["quantization"],
         "model_mode": mode,
-        "fallback_used": runtime == "none",
-        "asr_model_id": asr_model_id,
-        "text_model_id": text_model_id,
+        "fallback_used": axes["fallback_used"],
+        "asr_model_id": axes["asr_model_id"],
+        "text_model_id": axes["text_model_id"],
         "modal_configured": bool(modal_base_url()) if runtime == "modal" else None,
+        "hf_personal_configured": bool(hf_personal_base_url()) if runtime == "hf_personal_space" else None,
+        "runtime_switch_allowed": runtime_switch_allowed(),
         "concurrency": 1,
         "gradio_status_path": "/gradio",
         "trace_path": str(TRACE_PATH),
@@ -1008,6 +1170,7 @@ async def api_process(request: Request) -> JSONResponse:
     speech_mode = payload.get("speech_mode", packet["locale_defaults"]["default_speech_mode"])
     if speech_mode not in {"hindi", "hinglish"}:
         raise HTTPException(status_code=400, detail="Unsupported speech mode")
+    runtime = selected_model_runtime(payload.get("model_runtime"))
     duration_ms = int(payload.get("duration_ms") or payload.get("audio_duration_ms") or 0)
     if duration_ms > MAX_AUDIO_SECONDS * 1000:
         raise HTTPException(status_code=400, detail=f"Audio exceeds {MAX_AUDIO_SECONDS} second V1 smoke limit")
@@ -1018,17 +1181,22 @@ async def api_process(request: Request) -> JSONResponse:
         raise HTTPException(status_code=424, detail="Text generation failed in deterministic test mode")
 
     with PROCESS_LOCK:
-        if model_mode() == "deterministic":
+        if model_mode() == "deterministic" and runtime == "none":
             result = deterministic_process(packet, payload, "deterministic_mode")
             append_trace(result["trace"])
             return JSONResponse(result)
 
         try:
-            runtime = selected_model_runtime()
             if runtime == "modal":
                 trace = build_trace_base(packet, payload)
                 modal_result, modal_ms = call_modal(modal_payload(packet, payload, trace))
                 result = modal_result_to_response(packet, payload, trace, modal_result, modal_ms, text_only=False)
+                result["trace"]["audio_size_bytes"] = int(payload.get("audio_size_bytes") or 0)
+                result["trace"]["audio_duration_ms"] = duration_ms
+            elif runtime == "hf_personal_space":
+                trace = build_trace_base(packet, payload)
+                remote_result, remote_ms = call_hf_personal("/api/process", payload)
+                result = hf_personal_result_to_response(trace, remote_result, remote_ms, text_only=False)
                 result["trace"]["audio_size_bytes"] = int(payload.get("audio_size_bytes") or 0)
                 result["trace"]["audio_duration_ms"] = duration_ms
             elif runtime == "hf_space":
@@ -1044,15 +1212,15 @@ async def api_process(request: Request) -> JSONResponse:
             return JSONResponse(result)
         except Exception as exc:
             trace = build_trace_base(packet, payload)
-            runtime = selected_model_runtime()
+            axes = runtime_axes(runtime)
             trace.update(
                 {
                     "model_runtime": runtime,
-                    "model_backend": "modal_http" if runtime == "modal" else "nemo+llama.cpp",
-                    "inference_engine": "onnxruntime+llama.cpp" if runtime == "modal" else "nemo+llama.cpp",
-                    "model_artifact_format": "onnx+gguf" if runtime == "modal" else "nemo_archive+gguf",
-                    "quantization": "int4+q4_k_m" if runtime == "modal" else "unknown+q8_0",
-                    "model_id": f"{MODAL_ASR_MODEL_ID}+{MODAL_TEXT_MODEL_LABEL}" if runtime == "modal" else f"{ASR_MODEL_ID}+{TEXT_MODEL_LABEL}",
+                    "model_backend": axes["model_backend"],
+                    "inference_engine": axes["inference_engine"],
+                    "model_artifact_format": axes["model_artifact_format"],
+                    "quantization": axes["quantization"],
+                    "model_id": f"{axes['asr_model_id']}+{axes['text_model_id']}",
                     "fallback_used": True,
                     "fallback_reason": f"real_model_error:{type(exc).__name__}",
                     "blocker": str(exc),
@@ -1077,6 +1245,7 @@ async def api_text_smoke(request: Request) -> JSONResponse:
     speech_mode = payload.get("speech_mode", packet["locale_defaults"]["default_speech_mode"])
     if speech_mode not in {"hindi", "hinglish"}:
         raise HTTPException(status_code=400, detail="Unsupported speech mode")
+    runtime = selected_model_runtime(payload.get("model_runtime"))
 
     transcript = str(payload.get("transcript") or "").strip()
     if not transcript:
@@ -1084,7 +1253,7 @@ async def api_text_smoke(request: Request) -> JSONResponse:
 
     trace = build_trace_base(packet, payload)
     target_lang = trace["asr_language_hint"]
-    if model_mode() == "deterministic":
+    if model_mode() == "deterministic" and runtime == "none":
         text_json = deterministic_model_json(speech_mode, transcript)
         trace.update(
             {
@@ -1124,10 +1293,14 @@ async def api_text_smoke(request: Request) -> JSONResponse:
 
     started = time.time()
     try:
-        runtime = selected_model_runtime()
         if runtime == "modal":
             modal_result, modal_ms = call_modal(modal_payload(packet, payload, trace, transcript=transcript))
             result = modal_result_to_response(packet, payload, trace, modal_result, modal_ms, text_only=True)
+            append_trace(result["trace"])
+            return JSONResponse(result)
+        if runtime == "hf_personal_space":
+            remote_result, remote_ms = call_hf_personal("/api/text-smoke", payload)
+            result = hf_personal_result_to_response(trace, remote_result, remote_ms, text_only=True)
             append_trace(result["trace"])
             return JSONResponse(result)
         text_json, text_ms, raw_text = get_text_adapter().generate(packet, transcript, speech_mode, target_lang)
@@ -1172,16 +1345,16 @@ async def api_text_smoke(request: Request) -> JSONResponse:
         append_trace(trace)
         return JSONResponse({"transcript": transcript, "model_message_en": text_json["message_en"], "text": text_json, "trace": trace})
     except Exception as exc:
-        runtime = selected_model_runtime()
+        axes = runtime_axes(runtime)
         trace.update(
             {
                 "text_only_smoke": True,
                 "model_runtime": runtime,
-                "model_backend": "modal_http" if runtime == "modal" else "llama.cpp",
-                "inference_engine": "llama.cpp",
-                "model_artifact_format": "gguf",
-                "quantization": "q4_k_m" if runtime == "modal" else "q8_0",
-                "model_id": MODAL_TEXT_MODEL_LABEL if runtime == "modal" else TEXT_MODEL_LABEL,
+                "model_backend": axes["model_backend"],
+                "inference_engine": axes["inference_engine"],
+                "model_artifact_format": axes["model_artifact_format"],
+                "quantization": axes["quantization"],
+                "model_id": axes["text_model_id"],
                 "fallback_used": True,
                 "fallback_reason": f"real_text_model_error:{type(exc).__name__}",
                 "blocker": str(exc),
@@ -1283,8 +1456,9 @@ def main() -> int:
                     "audio_eval_consent": packet["audio_eval_consent"],
                     "app_host": detect_app_host(),
                     "model_mode": model_mode(),
-                    "model_runtime": "hf_space" if model_mode() == "real" else "none",
-                    "fallback_used": model_mode() != "real",
+                    "model_runtime": selected_model_runtime(),
+                    "runtime_switch_allowed": runtime_switch_allowed(),
+                    "fallback_used": selected_model_runtime() == "none",
                     "concurrency": 1,
                 },
                 indent=2,

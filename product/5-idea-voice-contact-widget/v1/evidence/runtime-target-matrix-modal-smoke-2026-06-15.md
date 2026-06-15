@@ -35,6 +35,13 @@ Important guardrail:
 - The app no longer auto-selects Modal just because `APP_MODAL_BASE_URL` exists.
 - Modal activates only when `VCW_MODEL_RUNTIME=modal`.
 - Submission profiles set `VCW_MODEL_RUNTIME=hf_space`.
+- The UI now always shows a `Model Runtime` selector with `HF hackathon space
+  (credit issue)`, `HF personal space`, and `Modal`.
+- `HF personal space` and `Modal` are selectable only when
+  `VCW_ALLOW_RUNTIME_SWITCH=1`.
+- `HF personal space` is proxied server-side through
+  `APP_HF_PERSONAL_BASE_URL`; browser clients receive only runtime labels, not
+  HF or Modal tokens.
 
 ## Modal Endpoint
 
@@ -221,3 +228,5 @@ Active app concerns: none from app list; Voice Contact Widget apps report tasks=
   `canPay=False`.
 - Full audio ASR proof is still pending for both Modal and HF Space paths; the
   proofs above used supplied transcripts to focus on text-model reachability.
+- The 2026-06-16 Model Runtime UI switch change is locally verified only; it is
+  not a fresh hosted Modal/HF paid-runtime proof.

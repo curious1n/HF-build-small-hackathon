@@ -95,6 +95,11 @@ function buildHistory(req, conversation) {
       lines: [turn.raw_message || req.rawMessage],
     }));
   }
+  if (req.modelBacked && req.pendingInboundMessage) {
+    return [
+      { time: 'Now', lines: [req.pendingInboundMessage] },
+    ];
+  }
   if (req.modelBacked) return [];
   if (req.rawMessage) {
     return [
@@ -142,9 +147,8 @@ function Stage(state, on) {
     ? 'the requested slot needs an alternative.'
     : req.status === 'clarification'
       ? 'I need one more detail before owner approval.'
-      : req.modelBacked && state.syncStatus === 'syncing'
-        ? 'I am checking this with the live model.'
       : 'your booking is confirmed.';
+  const suppressModelEmptyReply = req.modelBacked && !conversation;
 
   /* customer's incoming messages */
   const incoming = buildHistory(req, conversation).map(m =>
@@ -154,7 +158,7 @@ function Stage(state, on) {
         h('div', { class: 'tstamp' }, m.time))));
 
   /* our outgoing draft reply — live preview */
-  const outgoing = modelReadyForInput ? null : h('div', { class: 'msg out' },
+  const outgoing = modelReadyForInput || suppressModelEmptyReply ? null : h('div', { class: 'msg out' },
     h('div', { class: 'bubble out' },
       h('p', {}, 'Hi ', h('strong', {}, first), `, ${leadLine}`),
       h('p', {}, h('strong', {}, actV), ' at ', h('strong', {}, venue.name),
@@ -179,7 +183,7 @@ function Stage(state, on) {
       h('div', { class: 'chat-thread' },
           h('div', { class: 'day-chip' }, 'Today'),
           ...incoming,
-          !modelReadyForInput && h('div', { class: 'draft-divider', 'data-design-id': 'reply-draft' }, h('span', { class: 'u-dot' }), draftLabelForState(state)),
+          !modelReadyForInput && !suppressModelEmptyReply && h('div', { class: 'draft-divider', 'data-design-id': 'reply-draft' }, h('span', { class: 'u-dot' }), draftLabelForState(state)),
           outgoing)),
       req.modelBacked && TryMeComposer(state, on)),
     showPreviewMeta && h('div', { class: 'preview-meta' },
@@ -388,7 +392,8 @@ function modelRunState(state) {
   const run = state.modelRuns?.[req?.id] || {};
   const validation = extraction.validation || conversation?.model_validation || run.validation || {};
   const runtimeAxes = trace?.runtime_axes || {};
-  const status = state.syncStatus === 'syncing' && req?.modelBacked
+  const calling = (state.syncStatus === 'syncing' && req?.modelBacked) || run.status === 'calling';
+  const status = calling
     ? 'Calling'
     : run.status === 'error'
       ? 'Error'
@@ -397,10 +402,20 @@ function modelRunState(state) {
         : extraction.ok
           ? 'Complete'
           : 'Ready';
+  const elapsed = calling && run.startedAt ? Date.now() - run.startedAt : '';
   return {
     status,
     traceId: extraction.trace_id || run.traceId || conversation?.trace_id || 'pending',
     latency: extraction.client_latency_ms || extraction.latency_ms || run.latencyMs,
+    elapsed,
+    signal: calling
+      ? 'HTTP request open; waiting for Modal response'
+      : extraction.ok
+        ? 'Modal response received'
+        : run.status === 'error'
+          ? 'Request ended with blocker'
+          : 'Ready for edited message',
+    timeoutSeconds: run.timeoutSeconds || state.modalStatus?.timeout_seconds,
     fallbackUsed: extraction.fallback_used ?? run.fallbackUsed,
     validation,
     backend: extraction.backend || runtimeAxes.model_backend || run.backend || 'modal_http',
@@ -427,6 +442,9 @@ function ModelRunBlock(state) {
     h('div', { class: 'model-grid' },
       SimpleDetailRow('Runtime', 'Modal'),
       SimpleDetailRow('Backend', info.backend),
+      SimpleDetailRow('Signal', info.signal),
+      SimpleDetailRow('Elapsed', formatLatency(info.elapsed)),
+      SimpleDetailRow('Timeout', info.timeoutSeconds ? `${info.timeoutSeconds}s` : 'Pending'),
       SimpleDetailRow('Latency', formatLatency(info.latency)),
       SimpleDetailRow('Schema', schema),
       SimpleDetailRow('Fallback', fallback),

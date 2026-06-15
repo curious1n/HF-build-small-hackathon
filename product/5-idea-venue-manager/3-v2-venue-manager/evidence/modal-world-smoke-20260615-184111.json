@@ -1,0 +1,467 @@
+{
+  "approval": "COAGENTS.md standing bounded approval: Venue Manager v2 Modal/Nemotron single-scenario smoke; max $20; max 15 minutes; stop after one world-demo scenario returns schema-valid fallback_used=false result or exact blocker.",
+  "backend_action": "ready_for_owner_review",
+  "fallback_used": false,
+  "first_failure": "",
+  "generated_at": "2026-06-15T18:41:11+00:00",
+  "http_status": 200,
+  "max_seconds": 900.0,
+  "modal_status": {
+    "auth_configured": true,
+    "base_url_configured": true,
+    "configured": true,
+    "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+    "timeout_seconds": 900.0
+  },
+  "passed": true,
+  "proof_boundary": "One local v2 world-demo simulator scenario through server-side Modal extraction. No broad eval, public release, live WhatsApp send, HF Space proof, or judge-ready claim.",
+  "response": {
+    "conversation": {
+      "agent_trace": [
+        {
+          "adapter": "simulator",
+          "label": "Simulator WhatsApp message normalized",
+          "message_id": "venue-v2-warm-modal-20260615-001-1",
+          "step": "adapter_envelope",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral"
+        },
+        {
+          "label": "Model extraction validated",
+          "step": "model_validation",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral",
+          "validation": {
+            "errors": [],
+            "valid": true
+          }
+        },
+        {
+          "flow_state": "ready_for_owner_review",
+          "label": "Deterministic truth check completed before owner review",
+          "step": "truth_check_initial",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral"
+        },
+        {
+          "label": "Owner review required before outbound send",
+          "owner_review_required": true,
+          "step": "owner_review_pending",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral"
+        }
+      ],
+      "approval_source": null,
+      "approved_extraction": {},
+      "booking_record": {
+        "budget_amount": 6000,
+        "budget_currency": "Rs",
+        "customer_name": "Aman Sharma",
+        "date_text": "tomorrow",
+        "phone": "+91 98765 43210",
+        "players": 12,
+        "quoted_price": 6000,
+        "registered_player_id": "aman-sharma",
+        "registered_team_id": "corporate-aman",
+        "registered_team_name": "Aman Corporate XI",
+        "slot_id": "morning",
+        "source": "model_shaped_fixture_plus_backend_rules",
+        "sport": "cricket",
+        "status": "ready_for_owner_review",
+        "time_window": "morning",
+        "venue_id": "north-field",
+        "venue_name": "North Field"
+      },
+      "candidate_extraction": {
+        "booking_status": "ready_for_owner_review",
+        "budget": {
+          "amount": 6000,
+          "currency": "Rs"
+        },
+        "confidence": 0.95,
+        "customer": {
+          "name": "Aman Sharma",
+          "phone": "+91 98765 43210"
+        },
+        "date_text": "tomorrow",
+        "intent": "book_slot",
+        "missing_fields": [],
+        "owner_next_action": "Check availability of North Field morning slot for 12 players on natural grass within budget and confirm booking.",
+        "players": 12,
+        "reply_draft": "Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?",
+        "sport": "cricket",
+        "surface_preference": "Natural grass",
+        "time_window": "morning",
+        "venue_preference": "North Field"
+      },
+      "created_at": "2026-06-15T18:41:11+00:00",
+      "model_extraction": {
+        "backend": "modal_http",
+        "blocker": "",
+        "booking": {
+          "booking_status": "ready_for_owner_review",
+          "budget": {
+            "amount": 6000,
+            "currency": "Rs"
+          },
+          "confidence": 0.95,
+          "customer": {
+            "name": "Aman Sharma",
+            "phone": "+91 98765 43210"
+          },
+          "date_text": "tomorrow",
+          "intent": "book_slot",
+          "missing_fields": [],
+          "owner_next_action": "Check availability of North Field morning slot for 12 players on natural grass within budget and confirm booking.",
+          "players": 12,
+          "reply_draft": "Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?",
+          "sport": "cricket",
+          "surface_preference": "Natural grass",
+          "time_window": "morning",
+          "venue_preference": "North Field"
+        },
+        "client_latency_ms": 592053,
+        "fallback_used": false,
+        "gpu": "H100:2",
+        "inference_engine": "vllm",
+        "latency_ms": 577572,
+        "model_artifact_format": "safetensors",
+        "model_family": "Nemotron Cascade 2 30B-A3B",
+        "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+        "ok": true,
+        "quantization": "bf16",
+        "raw_text": "{\n  \"intent\": \"book_slot\",\n  \"customer\": {\n    \"name\": \"Aman Sharma\",\n    \"phone\": \"+91 98765 43210\"\n  },\n  \"sport\": \"cricket\",\n  \"date_text\": \"tomorrow\",\n  \"time_window\": \"morning\",\n  \"venue_preference\": \"North Field\",\n  \"surface_preference\": \"Natural grass\",\n  \"players\": 12,\n  \"budget\": {\n    \"amount\": 6000,\n    \"currency\": \"Rs\"\n  },\n  \"booking_status\": \"ready_for_owner_review\",\n  \"missing_fields\": [],\n  \"confidence\": 0.95,\n  \"owner_next_action\": \"Check availability of North Field morning slot for 12 players on natural grass within budget and confirm booking.\",\n  \"reply_draft\": \"Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?\"\n}",
+        "runtime_config": {
+          "timeout_seconds": 1800,
+          "warm_pool": {
+            "buffer_containers": 0,
+            "min_containers": 0,
+            "scaledown_window_seconds": 60
+          }
+        },
+        "tensor_parallel_size": 2,
+        "timing_ms": {
+          "generation_end": 577572,
+          "generation_start": 571093,
+          "load_llm_end": 571093,
+          "load_llm_start": 0,
+          "parse_validation_end": 577572,
+          "parse_validation_start": 577572,
+          "prompt_build_end": 571093,
+          "prompt_build_start": 571093,
+          "request_received": 0
+        },
+        "trace_id": "venue-v2-warm-modal-20260615-001",
+        "validation": {
+          "errors": [],
+          "valid": true
+        }
+      },
+      "model_validation": {
+        "errors": [],
+        "valid": true
+      },
+      "outbound_message": {
+        "channel": "whatsapp_simulator",
+        "delivery_state": "drafted_for_owner",
+        "kind": "confirmation",
+        "reason": "ready_for_owner_review",
+        "text": "Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?"
+      },
+      "owner_correction_diff": [],
+      "owner_review_action": null,
+      "owner_review_required": true,
+      "player_phone": "+91 98765 43210",
+      "send_adapter": {
+        "adapter": "simulator",
+        "delivery_state": "not_sent"
+      },
+      "session_id": "venue-v2-warm-modal-20260615-001",
+      "status": "ready_for_owner_review",
+      "terminal_state": null,
+      "trace_id": "venue-v2-warm-modal-20260615-001",
+      "truth_check_final": {},
+      "truth_check_initial": {
+        "alternatives": [
+          {
+            "rate": 6000,
+            "slot_id": "morning",
+            "slot_label": "8 AM - 12 PM",
+            "venue_id": "north-field",
+            "venue_name": "North Field"
+          },
+          {
+            "rate": 5500,
+            "slot_id": "morning",
+            "slot_label": "8 AM - 12 PM",
+            "venue_id": "south-field",
+            "venue_name": "South Field"
+          }
+        ],
+        "conflicts": [],
+        "eligible_for_hold": true,
+        "flow_state": "ready_for_owner_review",
+        "hold_key": "north-field:morning:tomorrow",
+        "matched_player_id": "aman-sharma",
+        "matched_slot_id": "morning",
+        "matched_slot_label": "8 AM - 12 PM",
+        "matched_team_id": "corporate-aman",
+        "matched_team_name": "Aman Corporate XI",
+        "matched_venue_id": "north-field",
+        "matched_venue_name": "North Field",
+        "missing_fields": [],
+        "owner_review_required": true,
+        "provisional_hold": {
+          "eligible": true,
+          "hold_key": "north-field:morning:tomorrow",
+          "policy": "owner_approval_required_before_send"
+        },
+        "quoted_price": 6000,
+        "status": "available"
+      },
+      "turn_count": 1,
+      "turns": [
+        {
+          "adapter_envelope": {
+            "adapter": "simulator",
+            "message_id": "venue-v2-warm-modal-20260615-001-1",
+            "provider_metadata": {},
+            "received_at": "2026-06-15T18:31:19+00:00",
+            "sender_phone": "+91 98765 43210",
+            "text": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210."
+          },
+          "raw_message": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210.",
+          "received_at": "2026-06-15T18:31:19+00:00",
+          "turn_index": 1
+        }
+      ],
+      "updated_at": "2026-06-15T18:41:11+00:00"
+    },
+    "ok": true,
+    "proof_boundary": {
+      "adapter": "simulator",
+      "extraction_mode": "modal",
+      "live_outbound_proven": false,
+      "live_whatsapp_inbound_proven": false
+    }
+  },
+  "run_label": "venue-manager-v2-world-modal-smoke",
+  "runtime_axes": {
+    "app_host": "local",
+    "fallback_used": false,
+    "lifecycle_stage": "testing",
+    "live_whatsapp_inbound": false,
+    "live_whatsapp_outbound": false,
+    "model_backend": "modal_http",
+    "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+    "model_runtime": "modal",
+    "send_adapter": "simulator"
+  },
+  "scenario": "normal",
+  "session_id": "venue-v2-warm-modal-20260615-001",
+  "terminal_state": null,
+  "trace_id": "venue-v2-warm-modal-20260615-001",
+  "trace_response": {
+    "ok": true,
+    "trace": {
+      "adapter_envelope": {
+        "adapter": "simulator",
+        "message_id": "venue-v2-warm-modal-20260615-001-1",
+        "provider_metadata": {},
+        "received_at": "2026-06-15T18:31:19+00:00",
+        "sender_phone": "+91 98765 43210",
+        "text": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210."
+      },
+      "agent_trace": [
+        {
+          "adapter": "simulator",
+          "label": "Simulator WhatsApp message normalized",
+          "message_id": "venue-v2-warm-modal-20260615-001-1",
+          "step": "adapter_envelope",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral"
+        },
+        {
+          "label": "Model extraction validated",
+          "step": "model_validation",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral",
+          "validation": {
+            "errors": [],
+            "valid": true
+          }
+        },
+        {
+          "flow_state": "ready_for_owner_review",
+          "label": "Deterministic truth check completed before owner review",
+          "step": "truth_check_initial",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral"
+        },
+        {
+          "label": "Owner review required before outbound send",
+          "owner_review_required": true,
+          "step": "owner_review_pending",
+          "timestamp": "2026-06-15T18:41:11+00:00",
+          "tone": "neutral"
+        }
+      ],
+      "approved_extraction": {},
+      "backend_action": "ready_for_owner_review",
+      "failure_reason": null,
+      "inbound_turns": [
+        {
+          "adapter_envelope": {
+            "adapter": "simulator",
+            "message_id": "venue-v2-warm-modal-20260615-001-1",
+            "provider_metadata": {},
+            "received_at": "2026-06-15T18:31:19+00:00",
+            "sender_phone": "+91 98765 43210",
+            "text": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210."
+          },
+          "raw_message": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210.",
+          "received_at": "2026-06-15T18:31:19+00:00",
+          "turn_index": 1
+        }
+      ],
+      "model_extraction": {
+        "backend": "modal_http",
+        "blocker": "",
+        "booking": {
+          "booking_status": "ready_for_owner_review",
+          "budget": {
+            "amount": 6000,
+            "currency": "Rs"
+          },
+          "confidence": 0.95,
+          "customer": {
+            "name": "Aman Sharma",
+            "phone": "+91 98765 43210"
+          },
+          "date_text": "tomorrow",
+          "intent": "book_slot",
+          "missing_fields": [],
+          "owner_next_action": "Check availability of North Field morning slot for 12 players on natural grass within budget and confirm booking.",
+          "players": 12,
+          "reply_draft": "Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?",
+          "sport": "cricket",
+          "surface_preference": "Natural grass",
+          "time_window": "morning",
+          "venue_preference": "North Field"
+        },
+        "client_latency_ms": 592053,
+        "fallback_used": false,
+        "gpu": "H100:2",
+        "inference_engine": "vllm",
+        "latency_ms": 577572,
+        "model_artifact_format": "safetensors",
+        "model_family": "Nemotron Cascade 2 30B-A3B",
+        "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+        "ok": true,
+        "quantization": "bf16",
+        "raw_text": "{\n  \"intent\": \"book_slot\",\n  \"customer\": {\n    \"name\": \"Aman Sharma\",\n    \"phone\": \"+91 98765 43210\"\n  },\n  \"sport\": \"cricket\",\n  \"date_text\": \"tomorrow\",\n  \"time_window\": \"morning\",\n  \"venue_preference\": \"North Field\",\n  \"surface_preference\": \"Natural grass\",\n  \"players\": 12,\n  \"budget\": {\n    \"amount\": 6000,\n    \"currency\": \"Rs\"\n  },\n  \"booking_status\": \"ready_for_owner_review\",\n  \"missing_fields\": [],\n  \"confidence\": 0.95,\n  \"owner_next_action\": \"Check availability of North Field morning slot for 12 players on natural grass within budget and confirm booking.\",\n  \"reply_draft\": \"Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?\"\n}",
+        "runtime_config": {
+          "timeout_seconds": 1800,
+          "warm_pool": {
+            "buffer_containers": 0,
+            "min_containers": 0,
+            "scaledown_window_seconds": 60
+          }
+        },
+        "tensor_parallel_size": 2,
+        "timing_ms": {
+          "generation_end": 577572,
+          "generation_start": 571093,
+          "load_llm_end": 571093,
+          "load_llm_start": 0,
+          "parse_validation_end": 577572,
+          "parse_validation_start": 577572,
+          "prompt_build_end": 571093,
+          "prompt_build_start": 571093,
+          "request_received": 0
+        },
+        "trace_id": "venue-v2-warm-modal-20260615-001",
+        "validation": {
+          "errors": [],
+          "valid": true
+        }
+      },
+      "model_validation": {
+        "errors": [],
+        "valid": true
+      },
+      "outbound_message": {
+        "channel": "whatsapp_simulator",
+        "delivery_state": "drafted_for_owner",
+        "kind": "confirmation",
+        "reason": "ready_for_owner_review",
+        "text": "Hi Aman, we have a slot at North Field tomorrow morning (8 AM - 12 PM) for 12 players on natural grass at Rs 6000. Shall we confirm?"
+      },
+      "owner_correction_diff": [],
+      "owner_review_action": null,
+      "raw_message": "Hi, this is Aman Sharma. Need a cricket ground tomorrow morning 8 AM to 12 PM for 12 players. Natural grass preferred, North Field if available. Budget is around Rs 6000. My number is +91 98765 43210.",
+      "runtime_axes": {
+        "app_host": "local",
+        "fallback_used": false,
+        "lifecycle_stage": "testing",
+        "live_whatsapp_inbound": false,
+        "live_whatsapp_outbound": false,
+        "model_backend": "modal_http",
+        "model_id": "nvidia/Nemotron-Cascade-2-30B-A3B",
+        "model_runtime": "modal",
+        "send_adapter": "simulator"
+      },
+      "send_adapter": {
+        "adapter": "simulator",
+        "delivery_state": "not_sent"
+      },
+      "session_id": "venue-v2-warm-modal-20260615-001",
+      "terminal_state": null,
+      "trace_id": "venue-v2-warm-modal-20260615-001",
+      "truth_check_final": {},
+      "truth_check_initial": {
+        "alternatives": [
+          {
+            "rate": 6000,
+            "slot_id": "morning",
+            "slot_label": "8 AM - 12 PM",
+            "venue_id": "north-field",
+            "venue_name": "North Field"
+          },
+          {
+            "rate": 5500,
+            "slot_id": "morning",
+            "slot_label": "8 AM - 12 PM",
+            "venue_id": "south-field",
+            "venue_name": "South Field"
+          }
+        ],
+        "conflicts": [],
+        "eligible_for_hold": true,
+        "flow_state": "ready_for_owner_review",
+        "hold_key": "north-field:morning:tomorrow",
+        "matched_player_id": "aman-sharma",
+        "matched_slot_id": "morning",
+        "matched_slot_label": "8 AM - 12 PM",
+        "matched_team_id": "corporate-aman",
+        "matched_team_name": "Aman Corporate XI",
+        "matched_venue_id": "north-field",
+        "matched_venue_name": "North Field",
+        "missing_fields": [],
+        "owner_review_required": true,
+        "provisional_hold": {
+          "eligible": true,
+          "hold_key": "north-field:morning:tomorrow",
+          "policy": "owner_approval_required_before_send"
+        },
+        "quoted_price": 6000,
+        "status": "available"
+      }
+    }
+  },
+  "validation": {
+    "errors": [],
+    "valid": true
+  },
+  "wall_clock_seconds": 592.055
+}

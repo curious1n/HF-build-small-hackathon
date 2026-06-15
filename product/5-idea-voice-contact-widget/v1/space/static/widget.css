@@ -164,16 +164,52 @@ button:disabled {
   border-radius: var(--radius-control);
 }
 
+.runtime-segmented {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .segment {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-2);
   color: var(--color-text-muted);
   background: transparent;
   border-radius: calc(var(--radius-control) - 4px);
   font-weight: 800;
+  line-height: 1.12;
+}
+
+.segment-label,
+.segment-note {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.segment-label {
+  font-size: 0.86rem;
+}
+
+.segment-note {
+  color: color-mix(in srgb, currentColor 78%, transparent);
+  font-size: 0.68rem;
+  font-weight: 750;
 }
 
 .segment.is-selected {
   color: #fff;
   background: var(--color-primary);
+}
+
+.segment.is-selected .segment-note {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.segment:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .recorder-panel {
@@ -422,6 +458,10 @@ button:focus-visible {
   .action-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .runtime-segmented {
+    grid-template-columns: 1fr;
   }
 
   .destination {

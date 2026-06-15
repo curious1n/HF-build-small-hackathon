@@ -27,17 +27,21 @@ remains untouched.
 ## Standing Modal Smoke Default
 
 For this v2 folder, @cu has approved a default Modal/Nemotron single-scenario
-smoke without repeated approval prompts:
+smoke without repeated approval prompts. This inherits the active-candidate
+Modal warm/runtime standing approval in `COAGENTS.md`, including bounded warm
+pool or always-on runtime when needed for demo responsiveness:
 
 - Budget: max `$20`.
 - Duration: max `15 minutes` wall-clock.
 - Stop condition: stop after one world-demo scenario returns schema-valid
   `fallback_used=false` result, or after recording the exact blocker.
 - Scope: the scale-to-zero Modal `venue-manager-agent-cascade` path for
-  `nvidia/Nemotron-Cascade-2-30B-A3B`.
+  `nvidia/Nemotron-Cascade-2-30B-A3B`, or a bounded warm/always-on window on the
+  same path while running the approved smoke.
 
-This does not approve warm pools, always-on services, new GPU classes,
-broad/batch evals, public release, judge-ready claims, or other products.
+Codex must scale down or stop the warm/always-on setting after the bounded run
+unless @cu explicitly extends it. This does not approve new GPU classes,
+broad/batch evals, public release, judge-ready claims, or parked products.
 Token-backed model-file preflight is still required if not already verified in
 the active thread.
 

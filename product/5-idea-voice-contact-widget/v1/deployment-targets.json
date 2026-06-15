@@ -7,7 +7,14 @@
     "token_env": "HF_TOKEN_2",
     "space_hardware": "cpu-basic",
     "model_runtime": "modal",
+    "allow_runtime_switch": true,
+    "runtime_switch_options": [
+      "hf_space",
+      "hf_personal_space",
+      "modal"
+    ],
     "modal_endpoint": "https://curious1n--voice-reach-v1-modal-process.modal.run",
+    "hf_personal_space_url": "https://curieous-voice-reach.hf.space",
     "modal_app": "voice-reach-v1-modal",
     "submission_allowed": false,
     "notes": [
@@ -24,6 +31,13 @@
     "token_env": "HF_TOKEN_2",
     "space_hardware": "t4-medium",
     "model_runtime": "hf_space",
+    "allow_runtime_switch": true,
+    "runtime_switch_options": [
+      "hf_space",
+      "hf_personal_space",
+      "modal"
+    ],
+    "hf_personal_space_url": "https://curieous-voice-reach.hf.space",
     "submission_allowed": false,
     "notes": [
       "Testing-only profile for proving the HF GPU path using user-account credits.",
@@ -38,6 +52,10 @@
     "token_env": "HF_TOKEN_2",
     "space_hardware": "t4-medium",
     "model_runtime": "hf_space",
+    "allow_runtime_switch": false,
+    "runtime_switch_options": [
+      "hf_space"
+    ],
     "submission_allowed": true,
     "notes": [
       "Official submission setting.",

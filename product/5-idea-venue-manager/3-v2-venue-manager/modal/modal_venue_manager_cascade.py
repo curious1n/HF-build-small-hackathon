@@ -29,6 +29,11 @@ GPU_CONFIG = os.environ.get("VENUE_MODAL_GPU", "H100:2")
 TENSOR_PARALLEL_SIZE = int(os.environ.get("VENUE_CASCADE_TENSOR_PARALLEL", "2"))
 MAX_MODEL_LEN = int(os.environ.get("VENUE_CASCADE_MAX_MODEL_LEN", "4096"))
 MAX_TOKENS = int(os.environ.get("VENUE_CASCADE_MAX_TOKENS", "1200"))
+MIN_CONTAINERS = int(os.environ.get("VENUE_MODAL_MIN_CONTAINERS", "0"))
+BUFFER_CONTAINERS = int(os.environ.get("VENUE_MODAL_BUFFER_CONTAINERS", "0"))
+SCALEDOWN_WINDOW = int(
+    os.environ.get("VENUE_MODAL_SCALEDOWN_WINDOW", "900" if MIN_CONTAINERS else "60")
+)
 
 app = modal.App(APP_NAME)
 cache_volume = modal.Volume.from_name(CACHE_VOLUME_NAME, create_if_missing=True)
@@ -265,6 +270,17 @@ def _validate_booking(value: Any) -> list[str]:
     return errors
 
 
+def _runtime_config() -> dict[str, Any]:
+    return {
+        "warm_pool": {
+            "min_containers": MIN_CONTAINERS,
+            "buffer_containers": BUFFER_CONTAINERS,
+            "scaledown_window_seconds": SCALEDOWN_WINDOW,
+        },
+        "timeout_seconds": 1800,
+    }
+
+
 def _run_model(payload: dict[str, Any]) -> dict[str, Any]:
     from vllm import SamplingParams
 
@@ -305,6 +321,7 @@ def _run_model(payload: dict[str, Any]) -> dict[str, Any]:
         "quantization": "bf16",
         "gpu": GPU_CONFIG,
         "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
+        "runtime_config": _runtime_config(),
         "fallback_used": False,
         "latency_ms": _duration_ms(started),
         "timing_ms": timing_ms,
@@ -369,6 +386,7 @@ def _run_model_batch(payload: dict[str, Any]) -> dict[str, Any]:
             "quantization": "bf16",
             "gpu": GPU_CONFIG,
             "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
+            "runtime_config": _runtime_config(),
             "fallback_used": False,
             "latency_ms": _duration_ms(started),
             "timing_ms": timing_ms,
@@ -400,6 +418,7 @@ def _run_model_batch(payload: dict[str, Any]) -> dict[str, Any]:
                 "quantization": "bf16",
                 "gpu": GPU_CONFIG,
                 "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
+                "runtime_config": _runtime_config(),
                 "fallback_used": False,
                 "latency_ms": _duration_ms(started),
                 "timing_ms": timing_ms,
@@ -423,6 +442,7 @@ def _run_model_batch(payload: dict[str, Any]) -> dict[str, Any]:
         "quantization": "bf16",
         "gpu": GPU_CONFIG,
         "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
+        "runtime_config": _runtime_config(),
         "fallback_used": False,
         "latency_ms": _duration_ms(started),
         "timing_ms": timing_ms,
@@ -473,9 +493,16 @@ def _structured_outputs_params() -> Any | None:
 
 @app.function(
     image=image,
+    env={
+        "VENUE_MODAL_MIN_CONTAINERS": str(MIN_CONTAINERS),
+        "VENUE_MODAL_BUFFER_CONTAINERS": str(BUFFER_CONTAINERS),
+        "VENUE_MODAL_SCALEDOWN_WINDOW": str(SCALEDOWN_WINDOW),
+    },
     gpu=GPU_CONFIG,
     timeout=1800,
-    scaledown_window=60,
+    min_containers=MIN_CONTAINERS or None,
+    buffer_containers=BUFFER_CONTAINERS or None,
+    scaledown_window=SCALEDOWN_WINDOW,
     volumes={"/cache": cache_volume},
     secrets=[
         modal.Secret.from_name(AUTH_SECRET_NAME),
@@ -508,6 +535,7 @@ def extract_booking(
             "quantization": "bf16",
             "gpu": GPU_CONFIG,
             "tensor_parallel_size": TENSOR_PARALLEL_SIZE,
+            "runtime_config": _runtime_config(),
             "fallback_used": False,
             "latency_ms": 0,
             "timing_ms": {},

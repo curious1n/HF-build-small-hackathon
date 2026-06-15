@@ -137,6 +137,32 @@ def build_hosted_demo() -> gr.Blocks:
             padding=False,
             js_on_load=_hosted_js(),
         )
+        backend_request = gr.Textbox(visible=False, container=False, label="Backend request")
+        backend_response = gr.Textbox(visible=False, container=False, label="Backend response")
+        gr.Button("Bootstrap", visible=False).click(
+            fn=_hosted_bootstrap,
+            inputs=backend_request,
+            outputs=backend_response,
+            api_name="epic_bootstrap",
+            show_progress="hidden",
+            queue=True,
+        )
+        gr.Button("Generate Goal", visible=False).click(
+            fn=_hosted_generate_goal,
+            inputs=backend_request,
+            outputs=backend_response,
+            api_name="epic_generate_goal",
+            show_progress="hidden",
+            queue=True,
+        )
+        gr.Button("DIY Preview", visible=False).click(
+            fn=_hosted_diy_preview,
+            inputs=backend_request,
+            outputs=backend_response,
+            api_name="epic_diy_preview",
+            show_progress="hidden",
+            queue=True,
+        )
     return demo
 
 
@@ -149,11 +175,19 @@ def _hosted_css() -> str:
             (DIY_FRONTEND_ROOT / "styles" / "diy.css").read_text(encoding="utf-8"),
         ]
     )
-    return (
-        ".gradio-container{max-width:none!important;padding:0!important;background:#111!important;}"
+    hosted_overrides = (
+        ":root{color-scheme:light;}"
+        "html,body{background:#f4f5f7!important;color-scheme:light!important;}"
+        "gradio-app,.gradio-container{color-scheme:light!important;}"
+        ".gradio-container{max-width:none!important;padding:0!important;background:#f4f5f7!important;color:#353a42!important;}"
+        ".dark .gradio-container,.gradio-container.dark{background:#f4f5f7!important;color:#353a42!important;}"
         "footer{display:none!important;}"
-        "#epic-hosted-shell{padding:0!important;margin:0!important;}"
+        "#epic-hosted-shell{padding:0!important;margin:0!important;background:var(--page-bg)!important;color:var(--body-color)!important;}"
+    )
+    return (
+        hosted_overrides
         + css
+        + hosted_overrides
     )
 
 
@@ -172,9 +206,80 @@ def _hosted_js() -> str:
     bootstrap = (
         "window.EPIC_ASSET_BASE = '';"
         "window.EPIC_EMBEDDED_SPACE_MODE = true;"
+        "window.EPIC_GRADIO_API_PREFIX = '/gradio_api';"
         f"window.EPIC_ASSET_MANIFEST = {json.dumps(manifest, separators=(',', ':'))};"
     )
     return bootstrap + "\n" + js
+
+
+def _decode_request(payload_json: str | None) -> dict[str, Any]:
+    if not payload_json:
+        return {}
+    try:
+        payload = json.loads(payload_json)
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _hosted_bootstrap(payload_json: str | None = None) -> str:
+    payload = build_app_bootstrap()
+    payload["backend_bridge"] = {
+        "transport": "gradio_blocks_named_api",
+        "bootstrap_endpoint": "epic_bootstrap",
+        "generate_endpoint": "epic_generate_goal",
+        "diy_preview_endpoint": "epic_diy_preview",
+        "model_runtime": "none",
+        "model_backend": "static_review_asset",
+        "fallback_used": True,
+    }
+    return json.dumps(payload, separators=(",", ":"))
+
+
+def _hosted_generate_goal(payload_json: str | None = None) -> str:
+    payload = _decode_request(payload_json)
+    generated = build_generated_goal(
+        str(payload.get("ordinary_goal") or ""),
+        str(
+            payload.get("ui_theme_id")
+            or payload.get("theme_id_at_creation")
+            or payload.get("theme_id")
+            or "questbook"
+        ),
+        selected_generation_reference_ids=[
+            str(item) for item in payload.get("selected_generation_reference_ids", []) if str(item).strip()
+        ],
+        audio_used_parent_reference=bool(payload.get("audio_used_parent_reference")),
+    )
+    generated["provenance"] = {
+        **generated.get("provenance", {}),
+        "app_host": "hf_space_gradio_blocks",
+        "model_runtime": "none",
+        "model_backend": "static_review_asset",
+        "backend_transport": "gradio_blocks_named_api",
+        "api_name": "epic_generate_goal",
+        "fallback_reason": "deterministic hosted dry-run; Modal/live model not wired to hosted app",
+    }
+    return json.dumps(generated, separators=(",", ":"))
+
+
+def _hosted_diy_preview(payload_json: str | None = None) -> str:
+    payload = _decode_request(payload_json)
+    preview = build_diy_state(
+        str(payload.get("theme_id") or payload.get("selected_theme_id") or "questbook"),
+        str(payload.get("ordinary_goal") or ""),
+        selected_generation_reference_ids=[
+            str(item) for item in payload.get("selected_generation_reference_ids", []) if str(item).strip()
+        ],
+    )
+    preview["backend_bridge"] = {
+        "transport": "gradio_blocks_named_api",
+        "api_name": "epic_diy_preview",
+        "model_runtime": "none",
+        "model_backend": "static_review_asset",
+        "fallback_used": True,
+    }
+    return json.dumps(preview, separators=(",", ":"))
 
 
 def _data_uri(path: Path) -> str:
