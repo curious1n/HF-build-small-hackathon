@@ -22,6 +22,9 @@ Voice Reach V1 is a metime.to voice contact widget that lets a site visitor
 speak in Hindi or Hinglish, review an editable English contact message, and
 send it through a site-owner contact flow.
 
+To use it: add `<iframe src="https://build-small-hackathon-voice-reach.hf.space" title="Voice Reach V1" allow="microphone" style="width:100%;height:640px;border:0;"></iframe>` to your website 
+- it was tested on a few business owner's websites but I didn't have enough time to get privacy sorted, so it's pulled down.
+
 NOTE: This is designed to be run 'Off Grid', so needs HF runtime (GPU) but since I'm unable to add credits to this org, it uses Modal.
 
 NOTE: This competes for 'Tiny Titan' prize
@@ -44,8 +47,8 @@ NOTE: This competes for 'Tiny Titan' prize
 
 ## Models And Runtime
 
-- ASR: `nvidia/nemotron-3.5-asr-streaming-0.6b` through NeMo/PyTorch.
-- Text: `CohereLabs/tiny-aya-fire-GGUF:Q8_0` through `llama.cpp`.
+- ASR: `nvidia/nemotron-3.5-asr-streaming-0.6b` through NeMo/PyTorch. (works like a charm)
+- Text: `CohereLabs/tiny-aya-fire-GGUF:Q8_0` through `llama.cpp`. (was best fit for my use-case but the translation needs some evals)
 - Official Space runtime: `VCW_MODEL_RUNTIME=hf_space` on `t4-medium`.
 - Local default without a selected real runtime: deterministic fallback,
   clearly labeled with `fallback_used=true`.

@@ -184,6 +184,37 @@ DIY frame height bump pass:
 - Browser UAT:
   - Not rerun in this pass; this claims static CSS proof only.
 
+Hosted goal latency hotfix:
+
+- User-observed hosted symptom: after clicking Goal, the app showed
+  `Fallback Hosted backend was unavailable, so this preview used browser fallback`
+  after about `98375ms`.
+- Root cause:
+  - The hosted Gradio `epic_generate_goal` endpoint was still calling
+    `build_generated_goal_with_live_fallback()`.
+  - When hosted env vars enabled live generation, the endpoint waited on the
+    Modal path before returning deterministic fallback.
+- Implementation:
+  - HF-hosted Gradio endpoint `_hosted_generate_goal()` now calls
+    `build_generated_goal()` directly.
+  - This keeps the HF-only hosted app on packaged deterministic assets and does
+    not call Modal for Goal preview.
+- Upload:
+  - Repo: `build-small-hackathon/epic-errands`.
+  - URL: `https://build-small-hackathon-epic-errands.hf.space/`.
+  - Commit: `d04b36e3d73de5794a4dc65d12faa6180e4232ec`.
+  - Commit message: `Hotfix hosted goal generation latency`.
+- Hosted smoke:
+  - Endpoint: `/gradio_api/call/epic_generate_goal`.
+  - Payload goal: `Read for 20 minutes`, theme `questbook`.
+  - `post_ms=1243`, `total_ms=3020`.
+  - Response provenance:
+    - `backend_transport=gradio_blocks_named_api`.
+    - `model_runtime=none`.
+    - `model_backend=static_review_asset`.
+    - `fallback_used=true`.
+    - `fallback_reason=deterministic hosted dry-run; Modal/live generation disabled or unavailable`.
+
 Known limits:
 
 - This is local deterministic fallback proof using cached spike outputs.

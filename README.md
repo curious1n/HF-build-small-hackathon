@@ -18,6 +18,9 @@ collaboration system. They helped @cu and Codex split responsibilities, preserve
 tribal knowledge, choose the right workflow lane for each task, and keep proof
 claims honest while moving three hackathon ideas toward shippable demos.
 
+Hackathon 'OpenAI Codex Track' reviewer: please read `product/z-jam-history.md` for a look-back summary
+of how @cu and Codex collaborated across the hackathon ideas.
+
 ## What This Repo Contains
 
 This repo does not contain the full working repository. It contains only

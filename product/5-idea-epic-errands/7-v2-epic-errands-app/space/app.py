@@ -255,7 +255,7 @@ def _hosted_bootstrap(payload_json: str | None = None) -> str:
 
 def _hosted_generate_goal(payload_json: str | None = None) -> str:
     payload = _decode_request(payload_json)
-    generated = build_generated_goal_with_live_fallback(
+    generated = build_generated_goal(
         str(payload.get("ordinary_goal") or ""),
         str(
             payload.get("ui_theme_id")

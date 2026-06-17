@@ -34,9 +34,9 @@ from pydantic import BaseModel
 
 APP_VERSION = "v1-space-local-model-2026-06-15"
 SPACE_DIR = Path(__file__).resolve().parent
-V1_DIR = SPACE_DIR.parent
-IDEA_DIR = V1_DIR.parent
-REPO_ROOT = V1_DIR.parents[2]
+V1_DIR = SPACE_DIR.parent if (SPACE_DIR.parent / "onboarding").exists() else SPACE_DIR
+IDEA_DIR = V1_DIR.parent if V1_DIR != SPACE_DIR else SPACE_DIR
+REPO_ROOT = V1_DIR.parents[2] if len(V1_DIR.parents) > 2 else V1_DIR
 
 
 def load_local_env_files(paths: tuple[Path, ...]) -> list[str]:
